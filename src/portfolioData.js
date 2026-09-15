@@ -6,6 +6,9 @@
  * The UI automatically reflects changes made here.
  */
 
+const base = import.meta.env.BASE_URL || '/';
+export const getAssetUrl = (path) => `${base}${path.replace(/^\//, '')}`;
+
 export const personalInfo = {
   name: "Mahmoud Khaled",
   title: "Video Editor & Videographer",
@@ -17,7 +20,7 @@ export const personalInfo = {
   phoneUrl: "tel:+201156379179",
   email: "mahmoud.kh.hanafy@gmail.com",
   instagramUrl: "https://www.instagram.com/mahmoud_khaled.0?stkn=cTk0c3h0ODh3ZWts&utm_source=qr",
-  heroPortrait: "/mahmoud.png", // Served from public/ or root
+  heroPortrait: getAssetUrl("mahmoud.png"), // Served from public/ or root
   availability: "AVAILABLE FOR SELECT PROJECTS — 2026"
 };
 
@@ -95,10 +98,10 @@ export const projects = [
     tagline: "Dynamic hook structure with high completion rate and sound design.",
     client: "Fitness & Athlete Coaching",
     description: "Rapid beat-synchronized cutting, sound effects with custom risers, kinetic subtitle typography, and punch-in reframing tailored for maximum engagement on Instagram Reels and TikTok.",
-    videoUrl: "/videos/reel1.mp4",
-    previewVideoUrl: "/videos/reel1.mp4",
-    fullVideoUrl: "/videos/reel1.mp4",
-    thumbnailUrl: "/videos/reel1.mp4#t=0.001",
+    videoUrl: getAssetUrl("videos/reel1.mp4"),
+    previewVideoUrl: getAssetUrl("videos/reel1.mp4"),
+    fullVideoUrl: getAssetUrl("videos/reel1.mp4"),
+    thumbnailUrl: `${getAssetUrl("videos/reel1.mp4")}#t=0.001`,
     tags: ["9:16 Reel", "Hook Retention", "Sound Design", "Fitness"],
     year: "2026"
   },
@@ -111,10 +114,10 @@ export const projects = [
     tagline: "Fast-paced visual storytelling engineered for authority and retention.",
     client: "Digital Creator & Personal Brand",
     description: "Constructed with punch-ins, kinetic typography, B-roll overlays, and spatial audio cues to maintain viewer retention past the critical 3-second window.",
-    videoUrl: "/videos/reel2.mp4",
-    previewVideoUrl: "/videos/reel2.mp4",
-    fullVideoUrl: "/videos/reel2.mp4",
-    thumbnailUrl: "/videos/reel2.mp4#t=0.001",
+    videoUrl: getAssetUrl("videos/reel2.mp4"),
+    previewVideoUrl: getAssetUrl("videos/reel2.mp4"),
+    fullVideoUrl: getAssetUrl("videos/reel2.mp4"),
+    thumbnailUrl: `${getAssetUrl("videos/reel2.mp4")}#t=0.001`,
     tags: ["Reels / TikTok", "Hook Strategy", "Motion Graphics"],
     year: "2026"
   },
@@ -127,10 +130,10 @@ export const projects = [
     tagline: "High-converting corporate talking-head with crisp graphics and pacing.",
     client: "Commercial Agency & Brand",
     description: "Professional audio mastering, multi-angle jump cuts, seamless visual popups, and branded typography that elevates educational and commercial presentations.",
-    videoUrl: "/videos/reel3.mp4",
-    previewVideoUrl: "/videos/reel3.mp4",
-    fullVideoUrl: "/videos/reel3.mp4",
-    thumbnailUrl: "/videos/reel3.mp4#t=0.001",
+    videoUrl: getAssetUrl("videos/reel3.mp4"),
+    previewVideoUrl: getAssetUrl("videos/reel3.mp4"),
+    fullVideoUrl: getAssetUrl("videos/reel3.mp4"),
+    thumbnailUrl: `${getAssetUrl("videos/reel3.mp4")}#t=0.001`,
     tags: ["Brand Promo", "Talking Head", "Audio Polish"],
     year: "2026"
   },
@@ -143,10 +146,10 @@ export const projects = [
     tagline: "Atmospheric on-ground event highlights with cinematic color pass.",
     client: "Cultural & Corporate Event",
     description: "Dynamic speed ramps, stabilizer passes, bespoke sound design, and color grading turning on-site footage into an engaging recap video.",
-    videoUrl: "/videos/reel4.mov",
-    previewVideoUrl: "/videos/reel4.mov",
-    fullVideoUrl: "/videos/reel4.mov",
-    thumbnailUrl: "/videos/reel4.mov#t=0.001",
+    videoUrl: getAssetUrl("videos/reel4.mov"),
+    previewVideoUrl: getAssetUrl("videos/reel4.mov"),
+    fullVideoUrl: getAssetUrl("videos/reel4.mov"),
+    thumbnailUrl: `${getAssetUrl("videos/reel4.mov")}#t=0.001`,
     tags: ["Event Highlight", "Color Pass", "Speed Ramps"],
     year: "2026"
   },
@@ -159,10 +162,10 @@ export const projects = [
     tagline: "Fast, rhythmic social media edit with organic transitions.",
     client: "Lifestyle & Social Brand",
     description: "Rhythmic cuts synchronized to music pulses, sound effects layering, and vibrant color grading designed to capture attention in the feed.",
-    videoUrl: "/videos/reel5.mp4",
-    previewVideoUrl: "/videos/reel5.mp4",
-    fullVideoUrl: "/videos/reel5.mp4",
-    thumbnailUrl: "/videos/reel5.mp4#t=0.001",
+    videoUrl: getAssetUrl("videos/reel5.mp4"),
+    previewVideoUrl: getAssetUrl("videos/reel5.mp4"),
+    fullVideoUrl: getAssetUrl("videos/reel5.mp4"),
+    thumbnailUrl: `${getAssetUrl("videos/reel5.mp4")}#t=0.001`,
     tags: ["Lifestyle", "Rhythm Cut", "Social Media"],
     year: "2026"
   },
@@ -175,10 +178,10 @@ export const projects = [
     tagline: "Wide-aspect commercial hero promo with high-dynamic range color grading.",
     client: "Commercial Production & Film",
     description: "Cinematic 16:9 widescreen showcase featuring cinematic color grading, rich orchestral sound mixing, and seamless pacing for broadcast and YouTube.",
-    videoUrl: "/videos/cinematic1.mp4",
-    previewVideoUrl: "/videos/cinematic1.mp4",
-    fullVideoUrl: "/videos/cinematic1.mp4",
-    thumbnailUrl: "/videos/cinematic1.mp4#t=0.001",
+    videoUrl: getAssetUrl("videos/cinematic1.mp4"),
+    previewVideoUrl: getAssetUrl("videos/cinematic1.mp4"),
+    fullVideoUrl: getAssetUrl("videos/cinematic1.mp4"),
+    thumbnailUrl: `${getAssetUrl("videos/cinematic1.mp4")}#t=0.001`,
     tags: ["16:9 Cinematic", "Color Grading", "Sound Mix"],
     year: "2026"
   }

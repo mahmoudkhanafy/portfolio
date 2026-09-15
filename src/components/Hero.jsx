@@ -116,7 +116,7 @@ export default function Hero() {
                   alt={personalInfo.name}
                   className="max-h-[96%] sm:max-h-[96%] lg:max-h-[95%] w-auto object-contain object-bottom drop-shadow-[0_20px_30px_rgba(0,0,0,0.35)] filter contrast-105"
                   onError={(e) => {
-                    e.target.src = '/mahmoud.png';
+                    e.target.src = personalInfo.heroPortrait;
                   }}
                 />
               </div>
