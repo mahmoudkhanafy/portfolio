@@ -3,34 +3,63 @@ import { Play, Eye, Film, Smartphone, Monitor, Sparkles, ArrowUpRight } from 'lu
 import { projects } from '../portfolioData';
 import VideoModal from './VideoModal';
 
-function ProjectCard({ project, onSelectProject }) {
-  const videoRef = useRef(null);
-  const [isHovered, setIsHovered] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
-  const isVertical = project.aspectRatio === '9/16';
-  const videoSrc = project.videoUrl || project.previewVideoUrl;
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return (
+      window.matchMedia('(hover: none)').matches ||
+      window.innerWidth <= 768 ||
+      (Boolean(navigator.maxTouchPoints) && navigator.maxTouchPoints > 0)
+    );
+  });
 
   useEffect(() => {
     const checkMobile = () => {
-      setIsMobile(
-        typeof window !== 'undefined' &&
-        (window.innerWidth < 768 ||
-         window.matchMedia('(hover: none)').matches ||
-         (navigator.maxTouchPoints && navigator.maxTouchPoints > 0))
-      );
+      if (typeof window === 'undefined') return;
+      const isTouchOrSmallScreen =
+        window.matchMedia('(hover: none)').matches ||
+        window.innerWidth <= 768 ||
+        (Boolean(navigator.maxTouchPoints) && navigator.maxTouchPoints > 0);
+      setIsMobile(isTouchOrSmallScreen);
     };
+
     checkMobile();
     window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
+
+    const hoverQuery =
+      typeof window !== 'undefined' && window.matchMedia ? window.matchMedia('(hover: none)') : null;
+    if (hoverQuery?.addEventListener) {
+      hoverQuery.addEventListener('change', checkMobile);
+    } else if (hoverQuery?.addListener) {
+      hoverQuery.addListener(checkMobile);
+    }
+
+    return () => {
+      window.removeEventListener('resize', checkMobile);
+      if (hoverQuery?.removeEventListener) {
+        hoverQuery.removeEventListener('change', checkMobile);
+      } else if (hoverQuery?.removeListener) {
+        hoverQuery.removeListener(checkMobile);
+      }
+    };
   }, []);
 
-  // Guarantee strictly muted volume on mount
+  return isMobile;
+}
+
+function ProjectCard({ project, onSelectProject, isMobile }) {
+  const videoRef = useRef(null);
+  const [isHovered, setIsHovered] = useState(false);
+  const isVertical = project.aspectRatio === '9/16';
+  const videoSrc = project.videoUrl || project.previewVideoUrl;
+
+  // Guarantee strictly muted volume on mount for desktop video element
   useEffect(() => {
-    if (videoRef.current) {
+    if (!isMobile && videoRef.current) {
       videoRef.current.muted = true;
       videoRef.current.volume = 0;
     }
-  }, []);
+  }, [isMobile]);
 
   const handleMouseEnter = () => {
     if (isMobile) return;
@@ -78,22 +107,33 @@ function ProjectCard({ project, onSelectProject }) {
           {/* Inner Screen Container */}
           <div className="relative aspect-[9/16] rounded-xl sm:rounded-[2.15rem] overflow-hidden bg-black">
             
-            {/* HTML5 Silent Video Loop: strictly muted with volume=0 */}
-            <video
-              ref={videoRef}
-              src={videoSrc}
-              poster={project.thumbnailUrl}
-              preload={isMobile ? "none" : "metadata"}
-              playsInline
-              webkit-playsinline="true"
-              loop
-              muted={true}
-              defaultMuted={true}
-              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 pointer-events-none"
-            >
-              <source src={videoSrc} type={videoSrc?.endsWith('.mov') ? 'video/quicktime' : 'video/mp4'} />
-              <source src={videoSrc} type="video/mp4" />
-            </video>
+            {/* Mobile/Touch: Render ONLY poster img with lazy loading to prevent GPU memory choke.
+                Desktop: Render active video tag with hover-to-play support. */}
+            {isMobile ? (
+              <img
+                src={project.thumbnailUrl}
+                alt={project.title}
+                loading="lazy"
+                decoding="async"
+                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 pointer-events-none"
+              />
+            ) : (
+              <video
+                ref={videoRef}
+                src={videoSrc}
+                poster={project.thumbnailUrl}
+                preload="metadata"
+                playsInline
+                webkit-playsinline="true"
+                loop
+                muted={true}
+                defaultMuted={true}
+                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 pointer-events-none"
+              >
+                <source src={videoSrc} type={videoSrc?.endsWith('.mov') ? 'video/quicktime' : 'video/mp4'} />
+                <source src={videoSrc} type="video/mp4" />
+              </video>
+            )}
 
             {/* Gradient Overlays */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent pointer-events-none"></div>
@@ -160,22 +200,33 @@ function ProjectCard({ project, onSelectProject }) {
         {/* Inner Screen */}
         <div className="relative aspect-video rounded-xl sm:rounded-2xl overflow-hidden bg-black">
           
-          {/* HTML5 Silent Video Loop: strictly muted with volume=0 */}
-          <video
-            ref={videoRef}
-            src={videoSrc}
-            poster={project.thumbnailUrl}
-            preload={isMobile ? "none" : "metadata"}
-            playsInline
-            webkit-playsinline="true"
-            loop
-            muted={true}
-            defaultMuted={true}
-            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 pointer-events-none"
-          >
-            <source src={videoSrc} type={videoSrc?.endsWith('.mov') ? 'video/quicktime' : 'video/mp4'} />
-            <source src={videoSrc} type="video/mp4" />
-          </video>
+          {/* Mobile/Touch: Render ONLY poster img with lazy loading to prevent GPU memory choke.
+              Desktop: Render active video tag with hover-to-play support. */}
+          {isMobile ? (
+            <img
+              src={project.thumbnailUrl}
+              alt={project.title}
+              loading="lazy"
+              decoding="async"
+              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 pointer-events-none"
+            />
+          ) : (
+            <video
+              ref={videoRef}
+              src={videoSrc}
+              poster={project.thumbnailUrl}
+              preload="metadata"
+              playsInline
+              webkit-playsinline="true"
+              loop
+              muted={true}
+              defaultMuted={true}
+              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 pointer-events-none"
+            >
+              <source src={videoSrc} type={videoSrc?.endsWith('.mov') ? 'video/quicktime' : 'video/mp4'} />
+              <source src={videoSrc} type="video/mp4" />
+            </video>
+          )}
 
           {/* Dark Vignette & Gradient */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/25 to-transparent pointer-events-none"></div>
@@ -230,6 +281,7 @@ function ProjectCard({ project, onSelectProject }) {
 }
 
 export default function SelectedWork() {
+  const isMobile = useIsMobile();
   const [filter, setFilter] = useState('all'); // 'all' | 'vertical' | 'cinematic'
   const [selectedProject, setSelectedProject] = useState(null);
 
@@ -310,6 +362,7 @@ export default function SelectedWork() {
                 <ProjectCard
                   project={project}
                   onSelectProject={(p) => setSelectedProject(p)}
+                  isMobile={isMobile}
                 />
               </div>
             );

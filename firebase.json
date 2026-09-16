@@ -1,0 +1,52 @@
+{
+  "hosting": [
+    {
+      "target": "mahmoudkhaled-site",
+      "public": "firebase-public",
+      "ignore": [
+        "firebase.json",
+        "**/.*",
+        "**/node_modules/**"
+      ],
+      "redirects": [
+        {
+          "source": "**",
+          "destination": "https://mahmoudkhanafy.github.io/portfolio/",
+          "type": 301
+        }
+      ]
+    },
+    {
+      "target": "portfolio-site",
+      "public": "firebase-public",
+      "ignore": [
+        "firebase.json",
+        "**/.*",
+        "**/node_modules/**"
+      ],
+      "redirects": [
+        {
+          "source": "**",
+          "destination": "https://mahmoudkhanafy.github.io/portfolio/",
+          "type": 301
+        }
+      ]
+    },
+    {
+      "target": "default-site",
+      "public": "firebase-public",
+      "ignore": [
+        "firebase.json",
+        "**/.*",
+        "**/node_modules/**"
+      ],
+      "redirects": [
+        {
+          "source": "**",
+          "destination": "https://mahmoudkhanafy.github.io/portfolio/",
+          "type": 301
+        }
+      ]
+    }
+  ]
+}

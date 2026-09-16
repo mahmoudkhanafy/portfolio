@@ -1,0 +1,20 @@
+{
+  "projects": {
+    "default": "mahmoud-khaled-a05a8"
+  },
+  "targets": {
+    "mahmoud-khaled-a05a8": {
+      "hosting": {
+        "mahmoudkhaled-site": [
+          "mahmoudkhaled"
+        ],
+        "portfolio-site": [
+          "mahmoud-khaled"
+        ],
+        "default-site": [
+          "mahmoud-khaled-a05a8"
+        ]
+      }
+    }
+  }
+}

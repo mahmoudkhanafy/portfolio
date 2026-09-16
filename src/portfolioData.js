@@ -101,7 +101,7 @@ export const projects = [
     videoUrl: getAssetUrl("videos/reel1.mp4"),
     previewVideoUrl: getAssetUrl("videos/reel1.mp4"),
     fullVideoUrl: getAssetUrl("videos/reel1.mp4"),
-    thumbnailUrl: `${getAssetUrl("videos/reel1.mp4")}#t=0.001`,
+    thumbnailUrl: getAssetUrl("thumbnails/reel1.jpg"),
     tags: ["9:16 Reel", "Hook Retention", "Sound Design", "Fitness"],
     year: "2026"
   },
@@ -117,7 +117,7 @@ export const projects = [
     videoUrl: getAssetUrl("videos/reel2.mp4"),
     previewVideoUrl: getAssetUrl("videos/reel2.mp4"),
     fullVideoUrl: getAssetUrl("videos/reel2.mp4"),
-    thumbnailUrl: `${getAssetUrl("videos/reel2.mp4")}#t=0.001`,
+    thumbnailUrl: getAssetUrl("thumbnails/reel2.jpg"),
     tags: ["Reels / TikTok", "Hook Strategy", "Motion Graphics"],
     year: "2026"
   },
@@ -133,7 +133,7 @@ export const projects = [
     videoUrl: getAssetUrl("videos/reel3.mp4"),
     previewVideoUrl: getAssetUrl("videos/reel3.mp4"),
     fullVideoUrl: getAssetUrl("videos/reel3.mp4"),
-    thumbnailUrl: `${getAssetUrl("videos/reel3.mp4")}#t=0.001`,
+    thumbnailUrl: getAssetUrl("thumbnails/reel3.jpg"),
     tags: ["Brand Promo", "Talking Head", "Audio Polish"],
     year: "2026"
   },
@@ -149,7 +149,7 @@ export const projects = [
     videoUrl: getAssetUrl("videos/reel4.mov"),
     previewVideoUrl: getAssetUrl("videos/reel4.mov"),
     fullVideoUrl: getAssetUrl("videos/reel4.mov"),
-    thumbnailUrl: `${getAssetUrl("videos/reel4.mov")}#t=0.001`,
+    thumbnailUrl: getAssetUrl("thumbnails/reel4.jpg"),
     tags: ["Event Highlight", "Color Pass", "Speed Ramps"],
     year: "2026"
   },
@@ -165,7 +165,7 @@ export const projects = [
     videoUrl: getAssetUrl("videos/reel5.mp4"),
     previewVideoUrl: getAssetUrl("videos/reel5.mp4"),
     fullVideoUrl: getAssetUrl("videos/reel5.mp4"),
-    thumbnailUrl: `${getAssetUrl("videos/reel5.mp4")}#t=0.001`,
+    thumbnailUrl: getAssetUrl("thumbnails/reel5.jpg"),
     tags: ["Lifestyle", "Rhythm Cut", "Social Media"],
     year: "2026"
   },
@@ -181,7 +181,7 @@ export const projects = [
     videoUrl: getAssetUrl("videos/cinematic1.mp4"),
     previewVideoUrl: getAssetUrl("videos/cinematic1.mp4"),
     fullVideoUrl: getAssetUrl("videos/cinematic1.mp4"),
-    thumbnailUrl: `${getAssetUrl("videos/cinematic1.mp4")}#t=0.001`,
+    thumbnailUrl: getAssetUrl("thumbnails/cinematic1.jpg"),
     tags: ["16:9 Cinematic", "Color Grading", "Sound Mix"],
     year: "2026"
   }
