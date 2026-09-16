@@ -14,18 +14,28 @@ export default function VideoModal({ project, onClose }) {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const lastTimeUpdateRef = useRef(0);
 
-  // Hardware decoding & memory cleanup on component unmount
+  // Bulletproof WebKit cleanup: pause, remove src, remove all child nodes, and call load()
+  const performWebKitCleanup = () => {
+    if (videoRef.current) {
+      try {
+        videoRef.current.pause();
+        videoRef.current.removeAttribute('src');
+        while (videoRef.current.firstChild) {
+          videoRef.current.removeChild(videoRef.current.firstChild);
+        }
+        videoRef.current.load(); // CRITICAL for iOS: immediately frees WebKit AVPlayer hardware decoder and GPU buffer
+      } catch (err) {
+        console.warn("Video cleanup warning:", err);
+      }
+    }
+  };
+
+  // Hardware decoding & memory cleanup tied to project & component lifecycle
   useEffect(() => {
     return () => {
-      if (videoRef.current) {
-        try {
-          videoRef.current.pause();
-          videoRef.current.removeAttribute('src');
-          videoRef.current.load();
-        } catch (err) {}
-      }
+      performWebKitCleanup();
     };
-  }, []);
+  }, [project]);
 
   // Track Fullscreen changes (Desktop & Android)
   useEffect(() => {
@@ -79,6 +89,7 @@ export default function VideoModal({ project, onClose }) {
         .then(() => {
           setIsPlaying(true);
           setIsMuted(false);
+          setIsBuffering(false);
         })
         .catch((err) => {
           console.warn("Unmuted autoplay restricted by browser policy, falling back to muted:", err);
@@ -86,11 +97,18 @@ export default function VideoModal({ project, onClose }) {
           setIsMuted(true);
           video
             .play()
-            .then(() => setIsPlaying(true))
-            .catch(() => setIsPlaying(false));
+            .then(() => {
+              setIsPlaying(true);
+              setIsBuffering(false);
+            })
+            .catch(() => {
+              setIsPlaying(false);
+              setIsBuffering(false); // CRITICAL: unblocks UI so user can tap play button
+            });
         });
     } else {
       setIsMuted(false);
+      setIsBuffering(false);
     }
   }, [project]);
 
@@ -122,13 +140,22 @@ export default function VideoModal({ project, onClose }) {
     if (videoRef.current.paused) {
       videoRef.current
         .play()
-        .then(() => setIsPlaying(true))
+        .then(() => {
+          setIsPlaying(true);
+          setIsBuffering(false);
+        })
         .catch(async () => {
           if (videoRef.current) {
             videoRef.current.muted = true;
             setIsMuted(true);
-            await videoRef.current.play();
-            setIsPlaying(true);
+            try {
+              await videoRef.current.play();
+              setIsPlaying(true);
+              setIsBuffering(false);
+            } catch (e) {
+              setIsPlaying(false);
+              setIsBuffering(false);
+            }
           }
         });
     } else {
@@ -182,14 +209,8 @@ export default function VideoModal({ project, onClose }) {
   };
 
   const handleClose = async () => {
-    // Release mobile GPU decoding buffers & RAM immediately
-    if (videoRef.current) {
-      try {
-        videoRef.current.pause();
-        videoRef.current.removeAttribute('src');
-        videoRef.current.load();
-      } catch (err) {}
-    }
+    // Release mobile GPU decoding buffers & RAM immediately using bulletproof WebKit cleanup
+    performWebKitCleanup();
     if (document.fullscreenElement) {
       try {
         if (document.exitFullscreen) {
@@ -321,6 +342,10 @@ export default function VideoModal({ project, onClose }) {
             onPlaying={() => setIsBuffering(false)}
             onCanPlay={() => setIsBuffering(false)}
             onLoadedData={() => setIsBuffering(false)}
+            onError={() => {
+              setIsBuffering(false);
+              setIsPlaying(false);
+            }}
             className="w-full h-full object-contain pointer-events-none"
           >
             <source src={videoSrc} type={videoSrc?.endsWith('.mov') ? 'video/quicktime' : 'video/mp4'} />

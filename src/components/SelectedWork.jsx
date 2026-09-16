@@ -61,6 +61,22 @@ function ProjectCard({ project, onSelectProject, isMobile }) {
     }
   }, [isMobile]);
 
+  // Clean up WebKit video buffers when ProjectCard unmounts
+  useEffect(() => {
+    return () => {
+      if (videoRef.current) {
+        try {
+          videoRef.current.pause();
+          videoRef.current.removeAttribute('src');
+          while (videoRef.current.firstChild) {
+            videoRef.current.removeChild(videoRef.current.firstChild);
+          }
+          videoRef.current.load();
+        } catch (err) {}
+      }
+    };
+  }, []);
+
   const handleMouseEnter = () => {
     if (isMobile) return;
     setIsHovered(true);
