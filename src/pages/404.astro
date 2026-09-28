@@ -2,7 +2,7 @@
 import Icon from '../components/Icon.astro';
 import Base from '../layouts/Base.astro';
 import { ui } from '../lib/i18n.ts';
-import { abs, pageHref } from '../lib/site.ts';
+import { absVersioned, pageHref } from '../lib/site.ts';
 
 // One page for every language: GitHub Pages serves it for any missing address under the site.
 const ar = ui.ar;
@@ -15,7 +15,7 @@ const en = ui.en;
   description={ar.notFoundBody}
   path="404.html"
   altPath="404.html"
-  og={{ image: abs('og-home.jpg'), width: 1200, height: 630, alt: ar.ogHomeAlt, type: 'website' }}
+  og={{ image: absVersioned('og-home.jpg'), width: 1200, height: 630, alt: ar.ogHomeAlt, type: 'website' }}
   noindex
 >
   <section class="missing" aria-labelledby="missing-ar">

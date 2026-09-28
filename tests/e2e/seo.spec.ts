@@ -13,7 +13,8 @@ for (const [lang, path, card] of [
   test(`the ${lang} home page previews with its own card and tells search engines whose site it is`, async ({ page, request, baseURL }) => {
     await page.goto(path);
     const image = await page.locator('meta[property="og:image"]').getAttribute('content');
-    expect(image).toBe(new URL(card, baseURL).href);
+    // Versioned by content, so an app that cached an older card fetches the new one.
+    expect(image).toMatch(new RegExp(`^${new URL(card, baseURL).href.replace(/\./g, '\\.')}\\?v=[0-9a-f]{10}$`));
     expect((await request.get(image!)).status()).toBe(200);
     await expect(page.locator('meta[name="twitter:image"]')).toHaveAttribute('content', image!);
 

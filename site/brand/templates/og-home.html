@@ -57,19 +57,6 @@
         gap: 18px;
         color: var(--white);
       }
-      .side .en {
-        font-size: 40px;
-        font-weight: 800;
-        line-height: 1.2;
-        direction: ltr;
-      }
-      .side .en small {
-        display: block;
-        margin-top: 8px;
-        color: #cfcfcf;
-        font-size: 28px;
-        font-weight: 500;
-      }
       .side .lead {
         color: #d6d6d6;
         font-size: 30px;
@@ -78,17 +65,9 @@
         direction: rtl;
         text-align: right;
       }
-      .side .ar {
-        font-size: 36px;
-        font-weight: 800;
-        line-height: 1.4;
-        direction: rtl;
-        text-align: right;
-      }
-      .side .ar small {
-        display: block;
+      .side .place {
         color: #cfcfcf;
-        font-size: 26px;
+        font-size: 28px;
         font-weight: 500;
       }
       .side .lead-en {
@@ -98,7 +77,7 @@
         line-height: 1.4;
         direction: ltr;
       }
-      /* ?en: the English page's card, his English name in the lower third. */
+      /* ?en: the English pages' card. Each card is in its page's language only. */
       .third[dir='ltr'] .name {
         padding: 6px 26px 14px;
         font-size: 62px;
@@ -124,7 +103,7 @@
     <div class="side">
       <p class="lead">مونتاج ريلز، كتابة متحركة، تغطية فعاليات وبراندات</p>
       <hr />
-      <p class="en">Mahmoud Khaled<small>Video editor &amp; videographer, Giza</small></p>
+      <p class="place" dir="rtl">الجيزة، القاهرة</p>
     </div>
     <script>
       if (location.search === '?en') {
@@ -132,7 +111,7 @@
         document.querySelector('.third').outerHTML =
           '<div class="third" dir="ltr"><div class="name">Mahmoud Khaled</div><div class="role">Video editor &amp; videographer</div></div>';
         document.querySelector('.side').innerHTML =
-          '<p class="lead-en">Reels, kinetic captions, event and brand coverage</p><hr /><p class="ar" lang="ar">محمود خالد<small>مونتير ومصوّر فيديو، الجيزة</small></p>';
+          '<p class="lead-en">Reels, kinetic captions, event and brand coverage</p><hr /><p class="place">Giza, Cairo</p>';
       }
     </script>
   </body>

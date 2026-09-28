@@ -87,7 +87,8 @@ site/portrait.png ────────────────────�
   file for the screen.
 - **Link previews and search**: every page has absolute Open Graph and Twitter tags, `hreflang`
   alternates and JSON-LD (`WebSite` and a `ProfilePage` for Mahmoud on home; `VideoObject` and a
-  breadcrumb per piece). Each language has its own preview images, with his name first in it: the home
+  breadcrumb per piece). Each language has its own preview images, in that language only (checked by
+  `tests/unit/brand-text.test.ts`): the home
   cards (`public/og-home.jpg`, `public/og-home-en.jpg`) and the wordmarks on per-video cards
   (`site/brand/og-wordmark*.png`) are rendered from `site/brand/templates/` with `npm run brand`, as
   are the icons and `favicon.ico`. The sitemap lists each piece's video, preview and date
