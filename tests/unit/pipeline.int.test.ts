@@ -25,7 +25,7 @@ beforeAll(async () => {
   ffmpeg('-f', 'lavfi', '-i', 'testsrc2=size=1280x720:rate=60', '-t', '2', '-c:v', 'libx264', '-pix_fmt', 'yuv420p', join(root, 'plain.mp4'));
   ffmpeg('-display_rotation', '90', '-i', join(root, 'plain.mp4'), '-c', 'copy', join(root, 'work/Phone Clip.mov'));
   writeFileSync(join(root, 'work/landscape.yml'), 'title: "مشهد عرضي"\ntitle_en: "Landscape"\ntype: film\ncover: "0:01"\norder: 2\n');
-  copyFileSync('site/brand/og-wordmark.png', join(root, 'site/brand/og-wordmark.png'));
+  for (const mark of ['og-wordmark.png', 'og-wordmark-en.png']) copyFileSync(`site/brand/${mark}`, join(root, 'site/brand', mark));
   await sharp({ create: { width: 400, height: 600, channels: 4, background: { r: 20, g: 20, b: 20, alpha: 0.5 } } }).png().toFile(join(root, 'site/portrait.png'));
 }, 60_000);
 
@@ -50,13 +50,17 @@ describe('buildMedia', () => {
     expect(phone.renditions).toHaveLength(1);
 
     for (const work of catalog.works) {
-      const files = [...work.renditions.map((r: { src: string }) => r.src), ...work.cover.avif.map((s: { src: string }) => s.src), ...work.cover.webp.map((s: { src: string }) => s.src), work.cover.jpg.src, work.og.src];
+      const files = [...work.renditions.map((r: { src: string }) => r.src), ...work.cover.avif.map((s: { src: string }) => s.src), ...work.cover.webp.map((s: { src: string }) => s.src), work.cover.jpg.src, work.og.ar.src, work.og.en.src];
       for (const src of files) expect(existsSync(join(root, 'public', src)), src).toBe(true);
       expect(work.cover.lqip).toMatch(/^data:image\/webp;base64,/);
       expect(work.cover.color).toMatch(/^#[0-9a-f]{6}$/);
-      const og = await sharp(join(root, 'public', work.og.src)).metadata();
-      expect([og.width, og.height, og.format]).toEqual([1200, 630, 'jpeg']);
-      expect(statSync(join(root, 'public', work.og.src)).size).toBeLessThan(300_000);
+      // One link preview per page language, each with its own name label.
+      expect(work.og.ar.src).not.toBe(work.og.en.src);
+      for (const og of [work.og.ar, work.og.en]) {
+        const meta = await sharp(join(root, 'public', og.src)).metadata();
+        expect([meta.width, meta.height, meta.format]).toEqual([1200, 630, 'jpeg']);
+        expect(statSync(join(root, 'public', og.src)).size).toBeLessThan(300_000);
+      }
     }
     expect(landscape.renditions[0].bytes).toBeGreaterThan(0);
     expect(landscape.renditions[0].bitrate).toBeGreaterThan(0);
@@ -104,7 +108,7 @@ describe('buildMedia with a video stored squeezed', () => {
     try {
       mkdirSync(join(squeezedRoot, 'work'));
       mkdirSync(join(squeezedRoot, 'site/brand'), { recursive: true });
-      copyFileSync('site/brand/og-wordmark.png', join(squeezedRoot, 'site/brand/og-wordmark.png'));
+      for (const mark of ['og-wordmark.png', 'og-wordmark-en.png']) copyFileSync(`site/brand/${mark}`, join(squeezedRoot, 'site/brand', mark));
       // A 9:16 video scaled into a square: ffmpeg keeps the picture's shape by flagging the pixels 9:16.
       ffmpeg('-f', 'lavfi', '-i', 'testsrc2=size=360x640:rate=30', '-t', '2', '-vf', 'scale=360:360', '-c:v', 'libx264', '-pix_fmt', 'yuv420p', join(squeezedRoot, 'work/squeezed.mp4'));
       writeFileSync(join(squeezedRoot, 'work/squeezed.yml'), 'title: "ريل"\ntype: reel\n');

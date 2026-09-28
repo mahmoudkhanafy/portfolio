@@ -85,6 +85,14 @@ test('carries its <head> script on every page without comments, in little more t
   expect(gzipSync(script).length).toBeLessThan(1_300);
 });
 
+test('writes the script every page runs into the page, so first paint waits on no other file', async ({ request }) => {
+  const html = await (await request.get('')).text();
+  // Astro writes a page's script in when it is small and imports nothing; the language offer
+  // (src/scripts/language.js) is added only once the page has loaded.
+  expect(html).not.toMatch(/<script type="module" src="[^"]*Base\.astro/);
+  expect(html).toMatch(/script\.src = '[^']*\/_astro\/language\.[\w-]+\.js'/);
+});
+
 test('keeps its own dark design under Dark Reader', async ({ page }) => {
   await page.goto('');
   await expect(page.locator('meta[name="darkreader-lock"]')).toHaveCount(1);

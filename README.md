@@ -2,7 +2,7 @@
 
 The video portfolio of Mahmoud Khaled, video editor and videographer in Giza / Cairo. Arabic first
 (`/`), English at `/en/`. Every piece has its own page and link preview, plays with sound on one tap,
-and ends on a pre-written WhatsApp message.
+and ends on a pre-written WhatsApp message. Live at https://mahmoudkhanafy.github.io/.
 
 **Adding a video is documented for Mahmoud in [ADD-A-VIDEO.md](ADD-A-VIDEO.md)** (Arabic, then English).
 
@@ -27,9 +27,16 @@ LAN address: `SITE_URL=http://192.168.x.x:4747 npm run build && npm run serve`.
 
 1. Create a repository and push `main`.
 2. **Settings → Pages → Build and deployment → Source: GitHub Actions.**
-3. Every push to `main` runs **Deploy site** (`.github/workflows/deploy.yml`). The site lives at
-   `https://<user>.github.io/<repo>/`; a custom domain set in the Pages settings also works (the base
-   path then becomes `/` automatically).
+3. Every push to `main` runs **Deploy site** (`.github/workflows/deploy.yml`). The repository is named
+   `<user>.github.io`, so the site lives at the root, `https://<user>.github.io/`, where search engines
+   read its `robots.txt` and favicon. Under any other repository name it lives at
+   `https://<user>.github.io/<repo>/`, and a custom domain set in the Pages settings also works: the
+   base path follows automatically.
+4. The site lived at `/portfolio/` until it moved to the root: `src/pages/portfolio/` keeps each old
+   address sending visitors to its new one, with any `#place` kept.
+5. Once, from Mahmoud's Google account: [Search Console](https://search.google.com/search-console),
+   add a **URL prefix** property for `https://mahmoudkhanafy.github.io/`, verify it with the HTML tag
+   (add the tag to `src/layouts/Base.astro`), then submit `sitemap-index.xml` under Sitemaps.
 
 **Test** (`.github/workflows/test.yml`) runs the unit and end-to-end suites on pushes and pull
 requests. It is deliberately separate from deployment, so a flaky browser never holds back a new video.
@@ -49,7 +56,7 @@ site/portrait.png ────────────────────�
   at the front — `hd` (1080 class) and `sd` (720 class) — at the video's true shape with square pixels
   (a 9:16 video stored squeezed into a square comes out 9:16), never spending much more than the source's
   own bitrate; picks the cover frame; renders AVIF/WebP covers, a blurred placeholder and a
-  1200×630 link-preview image under 300 KB; processes the portrait. Results are cached by content hash
+  1200×630 link-preview image under 300 KB for each language; processes the portrait. Results are cached by content hash
   in `.media-cache/` (restored between CI runs), so only new or changed files are processed.
 - **Site** (`src/`): static Astro pages, fonts self-hosted, no third-party requests. The only
   JavaScript is the player (`src/scripts/player.ts`, ~2.5 KB gzipped), the share button and the
@@ -78,9 +85,16 @@ site/portrait.png ────────────────────�
   home feed, the piece in view previews muted on its lightest file on phones (after the first scroll)
   and on hover with a mouse — never under reduced motion or Save-Data; "play with sound" then picks the
   file for the screen.
-- **Link previews**: every page has absolute Open Graph and Twitter tags, `hreflang` alternates and
-  JSON-LD (`Person` on home, `VideoObject` per piece). The home card (`public/og-home.jpg`) and the
-  wordmark used on per-video cards are rendered from `site/brand/templates/` with `npm run brand`.
+- **Link previews and search**: every page has absolute Open Graph and Twitter tags, `hreflang`
+  alternates and JSON-LD (`WebSite` and a `ProfilePage` for Mahmoud on home; `VideoObject` and a
+  breadcrumb per piece). Each language has its own preview images, with his name first in it: the home
+  cards (`public/og-home.jpg`, `public/og-home-en.jpg`) and the wordmarks on per-video cards
+  (`site/brand/og-wordmark*.png`) are rendered from `site/brand/templates/` with `npm run brand`, as
+  are the icons and `favicon.ico`. The sitemap lists each piece's video, preview and date
+  (`src/lib/seo.ts`).
+- **Language offer**: a visitor whose phone reads the other language gets a bar offering it, once,
+  until they pick one (`src/scripts/language.js`, added after the page loads). Not a redirect: search
+  engines read as an English browser and would never see the Arabic pages.
 
 ## Changing things
 

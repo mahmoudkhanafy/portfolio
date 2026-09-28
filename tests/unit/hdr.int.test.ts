@@ -27,7 +27,7 @@ describe.runIf(canRun)('HDR footage (iPhone HLG)', () => {
     root = mkdtempSync(join(tmpdir(), 'portfolio-hdr-'));
     mkdirSync(join(root, 'work'));
     mkdirSync(join(root, 'site/brand'), { recursive: true });
-    copyFileSync('site/brand/og-wordmark.png', join(root, 'site/brand/og-wordmark.png'));
+    for (const mark of ['og-wordmark.png', 'og-wordmark-en.png']) copyFileSync(`site/brand/${mark}`, join(root, 'site/brand', mark));
     execFileSync('ffmpeg', [
       '-hide_banner', '-loglevel', 'error', '-y',
       '-f', 'lavfi', '-i', 'testsrc2=size=1080x1920:rate=30', '-t', '2',

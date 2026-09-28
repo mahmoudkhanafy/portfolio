@@ -6,7 +6,7 @@ import WorkFeed from '../../components/WorkFeed.astro';
 import Base from '../../layouts/Base.astro';
 import { catalog } from '../../lib/catalog.ts';
 import { ui } from '../../lib/i18n.ts';
-import { personLd } from '../../lib/jsonld.ts';
+import { profilePageLd, websiteLd } from '../../lib/jsonld.ts';
 import { abs, href, otherLang, pageAbs } from '../../lib/site.ts';
 import { pagePath, type Lang } from '../../lib/urls.ts';
 
@@ -17,7 +17,8 @@ export function getStaticPaths() {
 const lang: Lang = Astro.params.lang === 'en' ? 'en' : 'ar';
 const t = ui[lang];
 const { portrait, works } = catalog;
-const ogImage = abs('og-home.jpg');
+// The card with his name first in the page's language (npm run brand).
+const ogImage = abs(lang === 'en' ? 'og-home-en.jpg' : 'og-home.jpg');
 const preload = portrait
   ? { imagesrcset: portrait.avif.map((s) => `${href(s.src)} ${s.width}w`).join(', '), imagesizes: HERO_SIZES, type: 'image/avif' }
   : undefined;
@@ -30,7 +31,7 @@ const preload = portrait
   path={pagePath(lang)}
   altPath={pagePath(otherLang(lang))}
   og={{ image: ogImage, width: 1200, height: 630, alt: t.ogHomeAlt, type: 'website' }}
-  jsonLd={[personLd({ url: pageAbs(lang), image: portrait ? abs(portrait.webp.at(-1)!.src) : ogImage })]}
+  jsonLd={[websiteLd({ url: pageAbs(lang), lang }), profilePageLd({ url: pageAbs(lang), image: portrait ? abs(portrait.webp.at(-1)!.src) : ogImage, lang })]}
   preload={preload}
   home
 >

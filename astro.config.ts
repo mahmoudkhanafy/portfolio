@@ -2,11 +2,16 @@ import { readFileSync } from 'node:fs';
 import { defineConfig, fontProviders } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
 import { DEFAULT_BASE, DEFAULT_PORT } from './scripts/config.ts';
+import type { Catalog } from './src/lib/catalog-types.ts';
+import { inSitemap, sitemapEntry } from './src/lib/seo.ts';
 import { normalizeBase } from './src/lib/urls.ts';
 
 // GitHub Actions passes the Pages origin and repo sub-path; local builds use the defaults.
 const site = (process.env.SITE_URL || `http://localhost:${DEFAULT_PORT}`).replace(/\/+$/, '');
 const base = normalizeBase(process.env.BASE_PATH ?? DEFAULT_BASE);
+const root = site + base;
+// Written by `npm run media`, which every build runs first.
+const catalog = (): Catalog => JSON.parse(readFileSync('src/generated/catalog.json', 'utf8'));
 
 /**
  * Self-hosted variable fonts from Fontsource packages, one @font-face per script subset.
@@ -34,7 +39,14 @@ export default defineConfig({
   outDir: process.env.OUT_DIR || 'dist',
   build: { format: 'directory', inlineStylesheets: 'always' },
   server: { port: DEFAULT_PORT, host: true },
-  integrations: [sitemap({ i18n: { defaultLocale: 'ar', locales: { ar: 'ar-EG', en: 'en' } } })],
+  integrations: [
+    sitemap({
+      // The same language codes as each page's hreflang links.
+      i18n: { defaultLocale: 'ar', locales: { ar: 'ar', en: 'en' } },
+      filter: (page) => inSitemap(page, root),
+      serialize: (item) => sitemapEntry(item, catalog(), root),
+    }),
+  ],
   fonts: [
     {
       provider: fontProviders.local(),

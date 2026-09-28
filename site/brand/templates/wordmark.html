@@ -18,7 +18,8 @@
         border-radius: 22px;
         background: rgba(0, 0, 0, 0.84);
       }
-      .ar {
+      /* The page language's name in the gold pill, the other under it (?en: English first). */
+      .pill {
         padding: 0 14px 6px;
         border-radius: 999px;
         background: var(--caption);
@@ -27,7 +28,10 @@
         font-weight: 900;
         line-height: 1.4;
       }
-      .en {
+      .pill[lang='en'] {
+        padding: 2px 16px 6px;
+      }
+      .sub {
         padding-inline-start: 4px;
         color: var(--white);
         font-size: 22px;
@@ -36,6 +40,11 @@
     </style>
   </head>
   <body>
-    <div id="mark"><span class="ar" lang="ar" dir="rtl">محمود خالد</span><span class="en" lang="en">Mahmoud Khaled</span></div>
+    <div id="mark"><span class="pill" lang="ar" dir="rtl">محمود خالد</span><span class="sub" lang="en">Mahmoud Khaled</span></div>
+    <script>
+      if (location.search === '?en') {
+        document.getElementById('mark').innerHTML = '<span class="pill" lang="en">Mahmoud Khaled</span><span class="sub" lang="ar" dir="rtl">محمود خالد</span>';
+      }
+    </script>
   </body>
 </html>

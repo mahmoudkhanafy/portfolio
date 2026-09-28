@@ -13,6 +13,7 @@ import { appendFile, copyFile, link, mkdir, readdir, readFile, rename, rm, stat,
 import { join, relative, resolve, sep } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import type { Catalog, Portrait, Work } from '../../src/lib/catalog-types.ts';
+import type { Lang } from '../../src/lib/urls.ts';
 import { formatDuration } from '../../src/lib/time.ts';
 import { encodeArgs, frameArgs } from './encode.ts';
 import { buildEntries, readWorkDir, type Entry, type Problem } from './entries.ts';
@@ -57,7 +58,7 @@ interface VideoMeta {
 
 interface ImageMeta {
   cover: CoverSet;
-  og: { file: string; bytes: number };
+  og: Record<Lang, { file: string; bytes: number }>;
 }
 
 interface Job {
@@ -156,7 +157,8 @@ export async function buildMedia(options: BuildOptions): Promise<BuildResult> {
     media: join(root, 'public/media'),
     cache: join(root, '.media-cache'),
     catalog: join(root, 'src/generated/catalog.json'),
-    wordmark: join(root, 'site/brand/og-wordmark.png'),
+    // The name label on each page language's link preview (npm run brand).
+    wordmarks: { ar: join(root, 'site/brand/og-wordmark.png'), en: join(root, 'site/brand/og-wordmark-en.png') },
     portrait: join(root, 'site/portrait.png'),
   };
   const cacheDir = (kind: 'video' | 'image' | 'portrait', key: string) => join(paths.cache, kind, key);
@@ -165,7 +167,7 @@ export async function buildMedia(options: BuildOptions): Promise<BuildResult> {
   const { entries, warnings, errors } = buildEntries(await readWorkDir(paths.work));
   if (errors.length > 0) throw new MediaError(errors);
 
-  const brandHash = existsSync(paths.wordmark) ? await hashFile(paths.wordmark) : 'no-wordmark';
+  const brandHash = (await Promise.all(Object.values(paths.wordmarks).map((file) => (existsSync(file) ? hashFile(file) : 'no-wordmark')))).join(':');
   const jobs: Job[] = await Promise.all(
     entries
       .filter((entry) => !entry.hidden)
@@ -245,9 +247,12 @@ export async function buildMedia(options: BuildOptions): Promise<BuildResult> {
         throw new ItemFailure(problem.unreadable(job.file));
       }
       const cover = await renderCover(frame, tmp);
-      const bytes = await renderOg(frame, size, paths.wordmark, join(tmp, 'og.jpg'));
+      const og = {
+        ar: { file: 'og.jpg', bytes: await renderOg(frame, size, paths.wordmarks.ar, join(tmp, 'og.jpg')) },
+        en: { file: 'og-en.jpg', bytes: await renderOg(frame, size, paths.wordmarks.en, join(tmp, 'og-en.jpg')) },
+      };
       await rm(frame);
-      return { cover, og: { file: 'og.jpg', bytes } };
+      return { cover, og };
     });
   };
 
@@ -313,7 +318,10 @@ export async function buildMedia(options: BuildOptions): Promise<BuildResult> {
         webp: await sources(images.cover.webp, job.ikey, entry.slug, 'image'),
         jpg: { src: await publish('image', job.ikey, images.cover.jpg.file, entry.slug), width: images.cover.jpg.width },
       },
-      og: { src: await publish('image', job.ikey, images.og.file, entry.slug), width: 1200, height: 630, bytes: images.og.bytes },
+      og: {
+        ar: { src: await publish('image', job.ikey, images.og.ar.file, entry.slug), width: 1200, height: 630, bytes: images.og.ar.bytes },
+        en: { src: await publish('image', job.ikey, images.og.en.file, entry.slug), width: 1200, height: 630, bytes: images.og.en.bytes },
+      },
     });
   }
 

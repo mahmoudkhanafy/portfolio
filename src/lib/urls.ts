@@ -1,5 +1,9 @@
 export type Lang = 'ar' | 'en';
 
+/** Where the site lived until it moved to the root of mahmoudkhanafy.github.io: links shared before
+ * then still open, through small pages under it that send them on (src/pages/portfolio/). */
+export const OLD_BASE = 'portfolio/';
+
 /** "/repo", "repo/", "" → "/repo/" or "/". */
 export function normalizeBase(base: string): string {
   const trimmed = base.trim().replace(/^\/+|\/+$/g, '');

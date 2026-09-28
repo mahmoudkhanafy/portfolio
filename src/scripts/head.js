@@ -91,4 +91,13 @@
     glide(slug);
     event.viewTransition.finished.finally(() => glide(null));
   });
+
+  // The offer of the other language (src/scripts/language.js), once the page has loaded. Base.astro
+  // writes the file's address in.
+  addEventListener('load', () => {
+    const script = document.createElement('script');
+    script.type = 'module';
+    script.src = 'LANGUAGE_SCRIPT';
+    document.head.append(script);
+  });
 })();

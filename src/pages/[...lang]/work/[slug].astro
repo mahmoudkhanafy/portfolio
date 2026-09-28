@@ -8,10 +8,11 @@ import Base from '../../../layouts/Base.astro';
 import { works, type Work } from '../../../lib/catalog.ts';
 import { whatsappMessage, whatsappUrl } from '../../../lib/contact.ts';
 import { typeLabel, ui } from '../../../lib/i18n.ts';
-import { videoLd } from '../../../lib/jsonld.ts';
+import { breadcrumbLd, videoLd } from '../../../lib/jsonld.ts';
 import { orientationOf, pick, ratioOf } from '../../../lib/localize.ts';
 import { pieceOf } from '../../../lib/phone.ts';
 import { abs, href, otherLang, pageAbs, pageHref } from '../../../lib/site.ts';
+import { workMeta } from '../../../lib/seo.ts';
 import { formatDuration } from '../../../lib/time.ts';
 import { pagePath, type Lang } from '../../../lib/urls.ts';
 import { RHYTHM } from '../../../lib/words.ts';
@@ -42,7 +43,7 @@ const layout = [`--r: ${ratio}`, `--shape: ${piece.shape}`, ...(piece.screen < 1
 const sizes = landscape ? '(min-width: 1000px) 62vw, 100vw' : '(min-width: 1000px) 44vw, 100vw';
 const hd = work.renditions[0]!;
 const lightest = work.renditions.at(-1)!;
-const metaDescription = description?.lang === lang ? description.text : t.workFallbackDescription;
+const metaDescription = workMeta(work, lang).description;
 const others = works.filter((w) => w.slug !== work.slug);
 ---
 
@@ -53,9 +54,9 @@ const others = works.filter((w) => w.slug !== work.slug);
   path={pagePath(lang, work.slug)}
   altPath={pagePath(otherLang(lang), work.slug)}
   og={{
-    image: abs(work.og.src),
-    width: work.og.width,
-    height: work.og.height,
+    image: abs(work.og[lang].src),
+    width: work.og[lang].width,
+    height: work.og[lang].height,
     alt: t.ogWorkAlt(title.text),
     type: 'video.other',
     video: { url: abs(lightest.src), width: lightest.width, height: lightest.height },
@@ -66,13 +67,18 @@ const others = works.filter((w) => w.slug !== work.slug);
       description: metaDescription,
       pageUrl,
       contentUrl: abs(hd.src),
-      thumbnails: [abs(work.og.src), abs(work.cover.jpg.src)],
+      thumbnails: [abs(work.og[lang].src), abs(work.cover.jpg.src)],
       uploadDate: work.addedAt,
       duration: work.duration,
       width: work.width,
       height: work.height,
       lang,
+      creatorUrl: pageAbs(lang),
     }),
+    breadcrumbLd([
+      { name: t.allWork, url: pageAbs(lang) },
+      { name: title.text, url: pageUrl },
+    ]),
   ]}
   preload={{ imagesrcset: work.cover.avif.map((s) => `${href(s.src)} ${s.width}w`).join(', '), imagesizes: sizes, type: 'image/avif' }}
 >

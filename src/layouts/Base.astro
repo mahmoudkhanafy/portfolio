@@ -7,6 +7,7 @@ import { jsonLdScript } from '../lib/jsonld.ts';
 import { abs, dirOf, href, otherLang } from '../lib/site.ts';
 import type { Lang } from '../lib/urls.ts';
 import head from '../scripts/head.js?raw';
+import languageScript from '../scripts/language.js?url&no-inline';
 import '../styles/global.css';
 
 interface Props {
@@ -43,7 +44,8 @@ const headScript = head
   .split('\n')
   .map((line) => line.trim())
   .filter((line) => line && !line.startsWith('//'))
-  .join('\n');
+  .join('\n')
+  .replace('LANGUAGE_SCRIPT', languageScript);
 ---
 
 <!doctype html>
@@ -68,7 +70,8 @@ const headScript = head
     <meta name="theme-color" content="#000000" />
     <meta name="darkreader-lock" />
     <meta name="format-detection" content="telephone=no" />
-    <link rel="icon" type="image/png" sizes="32x32" href={href('favicon-32.png')} />
+    <link rel="icon" type="image/png" sizes="96x96" href={href('favicon-96.png')} />
+    <link rel="icon" type="image/png" sizes="48x48" href={href('favicon-48.png')} />
     <link rel="apple-touch-icon" href={href('apple-touch-icon.png')} />
     <link rel="manifest" href={href('manifest.webmanifest')} />
 

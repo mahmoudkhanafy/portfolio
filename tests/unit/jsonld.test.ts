@@ -15,7 +15,7 @@ describe('jsonLdScript', () => {
   });
 });
 
-import { personLd, videoLd } from '../../src/lib/jsonld.ts';
+import { breadcrumbLd, personLd, profilePageLd, videoLd, websiteLd } from '../../src/lib/jsonld.ts';
 
 describe('personLd', () => {
   it('describes Mahmoud with his contact and profiles', () => {
@@ -49,6 +49,7 @@ describe('videoLd', () => {
       width: 1920,
       height: 1080,
       lang: 'en',
+      creatorUrl: 'https://e.github.io/r/en/',
     });
     expect(ld).toEqual({
       '@context': 'https://schema.org',
@@ -63,7 +64,53 @@ describe('videoLd', () => {
       width: 1920,
       height: 1080,
       inLanguage: 'en',
-      creator: { '@type': 'Person', name: 'Mahmoud Khaled' },
+      creator: { '@type': 'Person', name: 'Mahmoud Khaled', url: 'https://e.github.io/r/en/' },
+    });
+  });
+});
+
+describe('websiteLd', () => {
+  it('names the site in the language of its home page, so results show his name as the site name', () => {
+    expect(websiteLd({ url: 'https://e.github.io/', lang: 'ar' })).toEqual({
+      '@context': 'https://schema.org',
+      '@type': 'WebSite',
+      name: 'محمود خالد',
+      alternateName: 'Mahmoud Khaled',
+      url: 'https://e.github.io/',
+      inLanguage: 'ar',
+    });
+    expect(websiteLd({ url: 'https://e.github.io/en/', lang: 'en' })).toMatchObject({ name: 'Mahmoud Khaled', alternateName: 'محمود خالد', inLanguage: 'en' });
+  });
+});
+
+describe('profilePageLd', () => {
+  it('presents the home page as the profile of Mahmoud', () => {
+    const opts = { url: 'https://e.github.io/en/', image: 'https://e.github.io/media/portrait/p.webp' };
+    const { '@context': _, ...person } = personLd(opts);
+    expect(profilePageLd({ ...opts, lang: 'en' })).toEqual({
+      '@context': 'https://schema.org',
+      '@type': 'ProfilePage',
+      url: 'https://e.github.io/en/',
+      inLanguage: 'en',
+      mainEntity: person,
+    });
+  });
+});
+
+describe('breadcrumbLd', () => {
+  it('lists the trail from the home page, numbered from 1', () => {
+    expect(
+      breadcrumbLd([
+        { name: 'All work', url: 'https://e.github.io/en/' },
+        { name: 'Run', url: 'https://e.github.io/en/work/run/' },
+      ]),
+    ).toEqual({
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'All work', item: 'https://e.github.io/en/' },
+        { '@type': 'ListItem', position: 2, name: 'Run', item: 'https://e.github.io/en/work/run/' },
+      ],
     });
   });
 });

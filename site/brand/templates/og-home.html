@@ -78,6 +78,35 @@
         direction: rtl;
         text-align: right;
       }
+      .side .ar {
+        font-size: 36px;
+        font-weight: 800;
+        line-height: 1.4;
+        direction: rtl;
+        text-align: right;
+      }
+      .side .ar small {
+        display: block;
+        color: #cfcfcf;
+        font-size: 26px;
+        font-weight: 500;
+      }
+      .side .lead-en {
+        color: #d6d6d6;
+        font-size: 30px;
+        font-weight: 500;
+        line-height: 1.4;
+        direction: ltr;
+      }
+      /* ?en: the English page's card, his English name in the lower third. */
+      .third[dir='ltr'] .name {
+        padding: 6px 26px 14px;
+        font-size: 62px;
+        line-height: 1.15;
+      }
+      .third[dir='ltr'] .role {
+        font-size: 32px;
+      }
       .side hr {
         width: 100%;
         border: 0;
@@ -97,5 +126,14 @@
       <hr />
       <p class="en">Mahmoud Khaled<small>Video editor &amp; videographer, Giza</small></p>
     </div>
+    <script>
+      if (location.search === '?en') {
+        document.documentElement.lang = 'en';
+        document.querySelector('.third').outerHTML =
+          '<div class="third" dir="ltr"><div class="name">Mahmoud Khaled</div><div class="role">Video editor &amp; videographer</div></div>';
+        document.querySelector('.side').innerHTML =
+          '<p class="lead-en">Reels, kinetic captions, event and brand coverage</p><hr /><p class="ar" lang="ar">محمود خالد<small>مونتير ومصوّر فيديو، الجيزة</small></p>';
+      }
+    </script>
   </body>
 </html>

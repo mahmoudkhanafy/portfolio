@@ -21,9 +21,10 @@ for (const lang of ['ar', 'en'] as const) {
       expect(await meta(page, 'og:title')).toContain(title);
       expect((await meta(page, 'og:description'))?.length).toBeGreaterThan(20);
 
-      // WhatsApp and Instagram fetch the preview image by absolute URL; it must exist and stay small.
+      // WhatsApp and Instagram fetch the preview image by absolute URL; it must exist and stay small. Each
+      // page language has its own, with his name first in that language.
       const image = await meta(page, 'og:image');
-      expect(image).toMatch(/^http:\/\/localhost:\d+\/mahmoud-khaled\/media\/.+\/og\.[0-9a-f]+\.jpg$/);
+      expect(image).toMatch(new RegExp(`^http://localhost:\\d+/mahmoud-khaled/media/.+/og${lang === 'en' ? '-en' : ''}\\.[0-9a-f]+\\.jpg$`));
       expect([await meta(page, 'og:image:width'), await meta(page, 'og:image:height')]).toEqual(['1200', '630']);
       const imageResponse = await request.get(image!);
       expect(imageResponse.status()).toBe(200);
@@ -40,8 +41,16 @@ for (const lang of ['ar', 'en'] as const) {
         ['x-default', new URL(`work/${work.slug}/`, baseURL).href],
       ]);
 
-      const ld = JSON.parse((await page.locator('script[type="application/ld+json"]').textContent())!);
-      expect(ld).toMatchObject({ '@type': 'VideoObject', name: title, url: pageUrl, uploadDate: work.addedAt });
+      const lds = (await page.locator('script[type="application/ld+json"]').allTextContents()).map((text) => JSON.parse(text));
+      const ld = lds.find((data) => data['@type'] === 'VideoObject');
+      expect(ld).toMatchObject({ name: title, url: pageUrl, uploadDate: work.addedAt });
+      expect(ld.thumbnailUrl[0]).toBe(image);
+      const home = new URL(lang === 'en' ? 'en/' : '', baseURL).href;
+      expect(ld.creator.url).toBe(home);
+      expect(lds.find((data) => data['@type'] === 'BreadcrumbList')?.itemListElement).toEqual([
+        { '@type': 'ListItem', position: 1, name: lang === 'en' ? 'All work' : 'كل الشغل', item: home },
+        { '@type': 'ListItem', position: 2, name: title, item: pageUrl },
+      ]);
       expect((await request.head(ld.contentUrl)).status()).toBe(200);
 
       const cta = await page.locator('.work__cta a[href^="https://wa.me/"]').getAttribute('href');

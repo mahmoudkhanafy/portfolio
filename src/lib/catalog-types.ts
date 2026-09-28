@@ -1,4 +1,5 @@
 import type { WorkType } from './i18n.ts';
+import type { Lang } from './urls.ts';
 
 export interface ImageSource {
   src: string;
@@ -12,6 +13,13 @@ export interface Rendition {
   height: number;
   /** Average bits per second of the encoded file. */
   bitrate: number;
+  bytes: number;
+}
+
+export interface OgImage {
+  src: string;
+  width: number;
+  height: number;
   bytes: number;
 }
 
@@ -40,7 +48,8 @@ export interface Work {
     webp: ImageSource[];
     jpg: ImageSource;
   };
-  og: { src: string; width: number; height: number; bytes: number };
+  /** The link-preview image for each page language (its name label reads in that language first). */
+  og: Record<Lang, OgImage>;
 }
 
 export interface Portrait {

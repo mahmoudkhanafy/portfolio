@@ -17,6 +17,11 @@ export default defineConfig({
   use: {
     baseURL,
     trace: 'retain-on-failure',
+    // A language already picked, so pages do not offer the other one (tests/e2e/language.spec.ts does).
+    storageState: {
+      cookies: [],
+      origins: [{ origin: `http://localhost:${E2E_PORT}`, localStorage: [{ name: 'language', value: 'ar' }] }],
+    },
     screenshot: 'only-on-failure',
   },
   webServer: {
