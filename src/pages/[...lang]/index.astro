@@ -11,10 +11,10 @@ import { abs, absVersioned, href, otherLang, pageAbs } from '../../lib/site.ts';
 import { pagePath, type Lang } from '../../lib/urls.ts';
 
 export function getStaticPaths() {
-  return [{ params: { lang: undefined } }, { params: { lang: 'en' } }];
+  return [{ params: { lang: undefined } }, { params: { lang: 'ar' } }];
 }
 
-const lang: Lang = Astro.params.lang === 'en' ? 'en' : 'ar';
+const lang: Lang = Astro.params.lang === 'ar' ? 'ar' : 'en';
 const t = ui[lang];
 const { portrait, works } = catalog;
 // The card with his name first in the page's language (npm run brand).

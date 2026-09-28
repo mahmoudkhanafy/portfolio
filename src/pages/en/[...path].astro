@@ -1,0 +1,24 @@
+---
+/**
+ * English lived under en/ while Arabic was at the root; links to it (/en/, /en/work/…/) still open,
+ * sent on to the same page at the root, where English lives now.
+ */
+import Redirect from '../../components/Redirect.astro';
+import { works } from '../../lib/catalog.ts';
+import { pageAbs } from '../../lib/site.ts';
+
+export function getStaticPaths() {
+  return [undefined, ...works.map((work) => work.slug)].map((slug) => ({
+    params: { path: slug ? `work/${slug}` : undefined },
+    props: { slug },
+  }));
+}
+
+interface Props {
+  slug?: string;
+}
+
+const { slug } = Astro.props;
+---
+
+<Redirect lang="en" target={pageAbs('en', slug)} />

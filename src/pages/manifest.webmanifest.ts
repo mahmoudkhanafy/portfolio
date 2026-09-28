@@ -4,10 +4,10 @@ import { href } from '../lib/site.ts';
 export const GET: APIRoute = () =>
   new Response(
     JSON.stringify({
-      name: 'محمود خالد — مونتير ومصوّر فيديو',
-      short_name: 'محمود خالد',
-      lang: 'ar',
-      dir: 'rtl',
+      name: 'Mahmoud Khaled — Video editor & videographer',
+      short_name: 'Mahmoud Khaled',
+      lang: 'en',
+      dir: 'ltr',
       start_url: href(''),
       scope: href(''),
       display: 'browser',

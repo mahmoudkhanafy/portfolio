@@ -1,7 +1,7 @@
 import type { Catalog, Work } from './catalog-types.ts';
 import { ui } from './i18n.ts';
 import { pick } from './localize.ts';
-import { OLD_BASE, type Lang } from './urls.ts';
+import { OLD_BASE, OLD_ENGLISH, type Lang } from './urls.ts';
 
 /** A piece's title and search/preview description in a page language. */
 export function workMeta(work: Work, lang: Lang): { title: string; description: string } {
@@ -26,9 +26,9 @@ interface Found {
  */
 export function sitemapEntry<T extends Entry>(item: T, catalog: Catalog, root: string): T & Found {
   const path = item.url.startsWith(root) ? item.url.slice(root.length) : '';
-  const match = /^(en\/)?(?:work\/([^/]+)\/)?$/.exec(path);
+  const match = /^(ar\/)?(?:work\/([^/]+)\/)?$/.exec(path);
   if (!match) return item;
-  const lang: Lang = match[1] ? 'en' : 'ar';
+  const lang: Lang = match[1] ? 'ar' : 'en';
   const at = (src: string): string => root + src;
   const work = match[2] && catalog.works.find((w) => w.slug === match[2]);
   if (work) {
@@ -57,4 +57,4 @@ export function sitemapEntry<T extends Entry>(item: T, catalog: Catalog, root: s
 }
 
 /** Every page but those that only send old links on. */
-export const inSitemap = (page: string, root: string): boolean => !page.startsWith(root + OLD_BASE);
+export const inSitemap = (page: string, root: string): boolean => ![OLD_BASE, OLD_ENGLISH].some((old) => page.startsWith(root + old));

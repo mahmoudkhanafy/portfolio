@@ -53,7 +53,7 @@ test.describe('video frames', () => {
     expect(squeezed, 'the e2e build adds tests/fixtures/work/ (npm run build:e2e)').toBeDefined();
     expect(shape(squeezed!)).toBeCloseTo(9 / 16, 3);
 
-    await page.goto('');
+    await page.goto('ar/');
     const wide = page.viewportSize()!.width >= 760;
     for (const work of works) {
       const piece = pieceIn(page, work.slug);
@@ -70,7 +70,7 @@ test.describe('video frames', () => {
   });
 
   test('stand vertical reels in the phone on wider screens, and never on phones', async ({ page, isMobile }) => {
-    await page.goto('');
+    await page.goto('ar/');
     for (const work of works) {
       const phone = await phoneOf(pieceIn(page, work.slug));
       expect(phone !== null, work.slug).toBe(!isMobile && isFramed(shape(work)));
@@ -81,7 +81,7 @@ test.describe('video frames', () => {
   test('fit on the first screen of their page, play button included', async ({ page }) => {
     const viewport = page.viewportSize()!;
     for (const work of works) {
-      await page.goto(`work/${work.slug}/`);
+      await page.goto(`ar/work/${work.slug}/`);
       const frame = await outline(page.locator('.work__media'));
       expect(frame.y + frame.height, `${work.slug} frame bottom`).toBeLessThanOrEqual(viewport.height);
       expect(inside(await box(page.locator('.player__pill')), await box(page.locator('[data-player]'))), `${work.slug} play button`).toBe(true);
@@ -94,7 +94,7 @@ test.describe('video frames', () => {
     test(`fit on one screen in the feed and keep their buttons whole${size ? ` (${size.width}×${size.height})` : ''}`, async ({ page }) => {
       if (size) await page.setViewportSize(size);
       const viewport = page.viewportSize()!;
-      for (const path of ['', 'en/']) {
+      for (const path of ['ar/', '']) {
         await page.goto(path);
         for (const work of works) {
           const piece = pieceIn(page, work.slug);
@@ -124,7 +124,7 @@ test.describe('video frames', () => {
   test('run edge to edge on phones, and sit centred with rounded corners when a tall video must be narrower', async ({ page, isMobile }) => {
     test.skip(!isMobile, 'The edge-to-edge feed is the phone layout.');
     const viewport = page.viewportSize()!;
-    await page.goto('');
+    await page.goto('ar/');
     let narrower = 0;
     for (const work of works) {
       const frame = frameIn(page, work.slug);
@@ -143,7 +143,7 @@ test.describe('video frames', () => {
 
   test('give every frame in a row of the grid one height, so frames and titles line up', async ({ page, isMobile }) => {
     test.skip(isMobile, 'Phones show one piece per row.');
-    await page.goto('');
+    await page.goto('ar/');
     const rows = new Map<number, Array<{ slug: string; top: number; height: number; title: number }>>();
     for (const work of works) {
       const article = await box(page.locator('[data-reel]').filter({ has: page.locator(`#title-${work.slug}`) }));
@@ -176,7 +176,7 @@ test.describe('video frames', () => {
     test(`fill every row but the last, best piece first, in Mahmoud's order within each row (${size.width}×${size.height})`, async ({ page, isMobile }) => {
       test.skip(isMobile, 'Phones show one piece per row, in order.');
       await page.setViewportSize(size);
-      await page.goto('');
+      await page.goto('ar/');
       const list = await box(page.locator('.feed__list'));
       const rows = new Map<number, Array<{ rank: number; frame: Box; x: number; right: number; count: number; time: number; phone: boolean }>>();
       for (const [rank, work] of works.entries()) {
@@ -218,7 +218,7 @@ test.describe('video frames', () => {
   test('ease a phone’s picture from filling its screen to whole when it plays with sound', async ({ page, isMobile }) => {
     test.skip(isMobile, 'The phone frame is for wider screens.');
     const work = works.find((w) => Math.abs(shape(w) - 9 / 16) < 0.01)!;
-    await page.goto(`work/${work.slug}/`);
+    await page.goto(`ar/work/${work.slug}/`);
     const screen = await box(page.locator('[data-player]'));
     const picture = page.locator('[data-player] .player__media');
     const rest = await box(picture);
@@ -235,7 +235,7 @@ test.describe('video frames', () => {
     test.skip(browserName !== 'webkit', 'A Safari check.');
     await page.setViewportSize({ width: 1024, height: 768 });
     const work = works.find((w) => isFramed(shape(w)))!;
-    await page.goto(`work/${work.slug}/`);
+    await page.goto(`ar/work/${work.slug}/`);
     const phone = await phoneOf(page.locator('.work__media'));
     expect(phone, 'a phone at 1024 px').not.toBeNull();
     expect(phone!.width / phone!.height).toBeCloseTo(PHONE_SHAPE, 2);
@@ -254,7 +254,7 @@ test.describe('video frames', () => {
     const work = works.find((w) => isFramed(shape(w)))!;
     for (const size of [{ width: 1440, height: 900 }, { width: 1366, height: 657 }]) {
       await page.setViewportSize(size);
-      await page.goto(`work/${work.slug}/`);
+      await page.goto(`ar/work/${work.slug}/`);
       const column = await box(page.locator('.work__media'));
       const phone = (await phoneOf(page.locator('.work__media')))!;
       expect(Math.abs(column.width - phone.width), `${size.width}×${size.height} column`).toBeLessThanOrEqual(1);

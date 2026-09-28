@@ -40,8 +40,8 @@ describe('workMeta', () => {
 
 describe('sitemapEntry', () => {
   it('lists a video page with its video, preview image and date', () => {
-    expect(sitemapEntry({ url: `${root}en/work/run/`, links: [] }, catalog([work()]), root)).toEqual({
-      url: `${root}en/work/run/`,
+    expect(sitemapEntry({ url: `${root}work/run/`, links: [] }, catalog([work()]), root)).toEqual({
+      url: `${root}work/run/`,
       links: [],
       lastmod: '2026-09-21T13:55:49.407Z',
       img: [{ url: `${root}media/run/og-en.k.jpg` }],
@@ -59,14 +59,14 @@ describe('sitemapEntry', () => {
   });
 
   it('describes the Arabic page in Arabic', () => {
-    const entry = sitemapEntry({ url: `${root}work/run/` }, catalog([work()]), root);
+    const entry = sitemapEntry({ url: `${root}ar/work/run/` }, catalog([work()]), root);
     expect(entry.video?.[0]).toMatchObject({ title: 'جري', description: 'فيلم جري.', thumbnail_loc: `${root}media/run/og-ar.k.jpg` });
   });
 
   it('dates a home page by its newest piece and lists the portrait', () => {
     const works = [work(), work({ slug: 'new', addedAt: '2026-09-25T10:00:00.000Z' })];
-    expect(sitemapEntry({ url: `${root}en/` }, catalog(works), root)).toEqual({
-      url: `${root}en/`,
+    expect(sitemapEntry({ url: `${root}ar/` }, catalog(works), root)).toEqual({
+      url: `${root}ar/`,
       lastmod: '2026-09-25T10:00:00.000Z',
       img: [{ url: `${root}media/portrait/p-720.k.webp` }],
     });
@@ -74,14 +74,16 @@ describe('sitemapEntry', () => {
 
   it('works under a sub-path too', () => {
     const at = 'https://e.github.io/repo/';
-    expect(sitemapEntry({ url: `${at}work/run/` }, catalog([work()]), at).video?.[0]?.content_loc).toBe(`${at}media/run/hd.k.mp4`);
+    expect(sitemapEntry({ url: `${at}ar/work/run/` }, catalog([work()]), at).video?.[0]?.content_loc).toBe(`${at}media/run/hd.k.mp4`);
   });
 });
 
 describe('inSitemap', () => {
-  it('leaves out the pages that only send old /portfolio/ links on', () => {
+  it('leaves out the pages that only send old links on (/portfolio/…, /en/…)', () => {
     expect(inSitemap(`${root}portfolio/en/`, root)).toBe(false);
-    expect(inSitemap(`${root}en/work/run/`, root)).toBe(true);
+    expect(inSitemap(`${root}en/work/run/`, root)).toBe(false);
+    expect(inSitemap(`${root}ar/work/run/`, root)).toBe(true);
+    expect(inSitemap(`${root}work/run/`, root)).toBe(true);
     expect(inSitemap(root, root)).toBe(true);
   });
 });

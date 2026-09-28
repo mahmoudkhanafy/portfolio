@@ -42,7 +42,7 @@ export default defineConfig({
   integrations: [
     sitemap({
       // The same language codes as each page's hreflang links.
-      i18n: { defaultLocale: 'ar', locales: { ar: 'ar', en: 'en' } },
+      i18n: { defaultLocale: 'en', locales: { en: 'en', ar: 'ar' } },
       filter: (page) => inSitemap(page, root),
       serialize: (item) => sitemapEntry(item, catalog(), root),
     }),

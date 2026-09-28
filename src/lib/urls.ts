@@ -3,6 +3,8 @@ export type Lang = 'ar' | 'en';
 /** Where the site lived until it moved to the root of mahmoudkhanafy.github.io: links shared before
  * then still open, through small pages under it that send them on (src/pages/portfolio/). */
 export const OLD_BASE = 'portfolio/';
+/** Where English lived while Arabic was at the root (src/pages/en/ sends those links on). */
+export const OLD_ENGLISH = 'en/';
 
 /** "/repo", "repo/", "" → "/repo/" or "/". */
 export function normalizeBase(base: string): string {
@@ -20,8 +22,14 @@ export function absoluteUrl(path: string, site: string, base: string): string {
   return site.replace(/\/+$/, '') + withBase(path, base);
 }
 
-/** Path of a page (without the base): Arabic lives at the root, English under en/. */
+/** Path of a page (without the base): English lives at the root, Arabic under ar/. */
 export function pagePath(lang: Lang, slug?: string): string {
-  const prefix = lang === 'en' ? 'en/' : '';
+  const prefix = lang === 'ar' ? 'ar/' : '';
+  return slug ? `${prefix}work/${slug}/` : prefix;
+}
+
+/** A page's path before English moved to the root: Arabic at the root, English under en/. */
+export function oldPagePath(lang: Lang, slug?: string): string {
+  const prefix = lang === 'en' ? OLD_ENGLISH : '';
   return slug ? `${prefix}work/${slug}/` : prefix;
 }

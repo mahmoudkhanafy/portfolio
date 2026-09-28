@@ -6,7 +6,7 @@ const meta = (page: import('@playwright/test').Page, key: string) =>
 
 for (const lang of ['ar', 'en'] as const) {
   for (const work of works) {
-    const path = `${lang === 'en' ? 'en/' : ''}work/${work.slug}/`;
+    const path = `${lang === 'ar' ? 'ar/' : ''}work/${work.slug}/`;
 
     test(`${path} has a proper link preview and a way to message`, async ({ page, request, baseURL }) => {
       const problems = watchForProblems(page);
@@ -36,8 +36,8 @@ for (const lang of ['ar', 'en'] as const) {
 
       const alternates = await page.locator('link[rel="alternate"][hreflang]').evaluateAll((links) => links.map((l) => [l.getAttribute('hreflang'), l.getAttribute('href')]));
       expect(alternates).toEqual([
-        ['ar', new URL(`work/${work.slug}/`, baseURL).href],
-        ['en', new URL(`en/work/${work.slug}/`, baseURL).href],
+        ['ar', new URL(`ar/work/${work.slug}/`, baseURL).href],
+        ['en', new URL(`work/${work.slug}/`, baseURL).href],
         ['x-default', new URL(`work/${work.slug}/`, baseURL).href],
       ]);
 
@@ -45,7 +45,7 @@ for (const lang of ['ar', 'en'] as const) {
       const ld = lds.find((data) => data['@type'] === 'VideoObject');
       expect(ld).toMatchObject({ name: title, url: pageUrl, uploadDate: work.addedAt });
       expect(ld.thumbnailUrl[0]).toBe(image);
-      const home = new URL(lang === 'en' ? 'en/' : '', baseURL).href;
+      const home = new URL(lang === 'ar' ? 'ar/' : '', baseURL).href;
       expect(ld.creator.url).toBe(home);
       expect(lds.find((data) => data['@type'] === 'BreadcrumbList')?.itemListElement).toEqual([
         { '@type': 'ListItem', position: 1, name: lang === 'en' ? 'All work' : 'كل الشغل', item: home },
@@ -67,14 +67,14 @@ test('text from a .yml file is shown exactly as written, never read as HTML', as
   expect(edge, 'the e2e build adds tests/fixtures/work/ (npm run build:e2e)').toBeDefined();
   for (const lang of ['ar', 'en'] as const) {
     const problems = watchForProblems(page);
-    await page.goto(`${lang === 'en' ? 'en/' : ''}work/${edge!.slug}/`);
+    await page.goto(`${lang === 'ar' ? 'ar/' : ''}work/${edge!.slug}/`);
     const description = edge!.description[lang]!;
     await expect(page.locator('.work__description')).toHaveText(description);
     await expect(page.locator('.work__tags')).toContainText(edge!.client!);
     await expect(page.locator('main b, main img[src="x"]')).toHaveCount(0);
     expect(problems).toEqual([]);
   }
-  await page.goto('');
+  await page.goto('ar/');
   await expect(page.locator(`#title-${edge!.slug}`)).toHaveAccessibleName(edge!.title.ar);
   await expect(page.locator('main b, main img[src="x"]')).toHaveCount(0);
 });

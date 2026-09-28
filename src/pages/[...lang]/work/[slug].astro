@@ -19,7 +19,7 @@ import { RHYTHM } from '../../../lib/words.ts';
 
 export function getStaticPaths() {
   return (['ar', 'en'] as const).flatMap((lang) =>
-    works.map((work) => ({ params: { lang: lang === 'en' ? 'en' : undefined, slug: work.slug }, props: { work } })),
+    works.map((work) => ({ params: { lang: lang === 'ar' ? 'ar' : undefined, slug: work.slug }, props: { work } })),
   );
 }
 
@@ -28,7 +28,7 @@ interface Props {
 }
 
 const { work } = Astro.props;
-const lang: Lang = Astro.params.lang === 'en' ? 'en' : 'ar';
+const lang: Lang = Astro.params.lang === 'ar' ? 'ar' : 'en';
 const t = ui[lang];
 const title = pick(work.title, lang)!;
 const description = pick(work.description, lang);

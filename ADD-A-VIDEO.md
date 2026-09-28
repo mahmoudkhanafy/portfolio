@@ -77,11 +77,11 @@ client: "اسم الكافيه"
 
 ## ٦. ابعت اللينك
 
-- بالعربي: `https://…/work/cafe-opening-2026/`
-- بالإنجليزي: `https://…/en/work/cafe-opening-2026/`
+- بالإنجليزي: `https://…/work/cafe-opening-2026/`
+- بالعربي: `https://…/ar/work/cafe-opening-2026/`
 
 في صفحة الفيديو في زرار **شارك الفيديو** بيفتح واتساب والتطبيقات التانية على طول.
-لو هتبعته لحد بيقرا إنجليزي، ابعت لينك `/en/`: صورته بتكتب اسمك بالإنجليزي الأول.
+الموقع بيفتح بالإنجليزي، فلو هتبعته لحد بيقرا عربي، ابعت لينك `/ar/`: صورته وكلامه بالعربي.
 
 واتساب بيحفظ شكل اللينك أول مرة يتبعت، فلو غيّرت الصورة بعدها، ممكن الشات القديم يفضل يعرض الشكل القديم.
 
@@ -168,9 +168,9 @@ the change up to 10 minutes later because of caching.
 
 ## 6. Send the link
 
-`https://…/work/<name>/` (Arabic) or `https://…/en/work/<name>/` (English). The **Share this video**
-button on the page opens WhatsApp and other apps directly. Send the `/en/` link to someone who reads
-English: its preview says your name in English first. WhatsApp remembers a link's preview the first
+`https://…/work/<name>/` (English) or `https://…/ar/work/<name>/` (Arabic). The **Share this video**
+button on the page opens WhatsApp and other apps directly. The site opens in English; send the `/ar/`
+link to someone who reads Arabic, and its preview is in Arabic. WhatsApp remembers a link's preview the first
 time it is sent, so an older chat may keep showing the old picture.
 
 ## More

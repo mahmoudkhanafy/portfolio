@@ -44,10 +44,10 @@ describe('absoluteUrl', () => {
 
 describe('pagePath', () => {
   it.each([
-    ['ar', undefined, ''],
-    ['en', undefined, 'en/'],
-    ['ar', 'nimun-recap', 'work/nimun-recap/'],
-    ['en', 'nimun-recap', 'en/work/nimun-recap/'],
+    ['en', undefined, ''],
+    ['ar', undefined, 'ar/'],
+    ['en', 'nimun-recap', 'work/nimun-recap/'],
+    ['ar', 'nimun-recap', 'ar/work/nimun-recap/'],
   ] as const)('%s %s → %j', (lang, slug, want) => {
     expect(pagePath(lang, slug)).toBe(want);
   });

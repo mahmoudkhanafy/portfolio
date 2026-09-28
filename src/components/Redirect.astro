@@ -1,0 +1,35 @@
+---
+/**
+ * A page that only sends an old address on to where that page lives now, with any #place and
+ * tracking kept (src/pages/portfolio/, src/pages/en/). Search engines follow the redirect and the
+ * canonical link; browsers without JavaScript follow the refresh.
+ */
+import { ui } from '../lib/i18n.ts';
+import { dirOf } from '../lib/site.ts';
+import type { Lang } from '../lib/urls.ts';
+
+interface Props {
+  lang: Lang;
+  /** The page's absolute address now. */
+  target: string;
+}
+
+const { lang, target } = Astro.props;
+---
+
+<!doctype html>
+<html lang={lang} dir={dirOf(lang)}>
+  <head>
+    <meta charset="utf-8" />
+    <title>{ui[lang].name}</title>
+    <link rel="canonical" href={target} />
+    <script is:inline define:vars={{ target }}>
+      location.replace(target + location.search + location.hash);
+    </script>
+    <!-- Only without JavaScript: a refresh would race the redirect above, and drop the #place. -->
+    <noscript><meta http-equiv="refresh" content={`0; url=${target}`} /></noscript>
+  </head>
+  <body>
+    <a href={target}>{target}</a>
+  </body>
+</html>

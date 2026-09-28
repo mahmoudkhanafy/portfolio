@@ -3,7 +3,7 @@ import { videoState, works } from './helpers.ts';
 
 /** A piece with both an hd and an sd file, so switching between them can be tested. */
 const piece = works.find((w) => w.renditions.length > 1)!;
-const workPath = `work/${piece.slug}/`;
+const workPath = `ar/work/${piece.slug}/`;
 
 test.describe('player', () => {
   test('plays with sound after one tap', async ({ page }) => {
@@ -59,7 +59,7 @@ test.describe('player', () => {
   });
 
   test('plays one video at a time', async ({ page }) => {
-    await page.goto('');
+    await page.goto('ar/');
     const players = page.locator('[data-reel] [data-player]');
     await players.nth(0).locator('.player__play').click();
     await expect.poll(async () => (await videoState(page, '[data-reel] [data-player] >> nth=0')).time, { timeout: 15_000 }).toBeGreaterThan(0.3);
@@ -74,7 +74,7 @@ test.describe('muted previews in the feed', () => {
     test.skip(!isMobile, 'Phones preview the piece in view; mice preview on hover.');
     const first = page.locator('[data-reel]').first();
     const state = () => videoState(page, '[data-reel] [data-player] >> nth=0');
-    await page.goto('');
+    await page.goto('ar/');
     await first.scrollIntoViewIfNeeded();
     await page.evaluate(() => window.scrollBy(0, 4));
     await expect.poll(async () => (await state()).time, { timeout: 15_000 }).toBeGreaterThan(0.3);
@@ -91,7 +91,7 @@ test.describe('muted previews in the feed', () => {
 
   test('preview on hover with a mouse', async ({ page, isMobile }) => {
     test.skip(isMobile, 'Hover previews are for mouse users.');
-    await page.goto('');
+    await page.goto('ar/');
     const first = page.locator('[data-reel] [data-player]').first();
     await first.hover();
     await expect.poll(async () => (await videoState(page, '[data-reel] [data-player] >> nth=0')).time, { timeout: 15_000 }).toBeGreaterThan(0.2);
@@ -104,7 +104,7 @@ test.describe('muted previews in the feed', () => {
     test.use({ reducedMotion: 'reduce' });
 
     test('never preview and do not animate the lower third', async ({ page }) => {
-      await page.goto('');
+      await page.goto('ar/');
       expect(await page.locator('.hero__name').evaluate((el) => getComputedStyle(el).animationName)).toBe('none');
       const first = page.locator('[data-reel]').first();
       await first.scrollIntoViewIfNeeded();

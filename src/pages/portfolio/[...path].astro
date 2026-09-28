@@ -1,18 +1,18 @@
 ---
 /**
- * The site lived at mahmoudkhanafy.github.io/portfolio/ before it moved to the root; links shared then
- * (in WhatsApp chats, on Instagram) still open, here sent on to the same page at its new address,
- * with any #place and tracking kept. Search engines follow the redirect and the canonical link.
+ * The site lived at mahmoudkhanafy.github.io/portfolio/, Arabic at its root and English under en/,
+ * before it moved to the root of the domain with English first; links shared then (in WhatsApp chats,
+ * on Instagram) still open the same page in the same language.
  */
+import Redirect from '../../components/Redirect.astro';
 import { works } from '../../lib/catalog.ts';
-import { ui } from '../../lib/i18n.ts';
 import { pageAbs } from '../../lib/site.ts';
-import { pagePath, type Lang } from '../../lib/urls.ts';
+import { oldPagePath, type Lang } from '../../lib/urls.ts';
 
 export function getStaticPaths() {
   return (['ar', 'en'] as const).flatMap((lang) =>
     [undefined, ...works.map((work) => work.slug)].map((slug) => ({
-      params: { path: pagePath(lang, slug).replace(/\/$/, '') || undefined },
+      params: { path: oldPagePath(lang, slug).replace(/\/$/, '') || undefined },
       props: { lang, slug },
     })),
   );
@@ -24,22 +24,6 @@ interface Props {
 }
 
 const { lang, slug } = Astro.props;
-const target = pageAbs(lang, slug);
 ---
 
-<!doctype html>
-<html lang={lang} dir={lang === 'ar' ? 'rtl' : 'ltr'}>
-  <head>
-    <meta charset="utf-8" />
-    <title>{ui[lang].name}</title>
-    <link rel="canonical" href={target} />
-    <script is:inline define:vars={{ target }}>
-      location.replace(target + location.search + location.hash);
-    </script>
-    <!-- Only without JavaScript: a refresh would race the redirect above, and drop the #place. -->
-    <noscript><meta http-equiv="refresh" content={`0; url=${target}`} /></noscript>
-  </head>
-  <body>
-    <a href={target}>{target}</a>
-  </body>
-</html>
+<Redirect lang={lang} target={pageAbs(lang, slug)} />

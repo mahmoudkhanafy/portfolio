@@ -1,6 +1,6 @@
 /**
  * Lighthouse on the production build, served the way GitHub Pages serves it.
- * Builds with a matching origin, then audits the Arabic home, the English home and one video page
+ * Builds with a matching origin, then audits the English home, the Arabic home and one video page
  * with Lighthouse's mobile (throttled 4G) and desktop presets. Reports go to reports/lighthouse/.
  *
  *   npm run lighthouse
@@ -19,9 +19,9 @@ const reports = 'reports/lighthouse';
 execFileSync('npm', ['run', 'build'], { stdio: 'inherit', env: { ...process.env, SITE_URL: origin, OUT_DIR: outDir } });
 const catalog = JSON.parse(readFileSync('src/generated/catalog.json', 'utf8')) as { works: Array<{ slug: string }> };
 const pages = [
-  ['home-ar', ''],
-  ['home-en', 'en/'],
-  ['work-ar', `work/${catalog.works[0]!.slug}/`],
+  ['home-en', ''],
+  ['home-ar', 'ar/'],
+  ['work-en', `work/${catalog.works[0]!.slug}/`],
 ];
 
 /** Runs a command without blocking this process, which is also serving the pages being audited. */

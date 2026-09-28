@@ -1,7 +1,7 @@
 # Mahmoud Khaled — portfolio
 
-The video portfolio of Mahmoud Khaled, video editor and videographer in Giza / Cairo. Arabic first
-(`/`), English at `/en/`. Every piece has its own page and link preview, plays with sound on one tap,
+The video portfolio of Mahmoud Khaled, video editor and videographer in Giza / Cairo. English first
+(`/`), Arabic at `/ar/`; the old `/en/…` addresses send visitors on to the same page at `/…`. Every piece has its own page and link preview, plays with sound on one tap,
 and ends on a pre-written WhatsApp message. Live at https://mahmoudkhanafy.github.io/.
 
 **Adding a video is documented for Mahmoud in [ADD-A-VIDEO.md](ADD-A-VIDEO.md)** (Arabic, then English).

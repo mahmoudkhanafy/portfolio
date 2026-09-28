@@ -10,26 +10,26 @@ const en = ui.en;
 ---
 
 <Base
-  lang="ar"
-  title={`${ar.notFoundTitle} — ${ar.name}`}
-  description={ar.notFoundBody}
+  lang="en"
+  title={`${en.notFoundTitle} — ${en.name}`}
+  description={en.notFoundBody}
   path="404.html"
   altPath="404.html"
-  og={{ image: absVersioned('og-home.jpg'), width: 1200, height: 630, alt: ar.ogHomeAlt, type: 'website' }}
+  og={{ image: absVersioned('og-home-en.jpg'), width: 1200, height: 630, alt: en.ogHomeAlt, type: 'website' }}
   noindex
 >
-  <section class="missing" aria-labelledby="missing-ar">
+  <section class="missing" aria-labelledby="missing-en">
     <div>
-      <h1 id="missing-ar">{ar.notFoundTitle}</h1>
-      <p>{ar.notFoundBody}</p>
-      <a class="button button--primary" href={pageHref('ar')}>{ar.backHome}</a>
-    </div>
-    <div lang="en" dir="ltr">
-      <h2>{en.notFoundTitle}</h2>
+      <h1 id="missing-en">{en.notFoundTitle}</h1>
       <p>{en.notFoundBody}</p>
-      <a class="button button--ghost" href={pageHref('en')}>
-        {en.backHome}
-        <Icon name="back" size={18} class="missing__arrow" />
+      <a class="button button--primary" href={pageHref('en')}>{en.backHome}</a>
+    </div>
+    <div lang="ar" dir="rtl">
+      <h2>{ar.notFoundTitle}</h2>
+      <p>{ar.notFoundBody}</p>
+      <a class="button button--ghost" href={pageHref('ar')}>
+        {ar.backHome}
+        <Icon name="forward" size={18} />
       </a>
     </div>
   </section>
@@ -56,9 +56,5 @@ const en = ui.en;
 
   .missing p {
     color: var(--text);
-  }
-
-  .missing :global(.missing__arrow) {
-    transform: scaleX(-1);
   }
 </style>
