@@ -5,7 +5,8 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 let browser: Browser;
 beforeAll(async () => {
-  browser = await chromium.launch({ args: ['--allow-file-access-from-files'] });
+  // The same Chromium as the end-to-end suite: in CI, the runner's Google Chrome (PW_CHROMIUM_CHANNEL).
+  browser = await chromium.launch({ channel: process.env.PW_CHROMIUM_CHANNEL || undefined, args: ['--allow-file-access-from-files'] });
 });
 afterAll(async () => {
   await browser?.close();
