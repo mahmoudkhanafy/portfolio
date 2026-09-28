@@ -1,0 +1,39 @@
+/* "Caption": a true-black screen, white type, and one colour taken from Mahmoud's own caption gold. */
+:root {
+  color-scheme: dark;
+
+  --screen: #000000;
+  --raised: #121212;
+  --white: #ffffff;
+  --text: #d6d6d6;
+  --dim: #8f8f8f;
+  --caption: #e8b100;
+  --caption-hover: #ffc629;
+  --on-caption: #000000;
+  --rule: #2a2a2a;
+  --rule-strong: #4a4a4a;
+
+  --font: var(--font-sans), system-ui, sans-serif;
+  --step--1: clamp(0.8125rem, 0.79rem + 0.1vw, 0.875rem);
+  --step-0: clamp(1rem, 0.97rem + 0.15vw, 1.0625rem);
+  --step-1: clamp(1.1875rem, 1.1rem + 0.45vw, 1.375rem);
+  --step-2: clamp(1.4rem, 1.2rem + 1vw, 1.875rem);
+  --step-3: clamp(2rem, 1.45rem + 2.8vw, 3.5rem);
+  --step-name: clamp(4.5rem, 1.6rem + 19vw, 11rem);
+
+  --gutter: clamp(1.25rem, 0.85rem + 2vw, 3rem);
+  --measure: 34rem;
+  --page: 92rem;
+  --radius-frame: 14px;
+  --radius-pill: 999px;
+  --tap: 48px;
+  --ease-cut: cubic-bezier(0.2, 0.8, 0.2, 1);
+
+  /* Motion: a word pops on like a caption; a framed reel eases to its whole frame; a frame glides. */
+  --pop: 180ms;
+  --ease-pop: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --fit: 560ms;
+  --glide: 620ms;
+  /* The narrowest phone frame: its screen (92.72% of it) keeps the play button's 14rem. */
+  --phone-min: 15.1rem;
+}

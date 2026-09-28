@@ -1,0 +1,105 @@
+/*
+ * Text that builds the way Mahmoud's reels build captions (spec §2). Words.astro renders a line as word
+ * spans (.w), with a whole copy for screen readers. html.motion (set in <head> when JavaScript runs and
+ * the visitor allows motion) keeps words hidden until their moment:
+ *   [data-build='load']  builds on page load, each word at its --d (the hero line, a video's title);
+ *   [data-build='view']  builds once src/scripts/motion.ts adds .is-building as it comes into view, or
+ *                        shows at once with .is-built when it is already on screen as the page starts.
+ * Only opacity and transform change, so nothing else on the page moves.
+ */
+.w {
+  display: inline-block;
+}
+
+.w--key {
+  color: var(--caption);
+}
+
+/* The whole line for screen readers; the visible words are copied, not this. It keeps its place at the
+   start of the line (no negative margin), so its box and its text frame lie on the visible words: a
+   tap aimed at them, by a tool or by voice control, lands on the title's link. */
+.visually-hidden.words__read {
+  margin: 0;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* A feed title's last word and its arrow stay on one line (a line break may fall before any other
+   inline block). The word leaves the arrow room even when it is as wide as the line, like a pasted link. */
+.words__tail {
+  white-space: nowrap;
+}
+
+.words__tail > .w {
+  white-space: normal;
+}
+
+.words__tail > .w:first-child {
+  max-width: calc(100% - 3rem);
+}
+
+/* A page translator writes its words into the word spans, which keep the page's direction, so a
+   translated line would read backwards. The line shows its whole copy instead, which the translator
+   renders as one sentence; a feed title keeps its arrow. Chrome marks <html> translated-ltr or
+   translated-rtl, and src/scripts/motion.ts marks it translated when any translator rewrites a line. */
+:root:is(.translated, .translated-ltr, .translated-rtl) .visually-hidden.words__read {
+  position: static !important;
+  width: auto;
+  height: auto;
+  overflow: visible;
+  clip-path: none;
+  white-space: normal;
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+:root:is(.translated, .translated-ltr, .translated-rtl) .words .w:not(.w--trail) {
+  display: none;
+}
+
+/* On screen only: a printed page shows every word. */
+@media screen and (prefers-reduced-motion: no-preference) {
+  .motion [data-build='load'] .w,
+  .motion [data-build='view'].is-building :is(.w, .pop) {
+    animation: pop var(--pop) var(--ease-pop) var(--d, 0ms) both;
+  }
+
+  .motion [data-build='view']:not(.is-built) :is(.w, .pop) {
+    opacity: 0;
+  }
+}
+
+/* Like a caption pop: the word appears at once, a little low and at 80% of its size, and settles into
+   place with a slight overshoot. It is never half transparent, so no frame of it reads as faint text. */
+@keyframes pop {
+  0% {
+    opacity: 0;
+    transform: translateY(0.22em) scale(0.8);
+  }
+  1% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* The stretched word (motion.ts): a copy over it draws the kashida into the empty room after it, so the
+   word, and the line, keep their size. */
+.w[data-kashida] {
+  position: relative;
+}
+
+.w.is-stretching {
+  -webkit-text-fill-color: transparent;
+}
+
+.w__stretch {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  white-space: nowrap;
+  pointer-events: none;
+  -webkit-text-fill-color: currentColor;
+}

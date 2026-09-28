@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="fonts.css" />
+    <style>
+      html,
+      body {
+        width: 100vw;
+        height: 100vh;
+      }
+      body {
+        display: grid;
+      }
+      /* The hero's lower third in miniature: his initials on caption gold over a white role strip.
+         Latin initials stay legible at favicon size, where a lone Arabic letter blurs into a blob. */
+      .tile {
+        --mk: 46vw;
+        display: grid;
+        place-content: center;
+        justify-items: start;
+        gap: calc(var(--mk) * 0.144);
+        border-radius: 22.5vw;
+        background: var(--caption);
+      }
+      .mk {
+        color: var(--screen);
+        font-size: var(--mk);
+        font-weight: 800;
+        line-height: 1;
+        letter-spacing: -0.035em;
+        text-box: trim-both cap alphabetic;
+      }
+      .strip {
+        width: calc(var(--mk) * 0.64);
+        height: calc(var(--mk) * 0.127);
+        margin-inline-start: calc(var(--mk) * 0.042);
+        background: var(--white);
+      }
+      /* Android crops maskable icons to any shape: full bleed, with the mark inside the central circle. */
+      body.maskable .tile {
+        --mk: 37vw;
+        border-radius: 0;
+      }
+      /* iOS rounds home-screen icons itself and turns transparency black: full bleed. */
+      body.square .tile {
+        border-radius: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="tile"><div class="mk">MK</div><div class="strip"></div></div>
+    <script>
+      const variant = location.search.slice(1);
+      if (variant) document.body.classList.add(variant);
+    </script>
+  </body>
+</html>

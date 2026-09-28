@@ -1,0 +1,70 @@
+---
+import { CONTACT, whatsappMessage, whatsappUrl } from '../lib/contact.ts';
+import { ui } from '../lib/i18n.ts';
+import { otherLang, pageHref } from '../lib/site.ts';
+import type { Lang } from '../lib/urls.ts';
+import Icon from './Icon.astro';
+
+interface Props {
+  lang: Lang;
+  altHref: string;
+  /** The home hero already shows his name large; the header keeps only the controls there. */
+  showName?: boolean;
+}
+
+const { lang, altHref, showName = true } = Astro.props;
+const t = ui[lang];
+const other = otherLang(lang);
+---
+
+<header class="site-header">
+  {showName ? <a class="site-header__name" href={pageHref(lang)}>{t.name}</a> : <span />}
+  <nav class="site-header__nav" aria-label={lang === 'ar' ? 'روابط سريعة' : 'Quick links'}>
+    <a class="site-header__lang" href={altHref} lang={other} hreflang={other} aria-label={t.switchLabel}>{t.switchName}</a>
+    <a class="button button--ghost button--icon" href={whatsappUrl(whatsappMessage(lang))} aria-label={t.whatsapp}>
+      <Icon name="whatsapp" size={20} />
+    </a>
+    <a class="button button--ghost button--icon" href={CONTACT.instagramUrl} aria-label={t.instagram}>
+      <Icon name="instagram" size={19} />
+    </a>
+  </nav>
+</header>
+
+<style>
+  .site-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.75rem var(--gutter);
+    padding-top: max(0.75rem, env(safe-area-inset-top));
+  }
+
+  .site-header__name {
+    color: var(--white);
+    font-size: var(--step-1);
+    font-weight: 800;
+    text-decoration: none;
+  }
+
+  .site-header__nav {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .site-header__lang {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--tap);
+    padding-inline: 0.75rem;
+    color: var(--text);
+    font-size: var(--step--1);
+    font-weight: 500;
+    text-underline-offset: 0.3em;
+  }
+
+  .site-header__lang:hover {
+    color: var(--white);
+  }
+</style>

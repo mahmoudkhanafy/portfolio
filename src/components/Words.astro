@@ -1,0 +1,49 @@
+---
+/**
+ * A line as word spans that build like Mahmoud's captions (src/styles/motion.css). Screen readers read
+ * the whole line from a visually hidden copy, and the spans are hidden from them: some read separate
+ * spans as separate items. The copy starts the line (motion.css keeps it there, over the words), so a
+ * link's first box and its text frame lie on the title, where tools that aim at them tap. Place it
+ * inside the element that carries data-build. An optional "trail" slot (a feed title's arrow) builds
+ * right after the last word and stays on its line (.words__tail).
+ */
+import { captionWords, type Caption, type Dir, type Rhythm } from '../lib/words.ts';
+
+interface Props {
+  text: string | Caption;
+  dir: Dir;
+  rhythm: Rhythm;
+}
+
+const { text, dir, rhythm } = Astro.props;
+const caption = typeof text === 'string' ? { text } : text;
+const words = captionWords(caption, dir, rhythm);
+const trail = Astro.slots.has('trail');
+const single = words.length === 1 && !trail ? words[0]! : null;
+const trailDelay = (words.at(-1)?.delay ?? 0) + rhythm.step;
+---
+
+{
+  single ? (
+    <span class:list={['w', { 'w--key': single.key }]} style={`--d: ${single.delay}ms`}>{single.text}</span>
+  ) : (
+    <>
+      <span class="visually-hidden words__read">{caption.text}</span>
+      <span class="words" aria-hidden="true">
+        {words.map((word, i) => (
+          <>
+            {i > 0 && ' '}
+            {trail && i === words.length - 1 ? (
+              <span class="words__tail">
+                <span class:list={['w', { 'w--key': word.key }]} data-kashida={word.kashida} style={`--d: ${word.delay}ms`}>{word.text}</span>{' '}
+                <span class="w w--trail" style={`--d: ${trailDelay}ms`}><slot name="trail" /></span>
+              </span>
+            ) : (
+              <span class:list={['w', { 'w--key': word.key }]} data-kashida={word.kashida} style={`--d: ${word.delay}ms`}>{word.text}</span>
+            )}
+          </>
+        ))}
+      </span>
+    </>
+  )
+}

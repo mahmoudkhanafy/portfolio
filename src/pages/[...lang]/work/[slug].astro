@@ -1,0 +1,243 @@
+---
+import Icon from '../../../components/Icon.astro';
+import MoreWork from '../../../components/MoreWork.astro';
+import Player from '../../../components/Player.astro';
+import ShareButton from '../../../components/ShareButton.astro';
+import Words from '../../../components/Words.astro';
+import Base from '../../../layouts/Base.astro';
+import { works, type Work } from '../../../lib/catalog.ts';
+import { whatsappMessage, whatsappUrl } from '../../../lib/contact.ts';
+import { typeLabel, ui } from '../../../lib/i18n.ts';
+import { videoLd } from '../../../lib/jsonld.ts';
+import { orientationOf, pick, ratioOf } from '../../../lib/localize.ts';
+import { pieceOf } from '../../../lib/phone.ts';
+import { abs, href, otherLang, pageAbs, pageHref } from '../../../lib/site.ts';
+import { formatDuration } from '../../../lib/time.ts';
+import { pagePath, type Lang } from '../../../lib/urls.ts';
+import { RHYTHM } from '../../../lib/words.ts';
+
+export function getStaticPaths() {
+  return (['ar', 'en'] as const).flatMap((lang) =>
+    works.map((work) => ({ params: { lang: lang === 'en' ? 'en' : undefined, slug: work.slug }, props: { work } })),
+  );
+}
+
+interface Props {
+  work: Work;
+}
+
+const { work } = Astro.props;
+const lang: Lang = Astro.params.lang === 'en' ? 'en' : 'ar';
+const t = ui[lang];
+const title = pick(work.title, lang)!;
+const description = pick(work.description, lang);
+const role = pick(work.role, lang);
+const pageUrl = pageAbs(lang, work.slug);
+const cta = whatsappUrl(whatsappMessage(lang, { title: title.text, url: pageUrl }));
+const landscape = orientationOf(work.width, work.height) === 'landscape';
+const ratio = ratioOf(work.width, work.height);
+const piece = pieceOf(ratio);
+// A phone keeps its screen wide enough for the play button, even on a short screen.
+const layout = [`--r: ${ratio}`, `--shape: ${piece.shape}`, ...(piece.screen < 1 ? ['--least: var(--phone-min)'] : [])].join('; ');
+const sizes = landscape ? '(min-width: 1000px) 62vw, 100vw' : '(min-width: 1000px) 44vw, 100vw';
+const hd = work.renditions[0]!;
+const lightest = work.renditions.at(-1)!;
+const metaDescription = description?.lang === lang ? description.text : t.workFallbackDescription;
+const others = works.filter((w) => w.slug !== work.slug);
+---
+
+<Base
+  lang={lang}
+  title={t.workTitle(title.text)}
+  description={metaDescription}
+  path={pagePath(lang, work.slug)}
+  altPath={pagePath(otherLang(lang), work.slug)}
+  og={{
+    image: abs(work.og.src),
+    width: work.og.width,
+    height: work.og.height,
+    alt: t.ogWorkAlt(title.text),
+    type: 'video.other',
+    video: { url: abs(lightest.src), width: lightest.width, height: lightest.height },
+  }}
+  jsonLd={[
+    videoLd({
+      name: title.text,
+      description: metaDescription,
+      pageUrl,
+      contentUrl: abs(hd.src),
+      thumbnails: [abs(work.og.src), abs(work.cover.jpg.src)],
+      uploadDate: work.addedAt,
+      duration: work.duration,
+      width: work.width,
+      height: work.height,
+      lang,
+    }),
+  ]}
+  preload={{ imagesrcset: work.cover.avif.map((s) => `${href(s.src)} ${s.width}w`).join(', '), imagesizes: sizes, type: 'image/avif' }}
+>
+  <article class:list={['work', { 'work--landscape': landscape }]} aria-labelledby="work-title" style={layout}>
+    <a class="work__back" href={`${pageHref(lang)}#reel-${work.slug}`}>
+      <Icon name="back" size={18} />
+      {t.allWork}
+    </a>
+    <div class="work__layout">
+      <div class="work__media">
+        <Player work={work} lang={lang} sizes={sizes} eager />
+      </div>
+      <div class="work__body">
+        <h1 id="work-title" lang={title.lang} dir={title.dir} data-build="load"><Words text={title.text} dir={title.dir} rhythm={RHYTHM.page} /></h1>
+        <ul class="work__tags" role="list">
+          <li class="chip">{typeLabel(work.type, lang)}</li>
+          {work.client && <li class="chip">{t.forClient(work.client)}</li>}
+          <li class="chip tabular" dir="ltr">{formatDuration(work.duration)}</li>
+        </ul>
+        {
+          description && (
+            <p class="work__description" lang={description.lang} dir={description.dir}>
+              {description.text}
+            </p>
+          )
+        }
+        {
+          role && (
+            <p class="work__role" lang={role.lang} dir={role.dir}>
+              {role.text}
+            </p>
+          )
+        }
+        <div class="work__cta">
+          <p class="work__cta-lead">{t.likeThis}</p>
+          <div class="work__cta-actions">
+            <a class="button button--primary" href={cta}>
+              <Icon name="whatsapp" />
+              {t.whatsapp}
+            </a>
+            <ShareButton lang={lang} url={pageUrl} title={title.text} />
+          </div>
+        </div>
+      </div>
+    </div>
+  </article>
+  <MoreWork lang={lang} works={others} />
+</Base>
+
+<style>
+  .work {
+    /* The whole frame fits below the header and the back link, so the play button shows on arrival. */
+    --frame-h: calc(100svh - 9rem);
+    padding: 0 var(--gutter) clamp(2.5rem, 2rem + 3vw, 4rem);
+  }
+
+  .work__back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    min-height: var(--tap);
+    margin-bottom: 0.5rem;
+    color: var(--text);
+    font-size: var(--step--1);
+    text-underline-offset: 0.3em;
+  }
+
+  .work__layout {
+    display: grid;
+    gap: 1.5rem;
+  }
+
+  .work__media {
+    margin-inline: calc(var(--gutter) * -1);
+  }
+
+  .work__body {
+    display: grid;
+    justify-items: start;
+    gap: 0.9rem;
+    align-content: start;
+  }
+
+  /* Title, description and role come from Mahmoud's .yml files: a pasted link or hashtag has no space
+     to wrap at, so it may break anywhere rather than push the page sideways. */
+  .work__body h1,
+  .work__description,
+  .work__role {
+    overflow-wrap: anywhere;
+  }
+
+  .work__body h1 {
+    font-size: var(--step-3);
+    font-weight: 900;
+    line-height: 1.25;
+  }
+
+  .work__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .work__description {
+    max-width: var(--measure);
+    color: var(--text);
+    font-size: var(--step-1);
+    line-height: 1.75;
+  }
+
+  .work__role {
+    color: var(--dim);
+  }
+
+  .work__cta {
+    display: grid;
+    gap: 0.75rem;
+    width: 100%;
+    margin-top: 1rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--rule);
+  }
+
+  .work__cta-lead {
+    color: var(--white);
+    font-size: var(--step-1);
+    font-weight: 700;
+  }
+
+  .work__cta-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  @media (min-width: 1000px) {
+    .work {
+      --frame-h: calc(100svh - 10rem);
+    }
+
+    .work__layout {
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+      gap: clamp(2rem, 1rem + 3vw, 4rem);
+      align-items: start;
+    }
+
+    /* The frame's column is exactly as wide as the frame (a phone, for a vertical reel, never narrower
+       than --phone-min), up to a little over half the page, so a tall piece leaves the rest of the row
+       to its text. */
+    @supports (height: 1svh) {
+      .work__layout {
+        grid-template-columns: min(56%, max(var(--least, 0px), var(--frame-h) * var(--shape))) minmax(0, 1fr);
+      }
+    }
+
+    .work--landscape .work__layout {
+      grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+    }
+
+    .work__media {
+      --frame-align: flex-start;
+      margin-inline: 0;
+    }
+  }
+</style>

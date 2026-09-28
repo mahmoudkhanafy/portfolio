@@ -1,0 +1,131 @@
+---
+import type { Work } from '../lib/catalog.ts';
+import { typeLabel, ui } from '../lib/i18n.ts';
+import { pick } from '../lib/localize.ts';
+import { dirOf, href, pageHref } from '../lib/site.ts';
+import { formatDuration } from '../lib/time.ts';
+import type { Lang } from '../lib/urls.ts';
+import { RHYTHM } from '../lib/words.ts';
+import Words from './Words.astro';
+
+interface Props {
+  lang: Lang;
+  works: Work[];
+}
+
+const { lang, works } = Astro.props;
+const t = ui[lang];
+const srcset = (list: Array<{ src: string; width: number }>) =>
+  list
+    .filter((s) => s.width <= 720)
+    .map((s) => `${href(s.src)} ${s.width}w`)
+    .join(', ');
+---
+
+<nav class="more" aria-labelledby="more-heading">
+  <h2 id="more-heading" data-build="view"><Words text={t.moreWork} dir={dirOf(lang)} rhythm={RHYTHM.heading} /></h2>
+  <ul class="more__list" role="list">
+    {
+      works.map((work) => {
+        const title = pick(work.title, lang)!;
+        return (
+          <li>
+            <a class="more__item" href={pageHref(lang, work.slug)}>
+              <picture class="more__thumb" data-frame={work.slug} style={`background-color: ${work.cover.color}`}>
+                <source type="image/avif" srcset={srcset(work.cover.avif)} sizes="6rem" />
+                <source type="image/webp" srcset={srcset(work.cover.webp)} sizes="6rem" />
+                <img src={href(work.cover.jpg.src)} width={work.cover.width} height={work.cover.height} alt="" loading="lazy" decoding="async" />
+              </picture>
+              <span class="more__text">
+                <span class="more__title" lang={title.lang} dir={title.dir}>
+                  {title.text}
+                </span>
+                <span class="more__meta">
+                  {typeLabel(work.type, lang)}
+                  <span class="tabular" dir="ltr">
+                    {formatDuration(work.duration)}
+                  </span>
+                </span>
+              </span>
+            </a>
+          </li>
+        );
+      })
+    }
+  </ul>
+</nav>
+
+<style>
+  .more {
+    padding: clamp(3rem, 2rem + 4vw, 5rem) var(--gutter);
+    border-top: 1px solid var(--rule);
+  }
+
+  .more h2 {
+    margin-bottom: 1.25rem;
+    font-size: var(--step-2);
+    font-weight: 800;
+  }
+
+  .more__list {
+    display: grid;
+    gap: 0.25rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .more__item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding-block: 0.6rem;
+    color: var(--white);
+    text-decoration: none;
+  }
+
+  .more__thumb {
+    flex: none;
+    width: 6rem;
+    aspect-ratio: 1;
+    overflow: hidden;
+    border-radius: 10px;
+  }
+
+  .more__thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .more__text {
+    display: grid;
+    gap: 0.2rem;
+  }
+
+  .more__title {
+    overflow-wrap: anywhere; /* a title from a .yml file may be one long unbroken word */
+    font-size: var(--step-1);
+    font-weight: 700;
+    line-height: 1.4;
+  }
+
+  .more__item:hover .more__title {
+    text-decoration: underline;
+    text-underline-offset: 0.25em;
+  }
+
+  .more__meta {
+    display: flex;
+    gap: 0.75rem;
+    color: var(--dim);
+    font-size: var(--step--1);
+  }
+
+  @media (min-width: 760px) {
+    .more__list {
+      grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
+      gap: 0.5rem 2rem;
+    }
+  }
+</style>

@@ -1,0 +1,5 @@
+# A test piece for the e2e build only: a 2.39:1 "scope" film, wider than 16:9.
+title: "فيلم سينما ٢٫٣٩:١"
+title_en: "2.39:1 cinema film"
+type: film
+order: 97

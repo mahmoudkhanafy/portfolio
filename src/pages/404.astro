@@ -1,0 +1,64 @@
+---
+import Icon from '../components/Icon.astro';
+import Base from '../layouts/Base.astro';
+import { ui } from '../lib/i18n.ts';
+import { abs, pageHref } from '../lib/site.ts';
+
+// One page for every language: GitHub Pages serves it for any missing address under the site.
+const ar = ui.ar;
+const en = ui.en;
+---
+
+<Base
+  lang="ar"
+  title={`${ar.notFoundTitle} — ${ar.name}`}
+  description={ar.notFoundBody}
+  path="404.html"
+  altPath="404.html"
+  og={{ image: abs('og-home.jpg'), width: 1200, height: 630, alt: ar.ogHomeAlt, type: 'website' }}
+  noindex
+>
+  <section class="missing" aria-labelledby="missing-ar">
+    <div>
+      <h1 id="missing-ar">{ar.notFoundTitle}</h1>
+      <p>{ar.notFoundBody}</p>
+      <a class="button button--primary" href={pageHref('ar')}>{ar.backHome}</a>
+    </div>
+    <div lang="en" dir="ltr">
+      <h2>{en.notFoundTitle}</h2>
+      <p>{en.notFoundBody}</p>
+      <a class="button button--ghost" href={pageHref('en')}>
+        {en.backHome}
+        <Icon name="back" size={18} class="missing__arrow" />
+      </a>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .missing {
+    display: grid;
+    gap: 3rem;
+    padding: clamp(3rem, 2rem + 6vw, 7rem) var(--gutter);
+  }
+
+  .missing > div {
+    display: grid;
+    justify-items: start;
+    gap: 1rem;
+  }
+
+  .missing h1,
+  .missing h2 {
+    font-size: var(--step-3);
+    font-weight: 900;
+  }
+
+  .missing p {
+    color: var(--text);
+  }
+
+  .missing :global(.missing__arrow) {
+    transform: scaleX(-1);
+  }
+</style>

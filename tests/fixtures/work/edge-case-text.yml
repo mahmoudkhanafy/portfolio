@@ -1,0 +1,11 @@
+# A test piece for the e2e build only (npm run build:e2e adds tests/fixtures/work/ to work/).
+# Every text is something a person might paste: quotes, HTML, "&", emoji, hashtags and links with no spaces.
+title: "عنوان فيه \"تنصيص\" و </script><b>مش عريض</b> & &amp; 🎬 #مؤتمر_نموذج_الأمم_المتحدة_للشباب_في_القاهرة_٢٠٢٦"
+title_en: "A \"quoted\" </script><b>not bold</b> & &amp; 🎬 https://www.instagram.com/reel/C9xYzAbCdEfGhIjKlMnOpQrStUvWxYz0123456789/"
+description: "الفيديو الكامل على https://www.instagram.com/reel/C9xYzAbCdEfGhIjKlMnOpQrStUvWxYz0123456789/?igsh=MTc4MmM1YmI2Ng== <img src=x onerror=alert(1)> #هاشتاج_طويل_جداً_من_غير_ولا_مسافة_واحدة_خالص"
+description_en: "Line one\u2028line two <img src=x onerror=alert(1)> Supercalifragilisticexpialidocious-and-then-some-more-letters-without-any-break"
+type: brand
+client: "شركة_اسمها_طويل_جداً_من_غير_مسافات_خالص_للتجربة"
+role: "تصوير_ومونتاج_وتلوين_وصوت_وجرافيكس_من_غير_مسافات"
+role_en: "Shooting-editing-colour-sound-and-motion-graphics-all-in-one-word"
+order: 99

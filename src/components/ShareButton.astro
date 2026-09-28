@@ -1,0 +1,62 @@
+---
+import { ui } from '../lib/i18n.ts';
+import type { Lang } from '../lib/urls.ts';
+import Icon from './Icon.astro';
+
+interface Props {
+  lang: Lang;
+  url: string;
+  title: string;
+  /** Icon-only, for tight rows. */
+  compact?: boolean;
+}
+
+const { lang, url, title, compact = false } = Astro.props;
+const t = ui[lang];
+---
+
+<!-- Hidden until the share script confirms it can share or copy: no dead button without JavaScript. -->
+<button
+  class:list={['button button--ghost', { 'button--icon': compact }]}
+  type="button"
+  data-share={url}
+  data-share-title={title}
+  data-copied={t.copied}
+  aria-label={compact ? t.share : undefined}
+  hidden
+>
+  <Icon name="share" size={18} />
+  {!compact && <span>{t.share}</span>}
+</button>
+
+<script>
+  import '../scripts/share.ts';
+</script>
+
+<style>
+  /* Copied: a caption-style confirmation replaces the label for a moment. */
+  button:global(.is-copied) {
+    position: relative;
+    border-color: var(--caption);
+  }
+
+  button:global(.is-copied)::after {
+    content: attr(data-feedback);
+    position: absolute;
+    inset-block-end: calc(100% + 0.5rem);
+    inset-inline-start: 50%;
+    translate: -50% 0;
+    padding: 0.3rem 0.7rem;
+    border-radius: 8px;
+    background: var(--caption);
+    color: var(--on-caption);
+    font-size: var(--step--1);
+    font-weight: 700;
+    white-space: nowrap;
+    pointer-events: none;
+  }
+
+  :global([dir='rtl']) button:global(.is-copied)::after {
+    translate: 50% 0;
+  }
+</style>

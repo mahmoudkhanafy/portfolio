@@ -1,0 +1,305 @@
+---
+import type { Portrait } from '../lib/catalog.ts';
+import { CONTACT, whatsappMessage, whatsappUrl } from '../lib/contact.ts';
+import { ui } from '../lib/i18n.ts';
+import { dirOf, href } from '../lib/site.ts';
+import type { Lang } from '../lib/urls.ts';
+import { RHYTHM } from '../lib/words.ts';
+import Icon from './Icon.astro';
+import Words from './Words.astro';
+
+interface Props {
+  lang: Lang;
+  portrait: Portrait | null;
+}
+
+export const HERO_SIZES = '(min-width: 900px) 26rem, 62vw';
+
+const { lang, portrait } = Astro.props;
+const t = ui[lang];
+const srcset = (list: Array<{ src: string; width: number }>) => list.map((s) => `${href(s.src)} ${s.width}w`).join(', ');
+---
+
+<section class="hero" aria-labelledby="hero-name">
+  <div class="hero__stage">
+    {
+      portrait && (
+        <picture class="hero__portrait">
+          <source type="image/avif" srcset={srcset(portrait.avif)} sizes={HERO_SIZES} />
+          <source type="image/webp" srcset={srcset(portrait.webp)} sizes={HERO_SIZES} />
+          <img src={href(portrait.png.src)} width={portrait.width} height={portrait.height} alt={t.portraitAlt} fetchpriority="high" decoding="async" />
+        </picture>
+      )
+    }
+    <div class="hero__third">
+      <h1 id="hero-name" class="hero__name">{t.name}</h1>
+      <p class="hero__role">{t.role}</p>
+    </div>
+  </div>
+
+  <div class="hero__body">
+    <p class="hero__lead" data-build="load"><Words text={t.heroCaption} dir={dirOf(lang)} rhythm={RHYTHM.hero} /></p>
+    <p class="hero__place">{t.place}</p>
+    <div class="hero__actions">
+      <a class="button button--primary" href={whatsappUrl(whatsappMessage(lang))}>
+        <Icon name="whatsapp" />
+        {t.whatsapp}
+      </a>
+      <a class="button button--ghost" href={CONTACT.instagramUrl}>
+        <Icon name="instagram" size={18} />
+        {t.instagram}
+      </a>
+    </div>
+    <a class="hero__next" href="#work">
+      <span class="hero__next-label">{t.seeWork}</span>
+      <span class="hero__next-cue" aria-hidden="true"><span><Icon name="down" size={18} /></span></span>
+    </a>
+  </div>
+</section>
+
+<style>
+  .hero {
+    display: grid;
+    gap: 1.5rem;
+    padding-inline: var(--gutter);
+    padding-bottom: clamp(2.5rem, 2rem + 3vw, 4.5rem);
+  }
+
+  /* A studio backdrop: light falls behind him so the black suit separates from the black page. */
+  .hero__stage {
+    --third-inset: var(--gutter);
+    container-type: inline-size; /* the name is sized to this frame, not to the window */
+    position: relative;
+    display: grid;
+    justify-items: center;
+    align-items: end;
+    min-height: 22rem;
+    margin-inline: calc(var(--gutter) * -1);
+    padding-top: 1.5rem;
+    background: radial-gradient(58% 62% at 50% 42%, #3d3d3d 0%, #1c1c1c 46%, #000 80%);
+    overflow: hidden;
+  }
+
+  .hero__portrait img {
+    width: min(62vw, 26rem);
+    height: auto;
+  }
+
+  /* The lower third: how his own edits introduce a person on screen. */
+  .hero__third {
+    position: absolute;
+    inset-inline: var(--third-inset);
+    bottom: 1.1rem;
+    display: grid;
+    justify-items: start;
+    gap: 0.35rem;
+  }
+
+  /* One line, never larger than the frame allows: a wrapped name doubles the caption and covers his
+     face. --name-em is the name's width at weight 800 plus its 0.64em padding, with 4% to spare. */
+  .hero__name {
+    --name-em: 6.9;
+    padding: 0.02em 0.32em 0.14em;
+    background: var(--caption);
+    color: var(--on-caption);
+    font-size: clamp(2.5rem, 1.35rem + 6.2vw, 5.25rem);
+    font-size: min(clamp(2.5rem, 1.35rem + 6.2vw, 5.25rem), (100cqi - 2 * var(--third-inset)) / var(--name-em));
+    font-weight: 800;
+    line-height: 1.3;
+  }
+
+  /* "Mahmoud Khaled" runs 1.5 times as wide as "محمود خالد". */
+  .hero__name:lang(en) {
+    --name-em: 10.25;
+  }
+
+  .hero__role {
+    padding: 0.3em 0.75em 0.4em;
+    background: var(--white);
+    color: var(--on-caption);
+    font-size: var(--step-1);
+    font-weight: 500;
+    line-height: 1.35;
+  }
+
+  .hero__body {
+    display: grid;
+    justify-items: start;
+    gap: 0.4rem;
+  }
+
+  /* Positioned: the kashida stretch (motion.ts) measures the room left on its line against it. */
+  .hero__lead {
+    position: relative;
+    color: var(--white);
+    font-size: var(--step-1);
+    font-weight: 500;
+    line-height: 1.5;
+    max-width: 30ch;
+  }
+
+  .hero__place {
+    color: var(--dim);
+    font-size: var(--step--1);
+  }
+
+  .hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 1rem;
+  }
+
+  /* "See the work": a quiet scroll cue. Once the lower third has landed, the arrow drops through its
+     circle a few times and rests; hover or focus draws the underline in from the reading start. */
+  .hero__next {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-height: var(--tap);
+    margin-top: 0.5rem;
+    color: var(--text);
+    font-size: var(--step--1);
+    text-decoration: none;
+  }
+
+  .hero__next-label {
+    padding-block: 0.2em;
+    background:
+      linear-gradient(var(--white), var(--white)) no-repeat 100% 100% / 0% 1px,
+      linear-gradient(var(--rule-strong), var(--rule-strong)) no-repeat 100% 100% / 100% 1px;
+    transition:
+      background-size 420ms var(--ease-cut),
+      color 160ms linear;
+  }
+
+  :global([dir='ltr']) .hero__next-label {
+    background-position: 0% 100%, 0% 100%;
+  }
+
+  .hero__next-cue {
+    display: grid;
+    place-items: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border: 1.5px solid var(--rule-strong);
+    border-radius: 50%;
+    color: var(--white);
+    overflow: hidden;
+    transition: border-color 160ms linear;
+  }
+
+  .hero__next-cue > span {
+    display: grid;
+  }
+
+  .hero__next:hover .hero__next-label,
+  .hero__next:focus-visible .hero__next-label {
+    background-size: 100% 1px, 100% 1px;
+    color: var(--white);
+  }
+
+  .hero__next:hover .hero__next-cue,
+  .hero__next:focus-visible .hero__next-cue {
+    border-color: var(--white);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .hero__name {
+      animation: wipe-in 560ms var(--ease-cut) 180ms both;
+    }
+    .hero__role {
+      animation: wipe-in 460ms var(--ease-cut) 560ms both;
+    }
+    /* Starts once the hero line has built (3.5 s), then three cues and rest. */
+    .hero__next-cue :global(svg) {
+      animation: cue-drop 2.4s 3.9s 3 both;
+    }
+    .hero__next:hover .hero__next-cue > span,
+    .hero__next:focus-visible .hero__next-cue > span {
+      animation: cue-drop 1.1s;
+    }
+  }
+
+  /* Out through the bottom of the circle, back in from the top, then a rest before the next cue. */
+  @keyframes cue-drop {
+    0%,
+    12% {
+      transform: translateY(0);
+      opacity: 1;
+      animation-timing-function: cubic-bezier(0.55, 0, 1, 0.45);
+    }
+    30% {
+      transform: translateY(160%);
+      opacity: 0;
+    }
+    31% {
+      transform: translateY(-160%);
+      opacity: 0;
+      animation-timing-function: var(--ease-cut);
+    }
+    50%,
+    100% {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  /* Wipes open from the reading start: the right edge in Arabic, the left edge in English. */
+  @keyframes wipe-in {
+    from {
+      clip-path: inset(0 0 0 100%);
+    }
+    to {
+      clip-path: inset(0);
+    }
+  }
+
+  :global([dir='ltr']) .hero__name,
+  :global([dir='ltr']) .hero__role {
+    animation-name: wipe-in-ltr;
+  }
+
+  @keyframes wipe-in-ltr {
+    from {
+      clip-path: inset(0 100% 0 0);
+    }
+    to {
+      clip-path: inset(0);
+    }
+  }
+
+  @media (min-width: 900px) {
+    .hero {
+      grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+      align-items: center;
+      gap: clamp(2rem, 1rem + 4vw, 5rem);
+      padding-top: 1rem;
+    }
+
+    .hero__stage {
+      --third-inset: 2rem;
+      min-height: min(70svh, 42rem);
+      margin-inline: 0;
+      border-radius: 28px;
+    }
+
+    /* Keep the whole lower third on screen in a laptop-height window. */
+    .hero__portrait img {
+      width: auto;
+      max-width: 100%;
+      height: min(64svh, 40rem);
+    }
+
+    .hero__third {
+      bottom: 2rem;
+    }
+
+    .hero__lead {
+      font-size: clamp(1.6rem, 1.1rem + 1.2vw, 2.3rem);
+      font-weight: 500;
+      line-height: 1.45;
+      max-width: 20ch;
+    }
+  }
+</style>

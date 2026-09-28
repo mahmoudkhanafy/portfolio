@@ -1,0 +1,231 @@
+---
+import type { Work } from '../lib/catalog.ts';
+import { whatsappMessage, whatsappUrl } from '../lib/contact.ts';
+import { typeLabel, ui } from '../lib/i18n.ts';
+import { pick, ratioOf } from '../lib/localize.ts';
+import { pieceOf, SCREEN_SHARE, screenScales } from '../lib/phone.ts';
+import type { FeedLayout, RowPlace } from '../lib/rows.ts';
+import { pageAbs, pageHref } from '../lib/site.ts';
+import type { Lang } from '../lib/urls.ts';
+import { RHYTHM } from '../lib/words.ts';
+import Icon from './Icon.astro';
+import Player from './Player.astro';
+import ShareButton from './ShareButton.astro';
+import Words from './Words.astro';
+
+interface Props {
+  work: Work;
+  lang: Lang;
+  /** Its place in each of the feed's row layouts, from WorkFeed. */
+  rows: Record<FeedLayout, RowPlace>;
+}
+
+const { work, lang, rows } = Astro.props;
+const t = ui[lang];
+const title = pick(work.title, lang)!;
+const description = pick(work.description, lang);
+const cta = whatsappUrl(whatsappMessage(lang, { title: title.text, url: pageAbs(lang, work.slug) }));
+const ratio = ratioOf(work.width, work.height);
+const round = (n: number) => Math.round(n * 1e5) / 1e5;
+const piece = pieceOf(ratio);
+const framed = piece.screen < 1;
+// Its largest share of a row is, near enough, its largest share of the screen; a framed reel's cover
+// fills the phone's screen, a little wider than the phone itself.
+const cover = framed ? SCREEN_SHARE * screenScales(ratio).fill : 1;
+const share = Math.max(...Object.values(rows).map((place) => Math.ceil((piece.shape / place.sum) * cover * 100)));
+const sizes = `(min-width: 760px) ${share}vw, 100vw`;
+const places = Object.entries(rows).map(([name, { order, count, sum }]) => `--o-${name}: ${order}; --n-${name}: ${count}; --s-${name}: ${round(sum)}`);
+const style = [`--r: ${ratio}`, `--shape: ${piece.shape}`, ...(framed ? ['--least: var(--phone-min)'] : []), ...places].join('; ');
+---
+
+<article class="reel" id={`reel-${work.slug}`} aria-labelledby={`title-${work.slug}`} data-reel style={style}>
+  <Player work={work} lang={lang} sizes={sizes} />
+  <div class="reel__info">
+    <h3 class="reel__title" id={`title-${work.slug}`} lang={title.lang} dir={title.dir} data-build="view">
+      <a href={pageHref(lang, work.slug)}>
+        <Words text={title.text} dir={title.dir} rhythm={RHYTHM.title}>
+          <span class="reel__go" slot="trail"><Icon name="forward" size={18} /></span>
+        </Words>
+      </a>
+    </h3>
+    {
+      description && (
+        <p class="reel__description" lang={description.lang} dir={description.dir}>
+          {description.text}
+        </p>
+      )
+    }
+    <ul class="reel__tags" role="list">
+      <li class="chip">{typeLabel(work.type, lang)}</li>
+      {work.client && <li class="chip">{t.forClient(work.client)}</li>}
+    </ul>
+    <div class="reel__actions">
+      <a class="button button--ghost" href={cta}>
+        <Icon name="whatsapp" size={18} />
+        {t.messageAbout}
+      </a>
+      <ShareButton lang={lang} url={pageAbs(lang, work.slug)} title={title.text} compact />
+    </div>
+  </div>
+</article>
+
+<style>
+  .reel {
+    /* A frame and the first line of its title fit on one screen. */
+    --frame-h: calc(100svh - 7rem);
+    display: grid;
+    gap: 1.1rem;
+    /* "All work" on a video page comes back to #reel-<slug>, with a little room above the frame. */
+    scroll-margin-top: 1rem;
+  }
+
+  .reel__info {
+    display: grid;
+    justify-items: start;
+    align-content: start;
+    gap: 0.6rem;
+  }
+
+  /* Titles and descriptions come from Mahmoud's .yml files: a pasted link or hashtag has no space to
+     wrap at, so it may break anywhere rather than widen the feed past the screen. */
+  .reel__title,
+  .reel__description {
+    overflow-wrap: anywhere;
+  }
+
+  .reel__title {
+    font-size: var(--step-2);
+    font-weight: 800;
+  }
+
+  .reel__title a {
+    text-decoration: none;
+  }
+
+  /* The title opens the piece's page and says so: an arrow in a circle, pointing the reading way, that
+     steps forward on hover and keyboard focus. The link's name stays the title (Words.astro). */
+  .reel__title :global(.w--trail) {
+    vertical-align: middle;
+  }
+
+  .reel__go {
+    display: inline-grid;
+    place-items: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border: 1.5px solid var(--rule-strong);
+    border-radius: 50%;
+    color: var(--white);
+    transition:
+      translate 220ms var(--ease-cut),
+      border-color 160ms linear;
+  }
+
+  .reel__title a:focus-visible .reel__go {
+    border-color: var(--white);
+    translate: 5px 0;
+  }
+
+  .reel__title a:focus-visible .reel__go:dir(rtl) {
+    translate: -5px 0;
+  }
+
+  /* Hover only with a mouse: on touch screens Safari takes a tap that starts a hover transition as a
+     hover, and the link then needs a second tap. */
+  @media (hover: hover) {
+    .reel__title a:hover .reel__go {
+      border-color: var(--white);
+      translate: 5px 0;
+    }
+
+    .reel__title a:hover .reel__go:dir(rtl) {
+      translate: -5px 0;
+    }
+  }
+
+  .reel__description {
+    max-width: var(--measure);
+    color: var(--text);
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    overflow: hidden;
+  }
+
+  .reel__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .reel__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-top: 0.4rem;
+  }
+
+  /* Phones: an edge-to-edge feed, like the Instagram timeline his clients already scroll. A reel too
+     tall for the screen at full width sits centred instead, whole. */
+  @media (max-width: 759px) {
+    .reel > :global(.player-stage) {
+      margin-inline: calc(var(--gutter) * -1);
+    }
+  }
+
+  /* Rows (lib/rows.ts): a piece's width is its shape times the row's one height, so the pieces fill
+     the row and their frames and titles line up. A frame only needs to fit the screen by itself here;
+     a row too tall for that keeps the tallest height that fits and leaves the rest of the row. */
+  @media (min-width: 760px) {
+    .reel {
+      --frame-h: calc(100svh - 2rem);
+      --frame-align: flex-start;
+      --o: var(--o-tall);
+      --n: var(--n-tall);
+      --s: var(--s-tall);
+      flex: none;
+      order: var(--o);
+      width: max(var(--least, 0px), calc(((100% - (var(--n) - 1) * var(--gap)) / var(--s) - 1px) * var(--shape)));
+    }
+  }
+
+  /* The screen's shape picks the layout, so a row of phones fits its height: two a row on tall
+     screens, three once it is wider than tall... */
+  @media (min-width: 860px) and (min-aspect-ratio: 1/1) {
+    .reel {
+      --o: var(--o-narrow);
+      --n: var(--n-narrow);
+      --s: var(--s-narrow);
+    }
+  }
+
+  @media (min-width: 1100px) and (min-aspect-ratio: 1/1) {
+    .reel {
+      --o: var(--o-wide);
+      --n: var(--n-wide);
+      --s: var(--s-wide);
+    }
+  }
+
+  /* ...and four on wider screens (laptop windows: 1280×720, 1440×900, 1366×657), where three would be
+     taller than the screen. The feed stops widening at 92rem, so from there only the height decides. */
+  @media (min-width: 1150px) and (max-width: 1471px) and (min-aspect-ratio: 25/16), (min-width: 1472px) and (max-height: 932px) {
+    .reel {
+      --o: var(--o-short);
+      --n: var(--n-short);
+      --s: var(--s-short);
+    }
+  }
+
+  @supports (height: 1svh) {
+    @media (min-width: 760px) {
+      .reel {
+        width: max(var(--least, 0px), calc(min((100% - (var(--n) - 1) * var(--gap)) / var(--s) - 1px, var(--frame-h)) * var(--shape)));
+      }
+    }
+  }
+</style>

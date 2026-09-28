@@ -1,0 +1,79 @@
+# Unit and end-to-end tests. Runs beside the deploy workflow and does not block it, so a flaky browser
+# never holds back a new video.
+name: Test
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: test-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Unit and end-to-end tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    permissions:
+      contents: read # check out the repository
+    env:
+      # Linux Chromium builds can lack H.264; the runner's Google Chrome plays it.
+      PW_CHROMIUM_CHANNEL: chrome
+    steps:
+      - name: Check out (full history, for "newest first")
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Restore prepared videos
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .media-cache
+          key: media-${{ hashFiles('work/**', 'site/**', 'scripts/media/**') }}
+          restore-keys: media-
+
+      - name: Install ffmpeg (the pipeline tests encode real clips)
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends ffmpeg
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Prepare videos
+        run: npm run media
+
+      - name: Type-check
+        run: npm run check
+
+      - name: Unit tests
+        run: npm run test:unit
+
+      - name: Install the WebKit test browser
+        run: npx playwright install --with-deps webkit
+
+      - name: Build for end-to-end tests
+        run: npm run build:e2e
+
+      - name: End-to-end tests (desktop Chromium, mobile WebKit)
+        run: npm run test:e2e
+
+      - name: Keep the report when tests fail
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: playwright-report
+          path: reports/playwright
+          retention-days: 7

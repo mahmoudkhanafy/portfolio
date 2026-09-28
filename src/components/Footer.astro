@@ -1,0 +1,43 @@
+---
+import { ui } from '../lib/i18n.ts';
+import { otherLang } from '../lib/site.ts';
+import type { Lang } from '../lib/urls.ts';
+
+interface Props {
+  lang: Lang;
+  altHref: string;
+}
+
+const { lang, altHref } = Astro.props;
+const t = ui[lang];
+const other = otherLang(lang);
+const year = new Date().getFullYear();
+---
+
+<footer class="site-footer">
+  <p>{t.rights(year)}</p>
+  <p>{t.place}</p>
+  <a href={altHref} lang={other} hreflang={other} aria-label={t.switchLabel}>{t.switchName}</a>
+</footer>
+
+<style>
+  .site-footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 1.5rem;
+    padding: 2.5rem var(--gutter);
+    padding-bottom: max(2.5rem, env(safe-area-inset-bottom));
+    border-top: 1px solid var(--rule);
+    color: var(--dim);
+    font-size: var(--step--1);
+  }
+
+  .site-footer a {
+    margin-inline-start: auto;
+    color: var(--text);
+    min-height: var(--tap);
+    display: inline-flex;
+    align-items: center;
+  }
+</style>

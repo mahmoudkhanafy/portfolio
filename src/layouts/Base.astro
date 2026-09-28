@@ -1,0 +1,121 @@
+---
+import { Font } from 'astro:assets';
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
+import { ui } from '../lib/i18n.ts';
+import { jsonLdScript } from '../lib/jsonld.ts';
+import { abs, dirOf, href, otherLang } from '../lib/site.ts';
+import type { Lang } from '../lib/urls.ts';
+import head from '../scripts/head.js?raw';
+import '../styles/global.css';
+
+interface Props {
+  lang: Lang;
+  title: string;
+  description: string;
+  /** This page's path inside the site, e.g. "work/nimun-recap/" (no base). */
+  path: string;
+  /** The same page in the other language. */
+  altPath: string;
+  og: {
+    image: string;
+    width: number;
+    height: number;
+    alt: string;
+    type: 'website' | 'video.other';
+    video?: { url: string; width: number; height: number };
+  };
+  jsonLd?: unknown[];
+  /** The largest image above the fold, fetched early so it paints first. */
+  preload?: { imagesrcset: string; imagesizes: string; type: string };
+  noindex?: boolean;
+  /** Home page: the hero carries his name, so the header does not repeat it. */
+  home?: boolean;
+}
+
+const { lang, title, description, path, altPath, og, jsonLd = [], preload, noindex = false, home = false } = Astro.props;
+const t = ui[lang];
+const url = abs(path);
+const [arPath, enPath] = lang === 'ar' ? [path, altPath] : [altPath, path];
+const secure = (value: string) => value.startsWith('https://');
+// The <head> script as every page carries it: its code only, without comment lines or indentation.
+const headScript = head
+  .split('\n')
+  .map((line) => line.trim())
+  .filter((line) => line && !line.startsWith('//'))
+  .join('\n');
+---
+
+<!doctype html>
+<html lang={lang} dir={dirOf(lang)}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <script is:inline set:html={headScript} />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    {noindex ? <meta name="robots" content="noindex" /> : <link rel="canonical" href={url} />}
+    {
+      !noindex && (
+        <>
+          <link rel="alternate" hreflang="ar" href={abs(arPath)} />
+          <link rel="alternate" hreflang="en" href={abs(enPath)} />
+          <link rel="alternate" hreflang="x-default" href={abs(arPath)} />
+        </>
+      )
+    }
+    <meta name="color-scheme" content="dark" />
+    <meta name="theme-color" content="#000000" />
+    <meta name="darkreader-lock" />
+    <meta name="format-detection" content="telephone=no" />
+    <link rel="icon" type="image/png" sizes="32x32" href={href('favicon-32.png')} />
+    <link rel="apple-touch-icon" href={href('apple-touch-icon.png')} />
+    <link rel="manifest" href={href('manifest.webmanifest')} />
+
+    <meta property="og:type" content={og.type} />
+    <meta property="og:site_name" content={t.name} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={url} />
+    <meta property="og:locale" content={lang === 'ar' ? 'ar_EG' : 'en_US'} />
+    <meta property="og:locale:alternate" content={otherLang(lang) === 'ar' ? 'ar_EG' : 'en_US'} />
+    <meta property="og:image" content={og.image} />
+    {secure(og.image) && <meta property="og:image:secure_url" content={og.image} />}
+    <meta property="og:image:type" content="image/jpeg" />
+    <meta property="og:image:width" content={String(og.width)} />
+    <meta property="og:image:height" content={String(og.height)} />
+    <meta property="og:image:alt" content={og.alt} />
+    {
+      og.video && (
+        <>
+          <meta property="og:video" content={og.video.url} />
+          {secure(og.video.url) && <meta property="og:video:secure_url" content={og.video.url} />}
+          <meta property="og:video:type" content="video/mp4" />
+          <meta property="og:video:width" content={String(og.video.width)} />
+          <meta property="og:video:height" content={String(og.video.height)} />
+        </>
+      )
+    }
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={og.image} />
+    <meta name="twitter:image:alt" content={og.alt} />
+
+    <Font cssVariable="--font-sans" preload />
+    {preload && <link rel="preload" as="image" imagesrcset={preload.imagesrcset} imagesizes={preload.imagesizes} type={preload.type} fetchpriority="high" />}
+    {jsonLd.map((data) => <script is:inline type="application/ld+json" set:html={jsonLdScript(data)} />)}
+  </head>
+  <body>
+    <a class="skip-link" href="#main">{t.skip}</a>
+    <Header lang={lang} altHref={href(altPath)} showName={!home} />
+    <main id="main" tabindex="-1">
+      <slot />
+    </main>
+    <Footer lang={lang} altHref={href(altPath)} />
+    <p id="announcer" class="visually-hidden" aria-live="polite"></p>
+    <script>
+      import '../scripts/motion.ts';
+    </script>
+  </body>
+</html>

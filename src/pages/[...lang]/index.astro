@@ -1,0 +1,41 @@
+---
+import About from '../../components/About.astro';
+import Contact from '../../components/Contact.astro';
+import Hero, { HERO_SIZES } from '../../components/Hero.astro';
+import WorkFeed from '../../components/WorkFeed.astro';
+import Base from '../../layouts/Base.astro';
+import { catalog } from '../../lib/catalog.ts';
+import { ui } from '../../lib/i18n.ts';
+import { personLd } from '../../lib/jsonld.ts';
+import { abs, href, otherLang, pageAbs } from '../../lib/site.ts';
+import { pagePath, type Lang } from '../../lib/urls.ts';
+
+export function getStaticPaths() {
+  return [{ params: { lang: undefined } }, { params: { lang: 'en' } }];
+}
+
+const lang: Lang = Astro.params.lang === 'en' ? 'en' : 'ar';
+const t = ui[lang];
+const { portrait, works } = catalog;
+const ogImage = abs('og-home.jpg');
+const preload = portrait
+  ? { imagesrcset: portrait.avif.map((s) => `${href(s.src)} ${s.width}w`).join(', '), imagesizes: HERO_SIZES, type: 'image/avif' }
+  : undefined;
+---
+
+<Base
+  lang={lang}
+  title={t.homeTitle}
+  description={t.homeDescription}
+  path={pagePath(lang)}
+  altPath={pagePath(otherLang(lang))}
+  og={{ image: ogImage, width: 1200, height: 630, alt: t.ogHomeAlt, type: 'website' }}
+  jsonLd={[personLd({ url: pageAbs(lang), image: portrait ? abs(portrait.webp.at(-1)!.src) : ogImage })]}
+  preload={preload}
+  home
+>
+  <Hero lang={lang} portrait={portrait} />
+  <WorkFeed lang={lang} works={works} />
+  <About lang={lang} />
+  <Contact lang={lang} />
+</Base>

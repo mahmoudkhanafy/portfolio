@@ -1,0 +1,45 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# انسخ الملف ده لكل فيديو جديد، وسمّيه بنفس اسم الفيديو بالظبط.
+# Copy this file for every new video and give it exactly the video's name.
+#
+#   my-new-video.mp4   ←  الفيديو / the video
+#   my-new-video.yml   ←  الملف ده / this file
+#
+# اسم الملف هو لينك الفيديو / The file name becomes the video's link:
+#   .../work/my-new-video/
+#
+# خلّي كل نص جوه علامتين تنصيص "" / Keep every text inside "double quotes".
+# السطور اللي بتبدأ بـ # مجرد شرح ومش بتتقري / Lines starting with # are notes and are ignored.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# العنوان بالعربي (لازم) / Arabic title (required)
+title: "عنوان الفيديو"
+
+# العنوان بالإنجليزي (اختياري) / English title (optional)
+title_en: "Video title"
+
+# وصف قصير: جملة أو اتنين (اختياري) / Short description: a sentence or two (optional)
+description: "الفيديو ده معمول لمين، وإيه اللي اتعمل فيه."
+description_en: "Who the video was for and what went into it."
+
+# النوع / Type:  reel  أو/or  event  أو/or  brand  أو/or  film
+type: reel
+
+# لمين الفيديو؟ شيل الـ # من أول السطر عشان يشتغل (اختياري)
+# Who was it for? Remove the # at the start of the line to use it (optional)
+# client: "اسم العميل"
+
+# عملت إيه في الفيديو؟ (اختياري) / What did you do on it? (optional)
+# role: "تصوير ومونتاج"
+# role_en: "Shot and edited"
+
+# صورة الغلاف من الثانية كام؟ من غيرها بتتختار لوحدها (اختياري)
+# Cover picture from which second? Picked automatically if left out (optional)
+# cover: "0:05"
+
+# الترتيب في الصفحة (اختياري): الرقم الأصغر يظهر الأول. من غير رقم، الفيديو الجديد بيظهر فوق خالص.
+# Position on the page (optional): lower numbers show first. Without one, a new video shows at the very top.
+# order: 1
+
+# خبّي الفيديو من الموقع من غير ما تمسحه / Hide the video without deleting it
+# hidden: yes

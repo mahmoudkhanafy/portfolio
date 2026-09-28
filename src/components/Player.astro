@@ -1,0 +1,605 @@
+---
+import type { Work } from '../lib/catalog.ts';
+import { whatsappMessage, whatsappUrl } from '../lib/contact.ts';
+import { ui } from '../lib/i18n.ts';
+import { pick, ratioOf } from '../lib/localize.ts';
+import { isFramed, screenScales } from '../lib/phone.ts';
+import { href, pageAbs } from '../lib/site.ts';
+import { formatDuration } from '../lib/time.ts';
+import type { Lang } from '../lib/urls.ts';
+import Icon from './Icon.astro';
+
+interface Props {
+  work: Work;
+  lang: Lang;
+  sizes: string;
+  /** Above the fold: fetch the cover right away. */
+  eager?: boolean;
+}
+
+const { work, lang, sizes, eager = false } = Astro.props;
+const t = ui[lang];
+const title = pick(work.title, lang)!;
+const duration = formatDuration(work.duration);
+const srcset = (list: Array<{ src: string; width: number }>) => list.map((s) => `${href(s.src)} ${s.width}w`).join(', ');
+const renditions = work.renditions.map((r) => ({ id: r.id, src: href(r.src), width: r.width, height: r.height, bitrate: r.bitrate }));
+const lightest = renditions.at(-1)!;
+const cta = whatsappUrl(whatsappMessage(lang, { title: title.text, url: pageAbs(lang, work.slug) }));
+const ratio = ratioOf(work.width, work.height);
+// A vertical reel stands in the phone frame on wider screens (lib/phone.ts): its picture fills the
+// phone's screen at rest and shows whole while it plays.
+const framed = isFramed(ratio);
+const { fill, whole } = screenScales(ratio);
+const style = [`--r: ${ratio}`, `--tint: ${work.cover.color}`, `background-image: url("${work.cover.lqip}")`, ...(framed ? [`--fill: ${fill}`, `--whole: ${whole}`] : [])].join('; ');
+---
+
+<div class="player-stage">
+  <div class:list={['phone', { 'phone--on': framed }]} data-frame={framed ? work.slug : undefined}>
+    <div
+      class="player"
+      data-player
+      data-frame={work.slug}
+      data-title={title.text}
+      data-duration={work.duration}
+      data-renditions={JSON.stringify(renditions)}
+      data-artwork={href(work.cover.jpg.src)}
+      data-artist={t.name}
+      data-ended={t.ended}
+      style={style}
+    >
+      <div class="player__media">
+        <picture class="player__cover">
+          <source type="image/avif" srcset={srcset(work.cover.avif)} sizes={sizes} />
+          <source type="image/webp" srcset={srcset(work.cover.webp)} sizes={sizes} />
+          <img
+            src={href(work.cover.jpg.src)}
+            width={work.cover.width}
+            height={work.cover.height}
+            alt=""
+            loading={eager ? 'eager' : 'lazy'}
+            fetchpriority={eager ? 'high' : 'auto'}
+            decoding="async"
+          />
+        </picture>
+      </div>
+      <button class="player__play" type="button" aria-label={t.playLabel(title.text, duration)}>
+        <span class="player__pill" aria-hidden="true">
+          <Icon name="play" size={18} />
+          {t.playWithSound}
+        </span>
+      </button>
+      <span class="player__time tabular" aria-hidden="true"><span dir="ltr">{duration}</span></span>
+      <button class="player__sound" type="button" hidden>
+        <Icon name="muted" size={18} />
+        {t.tapForSound}
+      </button>
+      <div class="player__end" hidden>
+        <a class="button button--primary" href={cta}>
+          <Icon name="whatsapp" size={18} />
+          {t.messageAbout}
+        </a>
+        <button class="button button--ghost player__replay" type="button">
+          <Icon name="replay" size={18} />
+          {t.replay}
+        </button>
+      </div>
+      <p class="player__error" role="alert" hidden>
+        {t.playError}
+        <a href={lightest.src}>{t.openFile}</a>
+      </p>
+      <p class="visually-hidden player__status" aria-live="polite"></p>
+      <noscript>
+        <video class="player__fallback" controls preload="none" playsinline poster={href(work.cover.jpg.src)} width={work.width} height={work.height} src={lightest.src}></video>
+      </noscript>
+    </div>
+    {
+      framed && (
+        <>
+          <span class="phone__keys" aria-hidden="true" />
+          <span class="phone__volume" aria-hidden="true" />
+          <span class="phone__island" aria-hidden="true" />
+        </>
+      )
+    }
+  </div>
+</div>
+
+<script>
+  import '../scripts/player.ts';
+</script>
+
+<style>
+  /*
+   * The stage is the room a page gives the video: its full width, and --frame-h of height. The frame
+   * inside takes the video's own shape (--r, width per unit of height) at the largest size that fits,
+   * so nothing is ever stretched or cropped and the play button stays on screen. It never gets
+   * narrower than the play button needs. Pages may set --frame-align (centred by default).
+   */
+  .player-stage {
+    container-type: inline-size;
+    display: flex;
+    justify-content: var(--frame-align, center);
+  }
+
+  /* Every player sits in .phone; only a framed reel on a wider screen draws it (below). */
+  .phone {
+    display: contents;
+  }
+
+  .phone__keys,
+  .phone__volume,
+  .phone__island {
+    display: none;
+  }
+
+  /* The picture and, once it plays, the video: the whole frame, or in a phone a box that is scaled. */
+  .player__media {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+  }
+
+  .player {
+    position: relative;
+    width: 100%;
+    aspect-ratio: var(--r);
+    overflow: hidden;
+    isolation: isolate;
+    background-color: var(--tint);
+    background-position: center;
+    background-size: cover;
+  }
+
+  /* Browsers without container or small-viewport units (iOS 15 and older) keep a frame that fills
+     its stage at the video's shape: never stretched, only not fitted to the screen. */
+  @supports (width: 1cqw) and (height: 1svh) {
+    .player {
+      --frame-w: clamp(min(100cqw, 14rem), var(--frame-h, 100svh) * var(--r), 100cqw);
+      container: frame / inline-size;
+      width: var(--frame-w);
+      /* Square where it meets both edges of the screen, rounded wherever it stands clear of them. */
+      border-radius: clamp(0px, (100vw - var(--frame-w)) * 999, var(--radius-frame));
+    }
+  }
+
+  .player__cover,
+  .player__cover img,
+  .player__fallback,
+  .player :global(video) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .player :global(video) {
+    z-index: 1;
+    object-fit: contain;
+    background: #000;
+  }
+
+  /* The cover stays on top until the first frame is actually playing: no black flash. */
+  .player__cover {
+    z-index: 2;
+  }
+
+  .player:global(.is-live) .player__cover {
+    visibility: hidden;
+  }
+
+  .player__play {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-start;
+    padding: 0.75rem;
+    border: 0;
+    background: linear-gradient(to top, rgb(0 0 0 / 0.45), transparent 42%);
+    cursor: pointer;
+  }
+
+  .player__play:focus-visible {
+    outline-offset: -6px;
+  }
+
+  /* Says exactly what a tap does, and stays off the faces most covers are centred on. */
+  .player__pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    min-height: 2.75rem;
+    padding: 0.4rem 1.05rem 0.45rem;
+    border-radius: var(--radius-pill);
+    background: var(--caption);
+    color: var(--on-caption);
+    font-size: var(--step-0);
+    font-weight: 700;
+    line-height: 1.2;
+    box-shadow: 0 6px 24px rgb(0 0 0 / 0.35);
+    transition: background-color 120ms var(--ease-cut);
+  }
+
+  .player__pill :global(svg) {
+    transform: translateX(1px);
+  }
+
+  .player__play:hover .player__pill {
+    background: var(--caption-hover);
+  }
+
+  .player:global(.is-loading) .player__pill {
+    animation: breathe 900ms ease-in-out infinite alternate;
+  }
+
+  @keyframes breathe {
+    to {
+      opacity: 0.6;
+    }
+  }
+
+  .player__time {
+    position: absolute;
+    inset-inline-end: 0.75rem;
+    bottom: 0.75rem;
+    z-index: 3;
+    padding: 0.05rem 0.5rem;
+    border-radius: 6px;
+    background: rgb(0 0 0 / 0.72);
+    color: var(--white);
+    font-size: var(--step--1);
+    font-weight: 600;
+    pointer-events: none;
+  }
+
+  /* A narrow frame gets a smaller play button, so the duration can stay beside it; only the narrowest
+     move the duration to the top. Widths come from the labels at their largest, Arabic and English. */
+  @container frame (width < 16.5rem) {
+    .player__pill {
+      gap: 0.35rem;
+      padding-inline: 0.8rem;
+      font-size: var(--step--1);
+    }
+  }
+
+  @container frame (width < 18rem) {
+    .player__pill:lang(en) {
+      gap: 0.35rem;
+      padding-inline: 0.8rem;
+      font-size: var(--step--1);
+    }
+  }
+
+  @container frame (width < 14.75rem) {
+    .player__time {
+      top: 0.75rem;
+      bottom: auto;
+    }
+  }
+
+  @container frame (width < 16rem) {
+    .player__time:lang(en) {
+      top: 0.75rem;
+      bottom: auto;
+    }
+  }
+
+  .player:global(.is-previewing) .player__time,
+  .player:global(.is-watching) .player__play,
+  .player:global(.is-watching) .player__time {
+    display: none;
+  }
+
+  .player:global(.is-previewing) .player__play {
+    background: none;
+  }
+
+  .player:global(.is-previewing) .player__pill {
+    display: none;
+  }
+
+  .player__sound {
+    position: absolute;
+    inset-inline-start: 0.75rem;
+    bottom: 0.75rem;
+    z-index: 4;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    min-height: 2.5rem;
+    padding: 0.35rem 0.9rem;
+    border: 0;
+    border-radius: var(--radius-pill);
+    background: var(--caption);
+    color: var(--on-caption);
+    font-size: var(--step--1);
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .player__end {
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    display: grid;
+    place-content: center;
+    justify-items: center;
+    gap: 0.75rem;
+    padding: 1.25rem;
+    background: rgb(0 0 0 / 0.8);
+  }
+
+  .player__error {
+    position: absolute;
+    inset-inline: 0.75rem;
+    bottom: 0.75rem;
+    z-index: 5;
+    padding: 0.6rem 0.9rem;
+    border-radius: 10px;
+    background: rgb(0 0 0 / 0.85);
+    color: var(--white);
+    font-size: var(--step--1);
+  }
+
+  .player__error a {
+    color: var(--caption);
+  }
+
+  /*
+   * The phone (spec §3): the newest iPhone in cherry, measured on Apple's photo; every size is a share
+   * of the phone's width. The player becomes its 9:19.5 screen. The phone takes its width from
+   * --frame-h like any frame, never so narrow that its screen can't hold the play button. --u is 1% of
+   * that width for the phone's own box only: its parts inside use cqi, which the phone gives them.
+   */
+  @supports (width: 1cqw) and (height: 1svh) {
+    @media (min-width: 760px) {
+      .phone--on {
+        --phone-w: clamp(min(100cqw, var(--phone-min)), var(--frame-h, 100svh) * 0.4796, 100cqw);
+        --u: calc(var(--phone-w) / 100);
+        /* Cherry, from the rim's outer edge in; the light falls from the right. */
+        --edge: #150c0d;
+        --metal: #452a2e;
+        --shine: #93707a;
+        --falloff: #231012;
+        container: phone / inline-size;
+        display: block;
+        position: relative;
+        flex: none;
+        width: var(--phone-w);
+        aspect-ratio: 0.4796;
+        border-radius: calc(var(--u) * 18.2);
+        background: #000;
+        box-shadow:
+          inset 0 0 0 calc(var(--u) * 0.1) var(--edge),
+          inset 0 0 0 calc(var(--u) * 0.74) var(--metal),
+          inset 0 0 0 calc(var(--u) * 1.32) var(--shine),
+          inset 0 0 0 calc(var(--u) * 1.57) var(--falloff),
+          inset 0 0 0 calc(var(--u) * 1.65) #060304,
+          inset 0 0 0 calc(var(--u) * 1.82) #484a49,
+          inset 0 0 calc(var(--u) * 0.9) calc(var(--u) * 1.82) #6a6a6a;
+      }
+
+      /* Light across the rim: darker on the left, brighter on the right. */
+      .phone--on::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        z-index: 4;
+        padding: 1.57cqi;
+        border-radius: inherit;
+        background: linear-gradient(90deg, rgb(0 0 0 / 0.38), rgb(0 0 0 / 0) 30%, rgb(255 255 255 / 0) 62%, rgb(255 255 255 / 0.24));
+        -webkit-mask:
+          linear-gradient(#000 0 0) content-box,
+          linear-gradient(#000 0 0);
+        -webkit-mask-composite: xor;
+        mask:
+          linear-gradient(#000 0 0) content-box exclude,
+          linear-gradient(#000 0 0);
+        pointer-events: none;
+      }
+
+      /* The antenna break in the right rim. */
+      .phone--on::after {
+        content: '';
+        position: absolute;
+        top: 10.3%;
+        right: 0;
+        z-index: 5;
+        width: 1.57cqi;
+        height: 1%;
+        background: #2b171a;
+        pointer-events: none;
+      }
+
+      .phone--on > .player {
+        position: absolute;
+        inset: 3.64cqi;
+        width: auto;
+        aspect-ratio: auto;
+        border-radius: 14.56cqi;
+      }
+
+      /* At rest the picture fills the screen (a 9:16 reel loses a little of each side); playing with
+         sound eases it to its whole frame, the blurred preview dimmed above and below. */
+      .phone--on .player__media {
+        inset: 50% 0 auto;
+        aspect-ratio: var(--r);
+        transform: translateY(-50%) scale(var(--fill));
+        transition: transform var(--fit) var(--ease-cut);
+      }
+
+      .phone--on .player:global(.is-watching) .player__media {
+        transform: translateY(-50%) scale(var(--whole));
+      }
+
+      .phone--on .player::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: rgb(0 0 0 / 0.5);
+        opacity: 0;
+        transition: opacity var(--fit) linear;
+      }
+
+      .phone--on .player:global(.is-watching)::before {
+        opacity: 1;
+      }
+
+      /* Buttons and labels keep clear of the screen's rounded corners. */
+      .phone--on .player__play {
+        padding: 5.4cqi;
+      }
+
+      .phone--on .player__time,
+      .phone--on .player__sound,
+      .phone--on .player__error {
+        bottom: 5.4cqi;
+      }
+
+      .phone--on .player__time {
+        inset-inline-end: 5.4cqi;
+      }
+
+      .phone--on .player__sound {
+        inset-inline-start: 5.4cqi;
+      }
+
+      .phone--on .player__error {
+        inset-inline: 5.4cqi;
+      }
+
+      .phone--on .phone__keys,
+      .phone--on .phone__volume {
+        display: block;
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+      }
+
+      /* The action and volume buttons stand out of the left side; the side button (below) the right. */
+      .phone__keys::before,
+      .phone__keys::after,
+      .phone__volume::before,
+      .phone__volume::after {
+        content: '';
+        position: absolute;
+        right: 100%;
+        width: 0.5cqi;
+        border-radius: 0.6cqi 0 0 0.6cqi;
+        background: linear-gradient(90deg, var(--falloff), var(--metal) 35%, var(--shine) 70%, var(--metal));
+        transform: scaleX(-1);
+      }
+
+      .phone__keys::before {
+        top: 31.1%;
+        right: auto;
+        left: 100%;
+        width: 0.58cqi;
+        height: 11.8%;
+        border-radius: 0 0.6cqi 0.6cqi 0;
+        transform: none;
+      }
+
+      .phone__keys::after {
+        top: 20.6%;
+        height: 4.6%;
+      }
+
+      .phone__volume::before {
+        top: 28.6%;
+        height: 7.4%;
+      }
+
+      .phone__volume::after {
+        top: 38%;
+        height: 7.5%;
+      }
+
+      .phone--on .phone__island {
+        display: block;
+        position: absolute;
+        top: 6.94cqi;
+        left: 50%;
+        z-index: 3;
+        width: 21.57cqi;
+        height: 8.35cqi;
+        margin-left: -10.785cqi;
+        border-radius: 999px;
+        background: #000;
+        pointer-events: none;
+      }
+
+      /* The front camera: a lens in the island's right end, in a faint ring. */
+      .phone__island::before,
+      .phone__island::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        aspect-ratio: 1;
+        border-radius: 50%;
+        transform: translateY(-50%);
+      }
+
+      .phone__island::before {
+        right: 1.92cqi;
+        width: 4.5cqi;
+        background: radial-gradient(circle, #111219 0%, #0c0c11 50%, rgb(0 0 0 / 0) 71%);
+      }
+
+      .phone__island::after {
+        right: 2.92cqi;
+        width: 2.5cqi;
+        background: radial-gradient(circle at 50% 46%, #07070f 0 26%, #262a57 40%, #5a45a3 55%, #22234a 66%, #08080f 78%);
+      }
+
+      /* On a narrow screen the duration moves to the top (as in a plain frame, above), here below the
+         island. These come after the phone's own bottom: 5.4cqi so that bottom: auto wins; with both
+         set, the label would stretch into a bar. */
+      @container frame (width < 14.75rem) {
+        .phone--on .player__time {
+          top: 16cqi;
+          bottom: auto;
+        }
+      }
+
+      @container frame (width < 16rem) {
+        .phone--on .player__time:lang(en) {
+          top: 16cqi;
+          bottom: auto;
+        }
+      }
+    }
+  }
+
+  /* The photo's corners are a superellipse (exponent 2.6); browsers without corner-shape keep round ones. */
+  @supports (corner-shape: superellipse(1.38)) and (width: 1cqw) and (height: 1svh) {
+    @media (min-width: 760px) {
+      .phone--on {
+        border-radius: calc(var(--u) * 22.8);
+        corner-shape: superellipse(1.38);
+      }
+
+      .phone--on::before {
+        corner-shape: superellipse(1.38);
+      }
+
+      .phone--on > .player {
+        border-radius: 19.16cqi;
+        corner-shape: superellipse(1.38);
+      }
+    }
+  }
+
+  [hidden] {
+    display: none !important;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .player:global(.is-loading) .player__pill {
+      animation: none;
+      opacity: 0.75;
+    }
+  }
+</style>

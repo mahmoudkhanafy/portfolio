@@ -1,0 +1,128 @@
+---
+import { CONTACT, whatsappMessage, whatsappUrl } from '../lib/contact.ts';
+import { ui } from '../lib/i18n.ts';
+import { dirOf, href } from '../lib/site.ts';
+import type { Lang } from '../lib/urls.ts';
+import { RHYTHM } from '../lib/words.ts';
+import Icon from './Icon.astro';
+import Words from './Words.astro';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = ui[lang];
+const rows = [
+  { icon: 'instagram', label: t.instagram, value: `@${CONTACT.instagramHandle}`, href: CONTACT.instagramUrl },
+  { icon: 'phone', label: t.call, value: CONTACT.phoneDisplay, href: `tel:${CONTACT.phoneE164}` },
+  { icon: 'mail', label: t.email, value: CONTACT.email, href: `mailto:${CONTACT.email}` },
+] as const;
+---
+
+<section id="contact" class="contact" aria-labelledby="contact-heading">
+  <h2 id="contact-heading" data-build="view"><Words text={t.contactHeading} dir={dirOf(lang)} rhythm={RHYTHM.heading} /></h2>
+  <p class="contact__lead">{t.contactLead}</p>
+  <a class="button button--primary contact__main" href={whatsappUrl(whatsappMessage(lang))}>
+    <Icon name="whatsapp" size={22} />
+    <span>{t.whatsapp}</span>
+    <span class="contact__number tabular" dir="ltr">{CONTACT.phoneDisplay}</span>
+  </a>
+  <ul class="contact__list" role="list">
+    {
+      rows.map((row) => (
+        <li>
+          <a class="contact__row" href={row.href}>
+            <Icon name={row.icon} size={20} />
+            <span class="contact__text">
+              <span class="contact__label">{row.label}</span>
+              <span class="contact__value" dir="ltr">
+                {row.value}
+              </span>
+            </span>
+          </a>
+        </li>
+      ))
+    }
+    <li>
+      <a class="contact__row" href={href('mahmoud-khaled.vcf')} download="mahmoud-khaled.vcf">
+        <Icon name="contact" size={20} />
+        <span class="contact__label">{t.saveContact}</span>
+      </a>
+    </li>
+  </ul>
+</section>
+
+<style>
+  .contact {
+    display: grid;
+    justify-items: start;
+    gap: 1rem;
+    padding: clamp(3rem, 2rem + 5vw, 6rem) var(--gutter) clamp(4rem, 3rem + 5vw, 7rem);
+  }
+
+  .contact h2 {
+    font-size: var(--step-3);
+    font-weight: 900;
+  }
+
+  .contact__lead {
+    max-width: var(--measure);
+    color: var(--text);
+    font-size: var(--step-1);
+  }
+
+  .contact__main {
+    flex-wrap: wrap;
+    min-height: 3.75rem;
+    margin-top: 0.75rem;
+    padding-inline: 1.6rem;
+    font-size: var(--step-1);
+  }
+
+  .contact__number {
+    font-weight: 500;
+    opacity: 0.8;
+  }
+
+  .contact__list {
+    display: grid;
+    width: 100%;
+    max-width: 36rem;
+    margin: 1rem 0 0;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--rule);
+  }
+
+  .contact__row {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    min-height: 3.5rem;
+    border-bottom: 1px solid var(--rule);
+    color: var(--white);
+    text-decoration: none;
+  }
+
+  .contact__row:hover .contact__label {
+    text-decoration: underline;
+    text-underline-offset: 0.25em;
+  }
+
+  .contact__label {
+    font-weight: 600;
+  }
+
+  .contact__text {
+    display: grid;
+    justify-items: start;
+    padding-block: 0.6rem;
+  }
+
+  .contact__value {
+    color: var(--dim);
+    font-size: var(--step--1);
+    unicode-bidi: isolate;
+  }
+</style>

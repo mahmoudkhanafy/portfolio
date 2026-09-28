@@ -1,0 +1,7 @@
+# A test piece for the e2e build only (npm run build:e2e adds tests/fixtures/work/ to work/).
+# A 9:16 test card stored squeezed into 360×360 with its pixels flagged 9:16, the way four of the seed
+# reels arrived. The site must show it at 9:16: a round circle, not an oval.
+title: "بطاقة اختبار ٩:١٦ متخزّنة مربعة"
+title_en: "9:16 test card stored square"
+type: reel
+order: 95

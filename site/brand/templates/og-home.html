@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="ar">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="fonts.css" />
+    <style>
+      html,
+      body {
+        width: 1200px;
+        height: 630px;
+        overflow: hidden;
+        background: var(--screen);
+      }
+      /* The same lit backdrop and lower third as the site's hero. */
+      .stage {
+        position: absolute;
+        inset: 0 520px 0 0;
+        background: radial-gradient(60% 70% at 50% 40%, #404040 0%, #1c1c1c 48%, #000 82%);
+      }
+      .portrait {
+        position: absolute;
+        bottom: 0;
+        left: 150px;
+        height: 600px;
+      }
+      .third {
+        position: absolute;
+        left: 48px;
+        bottom: 58px;
+        display: grid;
+        justify-items: start;
+        gap: 10px;
+      }
+      .name {
+        padding: 0 28px 10px;
+        background: var(--caption);
+        color: var(--screen);
+        font-size: 84px;
+        font-weight: 900;
+        line-height: 1.3;
+      }
+      .role {
+        padding: 8px 20px 12px;
+        background: var(--screen);
+        color: var(--white);
+        font-size: 34px;
+        font-weight: 500;
+      }
+      .side {
+        position: absolute;
+        top: 0;
+        right: 64px;
+        bottom: 0;
+        width: 400px;
+        display: grid;
+        align-content: center;
+        gap: 18px;
+        color: var(--white);
+      }
+      .side .en {
+        font-size: 40px;
+        font-weight: 800;
+        line-height: 1.2;
+        direction: ltr;
+      }
+      .side .en small {
+        display: block;
+        margin-top: 8px;
+        color: #cfcfcf;
+        font-size: 28px;
+        font-weight: 500;
+      }
+      .side .lead {
+        color: #d6d6d6;
+        font-size: 30px;
+        font-weight: 500;
+        line-height: 1.6;
+        direction: rtl;
+        text-align: right;
+      }
+      .side hr {
+        width: 100%;
+        border: 0;
+        border-top: 2px solid #2a2a2a;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="stage"></div>
+    <img class="portrait" src="../../portrait.png" alt="" />
+    <div class="third" dir="rtl">
+      <div class="name">محمود خالد</div>
+      <div class="role">مونتير ومصوّر فيديو</div>
+    </div>
+    <div class="side">
+      <p class="lead">مونتاج ريلز، كتابة متحركة، تغطية فعاليات وبراندات</p>
+      <hr />
+      <p class="en">Mahmoud Khaled<small>Video editor &amp; videographer, Giza</small></p>
+    </div>
+  </body>
+</html>

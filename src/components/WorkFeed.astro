@@ -1,0 +1,78 @@
+---
+import type { Work } from '../lib/catalog.ts';
+import { ui, videoCount } from '../lib/i18n.ts';
+import { ratioOf } from '../lib/localize.ts';
+import { pieceOf } from '../lib/phone.ts';
+import { FEED_ROWS, layRows, type FeedLayout, type RowPlace } from '../lib/rows.ts';
+import { dirOf } from '../lib/site.ts';
+import type { Lang } from '../lib/urls.ts';
+import { RHYTHM } from '../lib/words.ts';
+import Reel from './Reel.astro';
+import Words from './Words.astro';
+
+interface Props {
+  lang: Lang;
+  works: Work[];
+}
+
+const { lang, works } = Astro.props;
+const t = ui[lang];
+const pieces = works.map((work) => pieceOf(ratioOf(work.width, work.height)));
+const layouts = Object.entries(FEED_ROWS).map(([name, layout]) => [name, layRows(pieces, layout)] as const);
+const rowsOf = (i: number) => Object.fromEntries(layouts.map(([name, places]) => [name, places[i]!])) as Record<FeedLayout, RowPlace>;
+---
+
+<section id="work" class="feed" aria-labelledby="work-heading">
+  <div class="feed__head">
+    <h2 id="work-heading" data-build="view"><Words text={t.workHeading} dir={dirOf(lang)} rhythm={RHYTHM.heading} /></h2>
+    <p class="feed__count">{videoCount(works.length, lang)}</p>
+  </div>
+  <div class="feed__list">
+    {works.map((work, i) => <Reel work={work} lang={lang} rows={rowsOf(i)} />)}
+  </div>
+</section>
+
+<style>
+  .feed {
+    padding-inline: var(--gutter);
+    padding-top: clamp(2rem, 1.5rem + 3vw, 4rem);
+  }
+
+  .feed__head {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 0.25rem 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .feed__head h2 {
+    font-size: var(--step-3);
+    font-weight: 900;
+  }
+
+  .feed__count {
+    color: var(--dim);
+  }
+
+  .feed__list {
+    display: grid;
+    gap: 3.5rem;
+    padding-top: 1.75rem;
+  }
+
+  /* Wider screens: rows laid out by lib/rows.ts, each piece sized by Reel.astro. Pieces keep the
+     reading order of the page; only where a film waits for a row of its own do the pieces after it
+     move up on screen. */
+  @media (min-width: 760px) {
+    .feed__list {
+      --gap: clamp(1.25rem, 0.5rem + 2vw, 2.5rem);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-start;
+      gap: clamp(2.5rem, 1.5rem + 3vw, 4rem) var(--gap);
+      padding-top: 2.5rem;
+    }
+  }
+</style>
