@@ -4,7 +4,7 @@ import { absoluteUrl, pagePath, withBase, type Lang } from './urls.ts';
 
 // Astro fills these from `base` and `site` in astro.config.ts (BASE_PATH / SITE_URL at build time).
 const BASE = import.meta.env.BASE_URL;
-const SITE = import.meta.env.SITE ?? 'http://localhost:4747';
+const SITE = import.meta.env.SITE ?? 'http://localhost:4750';
 
 /** Root-relative URL for a path inside the site. */
 export const href = (path: string): string => withBase(path, BASE);

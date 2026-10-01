@@ -26,7 +26,7 @@ describe('withBase', () => {
     expect(withBase('', '/repo/')).toBe('/repo/');
   });
   it('works at the domain root', () => {
-    expect(withBase('en/', '/')).toBe('/en/');
+    expect(withBase('ar/', '/')).toBe('/ar/');
   });
 });
 

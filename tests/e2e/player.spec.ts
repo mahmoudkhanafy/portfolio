@@ -103,9 +103,9 @@ test.describe('muted previews in the feed', () => {
   test.describe('with reduced motion', () => {
     test.use({ reducedMotion: 'reduce' });
 
-    test('never preview and do not animate the lower third', async ({ page }) => {
+    test('never preview and do not animate the name', async ({ page }) => {
       await page.goto('ar/');
-      expect(await page.locator('.hero__name').evaluate((el) => getComputedStyle(el).animationName)).toBe('none');
+      expect(await page.locator('.hero__first').evaluate((el) => getComputedStyle(el).animationName)).toBe('none');
       const first = page.locator('[data-reel]').first();
       await first.scrollIntoViewIfNeeded();
       await page.evaluate(() => window.scrollBy(0, 4));

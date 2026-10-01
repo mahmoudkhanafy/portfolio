@@ -23,22 +23,29 @@ const token = (name: string): string => {
 };
 
 describe('palette contrast (WCAG AA)', () => {
-  it('display and body text are comfortably readable on the screen colour', () => {
-    expect(contrast(token('white'), token('screen'))).toBeGreaterThanOrEqual(7);
-    expect(contrast(token('text'), token('screen'))).toBeGreaterThanOrEqual(7);
+  it('ink and body text are comfortably readable on paper and on the soft band', () => {
+    for (const surface of ['paper', 'soft']) {
+      expect(contrast(token('ink'), token(surface))).toBeGreaterThanOrEqual(7);
+      expect(contrast(token('body'), token(surface))).toBeGreaterThanOrEqual(7);
+    }
   });
 
-  it('secondary text meets AA for normal text', () => {
-    expect(contrast(token('dim'), token('screen'))).toBeGreaterThanOrEqual(4.5);
+  it('secondary text meets AA for normal text on paper and on the soft band', () => {
+    expect(contrast(token('muted'), token('paper'))).toBeGreaterThanOrEqual(4.5);
+    expect(contrast(token('muted'), token('soft'))).toBeGreaterThanOrEqual(4.5);
   });
 
-  it('caption gold works as a focus ring on the screen and as a button behind black text', () => {
-    expect(contrast(token('caption'), token('screen'))).toBeGreaterThanOrEqual(3);
-    expect(contrast(token('on-caption'), token('caption'))).toBeGreaterThanOrEqual(4.5);
+  it('orange text and the focus ring read on paper; text on the orange band and buttons reads too', () => {
+    expect(contrast(token('accent-ink'), token('paper'))).toBeGreaterThanOrEqual(4.5);
+    expect(contrast(token('accent-ink'), token('soft'))).toBeGreaterThanOrEqual(4.5);
+    expect(contrast(token('on-accent'), token('accent'))).toBeGreaterThanOrEqual(4.5);
+    expect(contrast(token('on-accent'), token('accent-hover'))).toBeGreaterThanOrEqual(4.5);
+    // The contact heading's key word, large text in the darkest shade on the orange band.
+    expect(contrast(token('night'), token('accent'))).toBeGreaterThanOrEqual(3);
   });
 
-  it('secondary text still reads on raised surfaces', () => {
-    expect(contrast(token('dim'), token('raised'))).toBeGreaterThanOrEqual(4.5);
-    expect(contrast(token('text'), token('raised'))).toBeGreaterThanOrEqual(7);
+  it('text on the dark bands meets AA', () => {
+    expect(contrast(token('paper'), token('night'))).toBeGreaterThanOrEqual(7);
+    expect(contrast(token('night-text'), token('night'))).toBeGreaterThanOrEqual(4.5);
   });
 });

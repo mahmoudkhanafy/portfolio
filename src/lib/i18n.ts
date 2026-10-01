@@ -30,18 +30,35 @@ export function videoCount(n: number, lang: Lang): string {
   }
 }
 
+/** A step of how he works. */
+export interface Step {
+  title: string;
+  text: string;
+}
+
 export interface Strings {
   skip: string;
   name: string;
   role: string;
   place: string;
-  heroCaption: Caption;
+  brandHome: string;
+  navLabel: string;
+  navWork: string;
+  navAbout: string;
+  letsTalk: string;
+  heroLead: Caption;
+  heroSummary: string;
+  heroVertical: string;
+  portraitCaption: [string, string];
+  selectedWork: string;
   switchLabel: string;
   switchName: string;
   whatsapp: string;
   instagram: string;
   seeWork: string;
+  workEyebrow: string;
   workHeading: string;
+  workIntro: [string, string];
   playWithSound: string;
   playLabel: (title: string, duration: string) => string;
   tapForSound: string;
@@ -58,11 +75,17 @@ export interface Strings {
   copied: string;
   moreWork: string;
   likeThis: string;
-  aboutHeading: string;
+  aboutEyebrow: string;
+  aboutHeading: Caption;
   about: string;
   servicesHeading: string;
   services: string[];
   toolsHeading: string;
+  processEyebrow: string;
+  processHeading: string;
+  processIntro: string;
+  process: Step[];
+  contactEyebrow: string;
   contactHeading: Caption;
   contactLead: string;
   call: string;
@@ -79,6 +102,7 @@ export interface Strings {
   notFoundBody: string;
   backHome: string;
   rights: (year: number) => string;
+  footerLine: string;
 }
 
 export const TOOLS = ['Premiere Pro', 'After Effects', 'DaVinci Resolve', 'Photoshop'] as const;
@@ -89,13 +113,24 @@ export const ui: Record<Lang, Strings> = {
     name: 'محمود خالد',
     role: 'مونتير ومصوّر فيديو',
     place: 'الجيزة، القاهرة',
-    heroCaption: { text: 'مونتاج ريلز، كتابة متحركة، تغطية فعاليات وبراندات', key: 'كتابة متحركة', stretch: 'متحركة' },
+    brandHome: 'محمود خالد (Mahmoud Khaled)، الصفحة الرئيسية',
+    navLabel: 'القائمة الرئيسية',
+    navWork: 'الشغل',
+    navAbout: 'عنّي',
+    letsTalk: 'نتكلم؟',
+    heroLead: { text: 'كل لقطة ليها حكاية. خلّينا نحكي حكايتك.', key: 'حكايتك', stretch: 'حكايتك', breakAfter: 'حكاية' },
+    heroSummary: 'مونتاج ريلز، كتابة متحركة، تغطية فعاليات وبراندات.',
+    heroVertical: 'زاوية مختلفة للرؤية.',
+    portraitCaption: ['ورا الكاميرا.', 'وقدّام التايم لاين.'],
+    selectedWork: 'أعمال مختارة',
     switchLabel: 'Read this site in English',
     switchName: 'English',
     whatsapp: 'كلّمني على واتساب',
     instagram: 'إنستجرام',
     seeWork: 'شوف الشغل',
-    workHeading: 'الشغل',
+    workEyebrow: 'أعمال مختارة',
+    workHeading: 'الشغل بيتكلم.',
+    workIntro: ['إيقاع مختلف. حكاية جديدة.', 'اختار فيديو وشوفه للآخر.'],
     playWithSound: 'شغّل بالصوت',
     playLabel: (title, duration) => `شغّل بالصوت: «${title}»، مدته ${duration}`,
     tapForSound: 'اضغط للصوت',
@@ -112,14 +147,24 @@ export const ui: Record<Lang, Strings> = {
     copied: 'اتنسخ اللينك',
     moreWork: 'شغل تاني',
     likeThis: 'عايز فيديو زي ده؟',
-    aboutHeading: 'عنّي',
+    aboutEyebrow: 'ورا المونتاج',
+    aboutHeading: { text: 'الفكرة عندك، والصورة عندي.', key: 'والصورة عندي' },
     about:
       'أنا محمود، مونتير ومصوّر فيديو من الجيزة. بعمل مونتاج ريلز لصنّاع المحتوى بكتابة متحركة بالعربي والإنجليزي، وبغطّي الفعاليات وتفعيلات البراندات، وبعمل قطع سينمائية قصيرة.',
     servicesHeading: 'بعمل إيه',
     services: ['مونتاج ريلز وفيديوهات قصيرة', 'كتابة متحركة وموشن جرافيك', 'تغطية فعاليات وتفعيلات براندات', 'تلوين وتصحيح ألوان'],
     toolsHeading: 'بشتغل على',
-    contactHeading: { text: 'يلا نشتغل سوا', key: 'سوا' },
-    contactLead: 'ابعتلي فكرتك على واتساب، أو اختار الطريقة اللي تريحك.',
+    processEyebrow: 'طريقة الشغل',
+    processHeading: 'من أول رسالة، لآخر كات.',
+    processIntro: 'خطوات واضحة عشان الفكرة تتحول لفيديو جاهز للنشر.',
+    process: [
+      { title: 'احكي الفكرة', text: 'ابعت الفكرة، المنصة اللي هينزل عليها الفيديو، وأي مرجع بصري عندك.' },
+      { title: 'نبني الحكاية', text: 'نرتّب اللقطات ونشتغل على التصوير والمونتاج بإيقاع يخدم الفكرة.' },
+      { title: 'نجهّز النسخة النهائية', text: 'نراجع المقاس والألوان والصوت عشان الفيديو يناسب المنصة اللي هينزل عليها.' },
+    ],
+    contactEyebrow: 'حكايتك الجاية',
+    contactHeading: { text: 'عندك فكرة؟ نخلّيها صورة.', key: 'صورة' },
+    contactLead: 'احكيلي فكرتك، المنصة اللي هينزل عليها الفيديو، والموعد اللي محتاجه.',
     call: 'اتصل بيا',
     email: 'ابعت إيميل',
     saveContact: 'احفظ رقمي',
@@ -134,19 +179,31 @@ export const ui: Record<Lang, Strings> = {
     notFoundBody: 'يمكن اللينك اتغيّر أو اتكتب غلط.',
     backHome: 'ارجع لشغل محمود',
     rights: (year) => `© ${year} محمود خالد`,
+    footerLine: 'تصوير ومونتاج · الجيزة، القاهرة',
   },
   en: {
     skip: 'Skip to content',
     name: 'Mahmoud Khaled',
     role: 'Video editor & videographer',
     place: 'Giza, Cairo',
-    heroCaption: { text: 'Reels, kinetic captions, events and brands', key: 'kinetic captions' },
+    brandHome: 'Mahmoud Khaled, home',
+    navLabel: 'Main',
+    navWork: 'Work',
+    navAbout: 'About',
+    letsTalk: "Let's talk",
+    heroLead: { text: "Every frame has a story. Let's tell yours.", key: 'yours', breakAfter: 'story' },
+    heroSummary: 'Reels, kinetic captions, events and brands.',
+    heroVertical: 'A different way to see.',
+    portraitCaption: ['Behind the camera.', 'At the edit timeline.'],
+    selectedWork: 'Selected work',
     switchLabel: 'اقرأ الموقع باللغة العربية',
     switchName: 'العربية',
     whatsapp: 'Message me on WhatsApp',
     instagram: 'Instagram',
     seeWork: 'See the work',
-    workHeading: 'Work',
+    workEyebrow: 'Selected work',
+    workHeading: 'Let the work speak.',
+    workIntro: ['A different rhythm. A new story.', 'Pick a video and watch it through.'],
     playWithSound: 'Play with sound',
     playLabel: (title, duration) => `Play with sound: “${title}”, ${duration} long`,
     tapForSound: 'Tap for sound',
@@ -163,14 +220,24 @@ export const ui: Record<Lang, Strings> = {
     copied: 'Link copied',
     moreWork: 'More work',
     likeThis: 'Want a video like this?',
-    aboutHeading: 'About',
+    aboutEyebrow: 'Behind the cut',
+    aboutHeading: { text: 'Your idea. My lens.', key: 'My lens' },
     about:
       "I'm Mahmoud, a video editor and videographer based in Giza. I edit reels for content creators with Arabic and English kinetic captions, cover events and brand activations, and make short cinematic pieces.",
     servicesHeading: 'What I do',
     services: ['Reel and short-form editing', 'Kinetic captions and motion graphics', 'Event and brand-activation coverage', 'Colour grading'],
     toolsHeading: 'Tools',
-    contactHeading: { text: "Let's work together", key: 'together' },
-    contactLead: 'Send me your idea on WhatsApp, or pick whichever way suits you.',
+    processEyebrow: 'The process',
+    processHeading: 'From first hello to final cut.',
+    processIntro: 'A clear path from an idea to a video ready for its platform.',
+    process: [
+      { title: 'Share the idea', text: 'Send your idea, the platform it belongs on, and any visual references you have.' },
+      { title: 'Build the story', text: 'Shape the shots through filming and editing, with a rhythm that serves the idea.' },
+      { title: 'Prepare the final cut', text: 'Check format, colour and sound for the platform where it will be seen.' },
+    ],
+    contactEyebrow: 'Your next story',
+    contactHeading: { text: "Have an idea? Let's make it visual.", key: 'visual' },
+    contactLead: 'Tell me your idea, the platform it belongs on, and when you need it.',
     call: 'Call me',
     email: 'Send an email',
     saveContact: 'Save my contact',
@@ -185,5 +252,6 @@ export const ui: Record<Lang, Strings> = {
     notFoundBody: 'The link may have changed or been mistyped.',
     backHome: "Back to Mahmoud's work",
     rights: (year) => `© ${year} Mahmoud Khaled`,
+    footerLine: 'Videography & editing · Giza, Cairo',
   },
 };

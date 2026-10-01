@@ -1,7 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import { works } from './helpers.ts';
 
-const GOLD = 'rgb(232, 177, 0)';
+const ORANGE = 'rgb(168, 57, 29)';
 
 /** Waits until every animation inside `scope` has finished (a scope that has not built has none). */
 const settled = (page: Page, scope: string) =>
@@ -12,11 +12,11 @@ const delaysOf = (page: Page, selector: string) => page.locator(selector).evalua
 
 test.describe('the hero line', () => {
   const lines = [
-    { path: 'ar/', count: 7, keys: ['كتابة', 'متحركة،'], text: 'مونتاج ريلز، كتابة متحركة، تغطية فعاليات وبراندات' },
-    { path: '', count: 6, keys: ['kinetic', 'captions,'], text: 'Reels, kinetic captions, events and brands' },
+    { path: 'ar/', count: 7, keys: ['حكايتك.'], text: 'كل لقطة ليها حكاية. خلّينا نحكي حكايتك.' },
+    { path: '', count: 8, keys: ['yours.'], text: "Every frame has a story. Let's tell yours." },
   ];
   for (const { path, count, keys, text } of lines) {
-    test(`builds word by word after the lower third, key words gold, and ends whole (${path || 'en'})`, async ({ page }) => {
+    test(`builds word by word as the name wipes in, its key word orange, and ends whole (${path || 'en'})`, async ({ page }) => {
       await page.goto(path);
       await expect(page.locator('html')).toHaveClass(/\bmotion\b/);
       const words = page.locator('.hero__lead .w');
@@ -28,7 +28,7 @@ test.describe('the hero line', () => {
       await settled(page, '.hero__lead');
       expect(await words.evaluateAll((els) => els.map((el) => getComputedStyle(el).opacity))).toEqual(Array(count).fill('1'));
       await expect(page.locator('.hero__lead .w--key')).toHaveText(keys);
-      expect(await page.locator('.hero__lead .w--key').evaluateAll((els) => els.map((el) => getComputedStyle(el).color))).toEqual(keys.map(() => GOLD));
+      expect(await page.locator('.hero__lead .w--key').evaluateAll((els) => els.map((el) => getComputedStyle(el).color))).toEqual(keys.map(() => ORANGE));
       await expect(page.locator('.hero__lead .words')).toHaveAttribute('aria-hidden', 'true');
       await expect(page.locator('.hero__lead .words__read')).toHaveText(text);
     });
@@ -52,10 +52,10 @@ test.describe('the hero line', () => {
 
   test('lets "See the work" cue only once the line has built', async ({ page }) => {
     await page.goto('ar/');
-    expect(await page.locator('.hero__next-cue svg').evaluate((el) => parseFloat(getComputedStyle(el).animationDelay))).toBeGreaterThanOrEqual(3.5);
+    expect(await page.locator('.hero__cue svg').evaluate((el) => parseFloat(getComputedStyle(el).animationDelay))).toBeGreaterThanOrEqual(3.5);
   });
 
-  test('stretches «متحركة» with kashida and relaxes it, moving nothing', async ({ page, browserName }) => {
+  test('stretches «حكايتك» with kashida and relaxes it, moving nothing', async ({ page, browserName }) => {
     test.skip(browserName !== 'chromium', 'Layout shifts are measured by Chromium.');
     await page.goto('ar/');
     const shift = page.evaluate(
@@ -126,8 +126,8 @@ test.describe('headings, titles and services', () => {
     const contact = page.locator('#contact-heading');
     await contact.evaluate((el) => el.scrollIntoView({ block: 'center' }));
     await settled(page, '#contact-heading');
-    await expect(contact.locator('.w--key')).toHaveText(['سوا']);
-    await expect(contact).toHaveAccessibleName('يلا نشتغل سوا');
+    await expect(contact.locator('.w--key')).toHaveText(['صورة.']);
+    await expect(contact).toHaveAccessibleName('عندك فكرة؟ نخلّيها صورة.');
   });
 
   test('show at once what is already on screen as the page starts', async ({ page }) => {

@@ -213,8 +213,8 @@ const style = [`--r: ${ratio}`, `--tint: ${work.cover.color}`, `background-image
     min-height: 2.75rem;
     padding: 0.4rem 1.05rem 0.45rem;
     border-radius: var(--radius-pill);
-    background: var(--caption);
-    color: var(--on-caption);
+    background: var(--accent);
+    color: var(--on-accent);
     font-size: var(--step-0);
     font-weight: 700;
     line-height: 1.2;
@@ -227,7 +227,7 @@ const style = [`--r: ${ratio}`, `--tint: ${work.cover.color}`, `background-image
   }
 
   .player__play:hover .player__pill {
-    background: var(--caption-hover);
+    background: var(--accent-hover);
   }
 
   .player:global(.is-loading) .player__pill {
@@ -246,9 +246,8 @@ const style = [`--r: ${ratio}`, `--tint: ${work.cover.color}`, `background-image
     bottom: 0.75rem;
     z-index: 3;
     padding: 0.05rem 0.5rem;
-    border-radius: 6px;
     background: rgb(0 0 0 / 0.72);
-    color: var(--white);
+    color: #fff;
     font-size: var(--step--1);
     font-weight: 600;
     pointer-events: none;
@@ -312,8 +311,8 @@ const style = [`--r: ${ratio}`, `--tint: ${work.cover.color}`, `background-image
     padding: 0.35rem 0.9rem;
     border: 0;
     border-radius: var(--radius-pill);
-    background: var(--caption);
-    color: var(--on-caption);
+    background: var(--accent);
+    color: var(--on-accent);
     font-size: var(--step--1);
     font-weight: 700;
     cursor: pointer;
@@ -331,24 +330,45 @@ const style = [`--r: ${ratio}`, `--tint: ${work.cover.color}`, `background-image
     background: rgb(0 0 0 / 0.8);
   }
 
+  /* On the dark end card the actions turn light: orange to message him, white outline to replay. */
+  .player__end .button--primary {
+    background: var(--accent);
+    color: var(--on-accent);
+  }
+
+  .player__end .button--ghost {
+    border-color: rgb(255 255 255 / 0.55);
+    color: #fff;
+  }
+
+  @media (hover: hover) {
+    .player__end .button--primary:hover {
+      background: var(--accent-hover);
+    }
+
+    .player__end .button--ghost:hover {
+      border-color: #fff;
+      background: rgb(255 255 255 / 0.1);
+    }
+  }
+
   .player__error {
     position: absolute;
     inset-inline: 0.75rem;
     bottom: 0.75rem;
     z-index: 5;
     padding: 0.6rem 0.9rem;
-    border-radius: 10px;
     background: rgb(0 0 0 / 0.85);
-    color: var(--white);
+    color: #fff;
     font-size: var(--step--1);
   }
 
   .player__error a {
-    color: var(--caption);
+    color: #ffb393;
   }
 
   /*
-   * The phone (spec §3): the newest iPhone in cherry, measured on Apple's photo; every size is a share
+   * The phone (spec §3): the newest iPhone in its orange, measured on Apple's photo; every size is a share
    * of the phone's width. The player becomes its 9:19.5 screen. The phone takes its width from
    * --frame-h like any frame, never so narrow that its screen can't hold the play button. --u is 1% of
    * that width for the phone's own box only: its parts inside use cqi, which the phone gives them.
@@ -358,11 +378,11 @@ const style = [`--r: ${ratio}`, `--tint: ${work.cover.color}`, `background-image
       .phone--on {
         --phone-w: clamp(min(100cqw, var(--phone-min)), var(--frame-h, 100svh) * 0.4796, 100cqw);
         --u: calc(var(--phone-w) / 100);
-        /* Cherry, from the rim's outer edge in; the light falls from the right. */
-        --edge: #150c0d;
-        --metal: #452a2e;
-        --shine: #93707a;
-        --falloff: #231012;
+        /* Shades of the site's orange, from the rim's outer edge in; the light falls from the right. */
+        --edge: #3a1406;
+        --metal: #b8481d;
+        --shine: #f29a6c;
+        --falloff: #6e2810;
         container: phone / inline-size;
         display: block;
         position: relative;
@@ -378,7 +398,8 @@ const style = [`--r: ${ratio}`, `--tint: ${work.cover.color}`, `background-image
           inset 0 0 0 calc(var(--u) * 1.57) var(--falloff),
           inset 0 0 0 calc(var(--u) * 1.65) #060304,
           inset 0 0 0 calc(var(--u) * 1.82) #484a49,
-          inset 0 0 calc(var(--u) * 0.9) calc(var(--u) * 1.82) #6a6a6a;
+          inset 0 0 calc(var(--u) * 0.9) calc(var(--u) * 1.82) #6a6a6a,
+          0 calc(var(--u) * 3) calc(var(--u) * 9) rgb(36 37 31 / 0.22);
       }
 
       /* Light across the rim: darker on the left, brighter on the right. */
@@ -409,7 +430,7 @@ const style = [`--r: ${ratio}`, `--tint: ${work.cover.color}`, `background-image
         z-index: 5;
         width: 1.57cqi;
         height: 1%;
-        background: #2b171a;
+        background: #5c230d;
         pointer-events: none;
       }
 

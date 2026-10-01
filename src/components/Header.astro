@@ -1,5 +1,5 @@
 ---
-import { CONTACT, whatsappMessage, whatsappUrl } from '../lib/contact.ts';
+import { whatsappMessage, whatsappUrl } from '../lib/contact.ts';
 import { ui } from '../lib/i18n.ts';
 import { otherLang, pageHref } from '../lib/site.ts';
 import type { Lang } from '../lib/urls.ts';
@@ -8,63 +8,161 @@ import Icon from './Icon.astro';
 interface Props {
   lang: Lang;
   altHref: string;
-  /** The home hero already shows his name large; the header keeps only the controls there. */
-  showName?: boolean;
 }
 
-const { lang, altHref, showName = true } = Astro.props;
+const { lang, altHref } = Astro.props;
 const t = ui[lang];
 const other = otherLang(lang);
+const home = pageHref(lang);
 ---
 
 <header class="site-header">
-  {showName ? <a class="site-header__name" href={pageHref(lang)}>{t.name}</a> : <span />}
-  <nav class="site-header__nav" aria-label={lang === 'ar' ? 'روابط سريعة' : 'Quick links'}>
-    <a class="site-header__lang" href={altHref} lang={other} hreflang={other} aria-label={t.switchLabel}>{t.switchName}</a>
-    <a class="button button--ghost button--icon" href={whatsappUrl(whatsappMessage(lang))} aria-label={t.whatsapp}>
-      <Icon name="whatsapp" size={20} />
+  <div class="site-header__bar">
+    <a class="brand" href={home} aria-label={t.brandHome}>
+      <span class="brand__mark" aria-hidden="true">mk<span>·</span></span>
+      <span class="brand__name" aria-hidden="true" lang="en" dir="ltr">Mahmoud<br />Khaled</span>
     </a>
-    <a class="button button--ghost button--icon" href={CONTACT.instagramUrl} aria-label={t.instagram}>
-      <Icon name="instagram" size={19} />
-    </a>
-  </nav>
+    <nav class="site-header__nav" aria-label={t.navLabel}>
+      <a class="site-header__link" href={`${home}#work`}>{t.navWork}</a>
+      <a class="site-header__link site-header__about" href={`${home}#about`}>{t.navAbout}</a>
+      <a class="site-header__lang" href={altHref} lang={other} hreflang={other} aria-label={t.switchLabel}>{t.switchName}</a>
+      <a class="site-header__talk" href={whatsappUrl(whatsappMessage(lang))}>
+        {t.letsTalk}
+        <Icon name="dive" size={18} class="icon--dive" />
+      </a>
+    </nav>
+  </div>
 </header>
 
 <style>
   .site-header {
+    border-bottom: 1px solid var(--line);
+  }
+
+  .site-header__bar {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 1rem;
+    max-width: var(--page);
+    min-height: 5.25rem;
+    margin-inline: auto;
     padding: 0.75rem var(--gutter);
     padding-top: max(0.75rem, env(safe-area-inset-top));
   }
 
-  .site-header__name {
-    color: var(--white);
-    font-size: var(--step-1);
-    font-weight: 800;
+  /* "mk·" and his name in two condensed lines: the mark reads left to right on both pages. */
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    flex: none;
+    min-height: var(--tap);
+    direction: ltr;
+    color: var(--ink);
     text-decoration: none;
+  }
+
+  .brand__mark {
+    font-family: var(--display);
+    font-size: 2.6rem;
+    line-height: 1;
+    letter-spacing: -0.07em;
+  }
+
+  .brand__mark > span {
+    color: var(--accent);
+  }
+
+  .brand__name {
+    padding-left: 0.7rem;
+    border-left: 1px solid var(--line);
+    font-family: var(--display);
+    font-size: 0.875rem;
+    line-height: 0.95;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
   }
 
   .site-header__nav {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
-    gap: 0.5rem;
+    justify-content: flex-end;
+    gap: 0.25rem clamp(0.85rem, 0.3rem + 2.2vw, 2.25rem);
+    min-width: 0;
+    font-size: var(--step--1);
+    font-weight: 600;
   }
 
-  .site-header__lang {
+  .site-header__nav a {
     display: inline-flex;
     align-items: center;
     min-height: var(--tap);
-    padding-inline: 0.75rem;
-    color: var(--text);
-    font-size: var(--step--1);
-    font-weight: 500;
-    text-underline-offset: 0.3em;
+    color: var(--ink);
+    text-decoration: none;
   }
 
-  .site-header__lang:hover {
-    color: var(--white);
+  @media (hover: hover) {
+    .site-header__link:hover {
+      text-decoration: underline;
+      text-underline-offset: 0.35em;
+    }
+  }
+
+  .site-header__nav .site-header__lang {
+    justify-content: center;
+    min-width: var(--tap);
+    padding-inline: 0.7rem;
+    border: 1px solid var(--line);
+  }
+
+  @media (hover: hover) {
+    .site-header__nav .site-header__lang:hover {
+      background: var(--soft);
+    }
+  }
+
+  .site-header__nav .site-header__talk {
+    gap: 1.25rem;
+    border-bottom: 1px solid var(--ink);
+  }
+
+  @media (hover: hover) {
+    .site-header__talk:hover :global(.icon--dive) {
+      translate: -3px 3px;
+    }
+
+    .site-header__talk:hover :global(.icon--dive:dir(ltr)) {
+      translate: 3px 3px;
+    }
+  }
+
+  @media (max-width: 649px) {
+    .site-header__bar {
+      min-height: 4.5rem;
+    }
+
+    .brand__mark {
+      font-size: 2.2rem;
+    }
+
+    .brand__name {
+      font-size: 0.72rem;
+    }
+
+    .site-header__about {
+      display: none !important;
+    }
+
+    .site-header__nav .site-header__talk {
+      gap: 0.6rem;
+    }
+  }
+
+  @media (max-width: 359px) {
+    .brand__name {
+      display: none;
+    }
   }
 </style>

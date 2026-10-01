@@ -1,8 +1,13 @@
 # Mahmoud Khaled — portfolio
 
 The video portfolio of Mahmoud Khaled, video editor and videographer in Giza / Cairo. English first
-(`/`), Arabic at `/ar/`; the old `/en/…` addresses send visitors on to the same page at `/…`. Every piece has its own page and link preview, plays with sound on one tap,
-and ends on a pre-written WhatsApp message. Live at https://mahmoudkhanafy.github.io/.
+(`/`), Arabic at `/ar/`; the old `/en/…` addresses send visitors on to the same page at `/…`. Every
+piece has its own page and a link preview in each language, plays with sound on one tap, and ends on
+a pre-written WhatsApp message. Live at https://mahmoudkhanafy.github.io/portfolio/.
+
+The look is "paper": ink on warm paper with one burnt orange, his portrait in black and white on an
+orange block, a dark band where a video plays, and the sections Work, About, Process and Contact. The
+black design it replaced is kept on the `black` branch.
 
 **Adding a video is documented for Mahmoud in [ADD-A-VIDEO.md](ADD-A-VIDEO.md)** (Arabic, then English).
 
@@ -13,15 +18,15 @@ Ubuntu). ffmpeg is only needed when a video in `work/` is new or changed.
 
 ```sh
 npm ci
-npm run dev            # http://localhost:4747/mahmoud-khaled/ (media is prepared first)
+npm run dev            # http://localhost:4750/mahmoud-khaled/ (media is prepared first)
 npm run build          # production build in dist/
 npm run serve          # serves dist/ like GitHub Pages, on the local network too
 ```
 
 `SITE_URL` (origin, used for link previews and canonical URLs) and `BASE_PATH` (repo sub-path) control
-where the build expects to live. They default to `http://localhost:4747` and `/mahmoud-khaled/`; CI
+where the build expects to live. They default to `http://localhost:4750` and `/mahmoud-khaled/`; CI
 takes them from GitHub Pages. To test link previews from a phone on the same Wi-Fi, build with the
-LAN address: `SITE_URL=http://192.168.x.x:4747 npm run build && npm run serve`.
+LAN address: `SITE_URL=http://192.168.x.x:4750 npm run build && npm run serve`.
 
 ## Publish on GitHub Pages
 
@@ -55,15 +60,18 @@ site/portrait.png ────────────────────�
   (as GitHub annotations and a job summary in CI); encodes two H.264/AAC MP4s per video with the index
   at the front — `hd` (1080 class) and `sd` (720 class) — at the video's true shape with square pixels
   (a 9:16 video stored squeezed into a square comes out 9:16), never spending much more than the source's
-  own bitrate; picks the cover frame; renders AVIF/WebP covers, a blurred placeholder and a
-  1200×630 link-preview image under 300 KB for each language; processes the portrait. Results are cached by content hash
+  own bitrate; picks the cover frame; renders AVIF/WebP covers and a blurred placeholder; draws a
+  1200×630 link-preview card per language (`scripts/media/og.ts`: the template
+  `site/brand/templates/og-work.html` in headless Chromium, the frame large beside its title, written
+  as a JPEG without colour subsampling and under 300 KB so WhatsApp shows it large); processes the
+  portrait. Results are cached by content hash
   in `.media-cache/` (restored between CI runs), so only new or changed files are processed.
 - **Site** (`src/`): static Astro pages, fonts self-hosted, no third-party requests. The only
   JavaScript is the player (`src/scripts/player.ts`, ~2.5 KB gzipped), the share button and the
   motion script (`src/scripts/motion.ts`, inlined), plus a small inline script in `<head>`.
 - **Frames**: each frame takes its video's own shape at the largest size that fits the screen with its
   play button, so nothing is stretched or cropped: films run wide, squares stay square. On screens
-  760 px and wider, vertical reels stand in a drawn iPhone (cherry, measured on Apple's photo;
+  760 px and wider, vertical reels stand in a drawn iPhone (in shades of the site's orange, measured on Apple's photo;
   `src/lib/phone.ts`, drawn in `Player.astro`): the reel fills its 9:19.5 screen at rest and eases to
   its whole 9:16 frame when it plays with sound. On phones a frame runs edge to edge when it fits and
   otherwise sits centred.
@@ -72,7 +80,7 @@ site/portrait.png ────────────────────�
   its phone. Films get a row of their own and the next pieces move up to finish the row before; the
   screen's shape picks two, three or four a row so a row fits the screen.
 - **Motion** ("Captions"): text builds the way his reels build captions. The hero line pops on word by
-  word with «كتابة متحركة» in gold and «متحركة» stretching with kashida; headings, feed titles and
+  word with «حكايتك» / "yours" in orange and «حكايتك» stretching with kashida; headings, feed titles and
   the services build as they come into view, and a video's title as its page opens
   (`src/lib/words.ts`, `Words.astro`, `src/styles/motion.css`, `src/scripts/motion.ts`). Screen
   readers read every line whole; with Reduce Motion or without JavaScript the text is simply there.
@@ -87,12 +95,11 @@ site/portrait.png ────────────────────�
   file for the screen.
 - **Link previews and search**: every page has absolute Open Graph and Twitter tags, `hreflang`
   alternates and JSON-LD (`WebSite` and a `ProfilePage` for Mahmoud on home; `VideoObject` and a
-  breadcrumb per piece). Each language has its own preview images, in that language only (checked by
-  `tests/unit/brand-text.test.ts`): the home
-  cards (`public/og-home.jpg`, `public/og-home-en.jpg`) and the wordmarks on per-video cards
-  (`site/brand/og-wordmark*.png`) are rendered from `site/brand/templates/` with `npm run brand`, as
-  are the icons and `favicon.ico`. The sitemap lists each piece's video, preview and date
-  (`src/lib/seo.ts`).
+  breadcrumb per piece), all in the page's language: an English link gets the English card, an `/ar/`
+  link the Arabic one, each in that language only (checked by `tests/unit/brand-text.test.ts`). The
+  home cards (`public/og-home-en.jpg`, `public/og-home-ar.jpg`), the icons and `favicon.ico` are
+  rendered from `site/brand/templates/` with `npm run brand`; the per-video cards come from the media
+  pipeline. The sitemap lists each piece's video, preview and date (`src/lib/seo.ts`).
 - **Language offer**: a visitor whose phone reads the other language gets a bar offering it, once,
   until they pick one (`src/scripts/language.js`, added after the page loads). Not a redirect: search
   engines read as an English browser and would never see the Arabic pages.
@@ -106,7 +113,7 @@ site/portrait.png ────────────────────�
 | Contact details | `src/lib/contact.ts` |
 | Interface text, bio, services | `src/lib/i18n.ts` |
 | Colours, type scale | `src/styles/tokens.css` (contrast is checked by `tests/unit/contrast.test.ts`) |
-| Brand artwork (icons, wordmark, home card) | `site/brand/templates/`, then `npm run brand` |
+| Brand artwork (icons, home cards) | `site/brand/templates/`, then `npm run brand` |
 
 ## Tests
 
@@ -124,7 +131,7 @@ covers both languages, link previews (absolute, reachable, < 300 KB), playback w
 start, `hd` → `sd` fallback, the end card, one-video-at-a-time, muted previews, reduced motion, 404s,
 shared URLs with tracking parameters, page weight, axe accessibility checks, frames (true shape,
 whole on screen with the play button, one height per row, full rows in his order at six screen
-sizes), motion (word-by-word builds, gold key words, kashida without layout shift, reduced motion, no
+sizes), motion (word-by-word builds, orange key words, kashida without layout shift, reduced motion, no
 JavaScript), the phone frame (9:19.5 screen, fill and whole, clear of its island, Safari's round
 corners) and the rules (a picture plays in place, a title opens its page, the glide pairs one frame
 each way, "All work" returns to the piece). `build:e2e` adds the
@@ -149,7 +156,8 @@ recording, 2.39:1 and 1:1), whose circles show any stretch.
 
 ## Credits
 
-- Typeface: [Alexandria](https://fonts.google.com/specimen/Alexandria) by Mohamed Gaber (SIL Open Font
-  License), via Fontsource.
+- Typefaces: [Noto Sans Arabic](https://fonts.google.com/noto/specimen/Noto+Sans+Arabic) and
+  [Barlow Condensed](https://fonts.google.com/specimen/Barlow+Condensed) (SIL Open Font License),
+  subset and checked in under `site/fonts/` (its README has the commands).
 - Icons: [Simple Icons](https://simpleicons.org) (CC0-1.0) for WhatsApp and Instagram,
   [Lucide](https://lucide.dev) (ISC) for the interface.

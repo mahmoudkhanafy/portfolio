@@ -1,6 +1,7 @@
 ---
+import { CONTACT } from '../lib/contact.ts';
 import { ui } from '../lib/i18n.ts';
-import { otherLang } from '../lib/site.ts';
+import { otherLang, pageHref } from '../lib/site.ts';
 import type { Lang } from '../lib/urls.ts';
 
 interface Props {
@@ -15,29 +16,58 @@ const year = new Date().getFullYear();
 ---
 
 <footer class="site-footer">
-  <p>{t.rights(year)}</p>
-  <p>{t.place}</p>
-  <a href={altHref} lang={other} hreflang={other} aria-label={t.switchLabel}>{t.switchName}</a>
+  <div class="site-footer__bar">
+    <a class="site-footer__brand" href={pageHref(lang)} aria-label={t.brandHome}>
+      <span aria-hidden="true">mk<span>·</span></span>
+    </a>
+    <p>{t.footerLine}</p>
+    <a class="site-footer__link" href={CONTACT.instagramUrl}>{t.instagram} <span aria-hidden="true">↗</span></a>
+    <a class="site-footer__link" href={altHref} lang={other} hreflang={other} aria-label={t.switchLabel}>{t.switchName}</a>
+    <p class="site-footer__rights">{t.rights(year)}</p>
+  </div>
 </footer>
 
 <style>
-  .site-footer {
+  .site-footer__bar {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 0.5rem 1.5rem;
-    padding: 2.5rem var(--gutter);
-    padding-bottom: max(2.5rem, env(safe-area-inset-bottom));
-    border-top: 1px solid var(--rule);
-    color: var(--dim);
+    gap: 0.5rem 2rem;
+    max-width: var(--page);
+    margin-inline: auto;
+    padding: 2rem var(--gutter);
+    padding-bottom: max(2rem, env(safe-area-inset-bottom));
+    color: var(--muted);
     font-size: var(--step--1);
   }
 
-  .site-footer a {
-    margin-inline-start: auto;
-    color: var(--text);
-    min-height: var(--tap);
+  .site-footer__brand {
     display: inline-flex;
     align-items: center;
+    min-height: var(--tap);
+    direction: ltr;
+    color: var(--ink);
+    font-family: var(--display);
+    font-size: 2.2rem;
+    line-height: 1;
+    letter-spacing: -0.07em;
+    text-decoration: none;
+  }
+
+  .site-footer__brand span span {
+    color: var(--accent);
+  }
+
+  .site-footer__link {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--tap);
+    color: var(--ink);
+    font-weight: 600;
+    text-underline-offset: 0.3em;
+  }
+
+  .site-footer__rights {
+    margin-inline-start: auto;
   }
 </style>

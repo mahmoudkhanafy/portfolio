@@ -41,7 +41,7 @@ describe('videoLd', () => {
     const ld = videoLd({
       name: 'Run',
       description: 'A run.',
-      pageUrl: 'https://e.github.io/r/en/work/run/',
+      pageUrl: 'https://e.github.io/r/work/run/',
       contentUrl: 'https://e.github.io/r/media/run/hd.k.mp4',
       thumbnails: ['https://e.github.io/r/media/run/og.k.jpg', 'https://e.github.io/r/media/run/cover-720.k.jpg'],
       uploadDate: '2026-09-23T08:00:00.000Z',
@@ -56,7 +56,7 @@ describe('videoLd', () => {
       '@type': 'VideoObject',
       name: 'Run',
       description: 'A run.',
-      url: 'https://e.github.io/r/en/work/run/',
+      url: 'https://e.github.io/r/work/run/',
       contentUrl: 'https://e.github.io/r/media/run/hd.k.mp4',
       thumbnailUrl: ['https://e.github.io/r/media/run/og.k.jpg', 'https://e.github.io/r/media/run/cover-720.k.jpg'],
       uploadDate: '2026-09-23T08:00:00.000Z',

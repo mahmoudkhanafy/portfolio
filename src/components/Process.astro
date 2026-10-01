@@ -1,0 +1,137 @@
+---
+import { ui } from '../lib/i18n.ts';
+import { dirOf } from '../lib/site.ts';
+import type { Lang } from '../lib/urls.ts';
+import { RHYTHM } from '../lib/words.ts';
+import Words from './Words.astro';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = ui[lang];
+---
+
+<section class="process band" aria-labelledby="process-heading">
+  <div class="process__head">
+    <div>
+      <p class="eyebrow"><span class="num" lang="en">03</span> / {t.processEyebrow}</p>
+      <h2 id="process-heading" data-build="view"><Words text={t.processHeading} dir={dirOf(lang)} rhythm={RHYTHM.heading} /></h2>
+    </div>
+    <p class="process__intro">{t.processIntro}</p>
+  </div>
+  <ol class="process__steps" role="list">
+    {
+      t.process.map((step, i) => (
+        <li>
+          <span class="process__number" lang="en" aria-hidden="true">
+            {String(i + 1).padStart(2, '0')}
+          </span>
+          <h3>{step.title}</h3>
+          <p>{step.text}</p>
+        </li>
+      ))
+    }
+  </ol>
+</section>
+
+<style>
+  .process {
+    --band: var(--night);
+    padding: clamp(3rem, 2rem + 4vw, 5rem) var(--gutter);
+    color: var(--paper);
+  }
+
+  .process .eyebrow,
+  .process__intro,
+  .process__steps p {
+    color: var(--night-text);
+  }
+
+  .process h2,
+  .process h3 {
+    color: var(--paper);
+  }
+
+  .process__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem 2rem;
+    margin-bottom: clamp(1.75rem, 1rem + 3vw, 3rem);
+  }
+
+  .process h2 {
+    margin-top: 0.75rem;
+    font-size: var(--step-3);
+    line-height: 1.5;
+  }
+
+  .process h2:lang(en) {
+    font-size: clamp(2.25rem, 1.5rem + 2.6vw, 3.25rem);
+    line-height: 1.1;
+  }
+
+  .process__intro {
+    max-width: 24rem;
+    font-size: var(--step--1);
+    line-height: 1.9;
+  }
+
+  .process__steps {
+    display: grid;
+    gap: 1.75rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .process__steps li {
+    position: relative;
+    padding-top: 1.1rem;
+    padding-inline-start: 3rem;
+    border-top: 1px solid var(--night-line);
+  }
+
+  .process__number {
+    position: absolute;
+    inset-inline-start: 0;
+    top: 1.35rem;
+    color: #e8987c;
+    font-family: var(--display);
+    font-size: 1.15rem;
+  }
+
+  .process h3 {
+    margin-bottom: 0.5rem;
+    font-size: var(--step-1);
+    font-weight: 500;
+  }
+
+  .process__steps p {
+    max-width: 38ch;
+    font-size: var(--step--1);
+    line-height: 1.9;
+  }
+
+  @media (min-width: 760px) {
+    .process__steps {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 2.5rem;
+    }
+
+    .process__steps li {
+      padding-top: 1.25rem;
+      padding-inline-start: 0;
+    }
+
+    .process__number {
+      position: static;
+      display: block;
+      margin-bottom: 1.5rem;
+      font-size: 1.25rem;
+    }
+  }
+</style>

@@ -1,5 +1,5 @@
 /**
- * The phone frame vertical reels stand in on wider screens (spec §3): the newest iPhone in cherry,
+ * The phone frame vertical reels stand in on wider screens (spec §3): the newest iPhone in its orange,
  * measured on Apple's photo (the phone 1210 × 2523 px). Player.astro draws it in CSS from the same
  * numbers, as shares of the phone's width; the rows lay a framed reel out at the phone's outline.
  */

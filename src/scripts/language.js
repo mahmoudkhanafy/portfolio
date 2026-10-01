@@ -46,10 +46,11 @@ const css = `
   margin-inline: auto;
   padding: 0.5rem;
   padding-inline-start: 1.1rem;
-  border: 1px solid var(--rule-strong);
+  border: 1px solid var(--line-strong);
+  border-top: 3px solid var(--accent);
   border-radius: var(--radius-frame);
-  background: var(--raised);
-  box-shadow: 0 1rem 2.5rem rgb(0 0 0 / 0.7);
+  background: var(--paper);
+  box-shadow: 0 1rem 2.5rem rgb(36 37 31 / 0.22);
 }
 .offer[hidden] {
   display: none;
@@ -57,22 +58,22 @@ const css = `
 .offer p {
   flex: 1;
   margin: 0;
-  color: var(--white);
+  color: var(--ink);
   font-size: var(--step--1);
   font-weight: 500;
   line-height: 1.4;
 }
-/* Quiet: gold stays the one primary action, WhatsApp. */
+/* Quiet: the dark button stays the one primary action, WhatsApp. */
 .offer .button--ghost {
   padding-inline: 1.1rem;
   font-size: var(--step--1);
   white-space: nowrap;
 }
 .offer__close {
-  color: var(--dim);
+  color: var(--muted);
 }
 .offer__close:hover {
-  color: var(--white);
+  color: var(--ink);
 }
 @media (prefers-reduced-motion: no-preference) {
   .offer:not([hidden]) {
@@ -91,7 +92,6 @@ const css = `
   }
 }
 `;
-
 
 // Lucide "x", drawn as src/components/Icon.astro draws its icons.
 const closeIcon =

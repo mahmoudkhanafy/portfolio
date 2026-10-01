@@ -6,13 +6,15 @@
 
 export type Dir = 'rtl' | 'ltr';
 
-/** A line, with its gold words and, optionally, the one word that stretches. */
+/** A line, with its key words and, optionally, the one word that stretches. */
 export interface Caption {
   text: string;
-  /** The words shown in gold, as they appear in `text`; trailing punctuation may be left off. */
+  /** The words shown in the key colour, as they appear in `text`; trailing punctuation may be left off. */
   key?: string;
   /** A word that stretches with kashida as it appears (Arabic). */
   stretch?: string;
+  /** The word after which the line breaks, so a caption of two sentences shows one to a line. */
+  breakAfter?: string;
 }
 
 export interface Rhythm {
@@ -20,7 +22,7 @@ export interface Rhythm {
   start?: number;
   /** From one word to the next, in ms. */
   step: number;
-  /** An extra beat after a comma, in ms. */
+  /** An extra beat after a comma or the end of a sentence, in ms. */
   comma?: number;
   /** After the stretched word, the next one waits at least this long, in ms, while the stretch plays. */
   stretch?: number;
@@ -34,6 +36,8 @@ export interface Word {
   key: boolean;
   /** Where the kashida goes in `text`, for the word that stretches. */
   kashida?: number;
+  /** The line breaks after it. */
+  breakAfter?: true;
   /** When it appears, in ms. */
   delay: number;
 }
@@ -136,8 +140,10 @@ export function captionWords(caption: Caption, dir: Dir, rhythm: Rhythm): Word[]
   const texts = splitWords(caption.text, dir);
   const keys = new Set(caption.key ? find(texts, caption.key, dir) : []);
   const stretched = caption.stretch ? find(texts, caption.stretch, dir)[0] : undefined;
+  const broken = caption.breakAfter ? find(texts, caption.breakAfter, dir)[0] : undefined;
   const words = texts.map((text, i): Word => {
     const word: Word = { text, key: keys.has(i), delay: 0 };
+    if (i === broken) word.breakAfter = true;
     if (i === stretched) {
       const at = kashidaAt(text);
       if (at === null) throw new Error(`"${text}" has no letter a kashida can follow`);
@@ -145,10 +151,10 @@ export function captionWords(caption: Caption, dir: Dir, rhythm: Rhythm): Word[]
     }
     return word;
   });
-  // From one word to the next: a step, a beat more after a comma, a wait while a word stretches.
+  // From one word to the next: a step, a beat more after a comma or a sentence, a wait while a word stretches.
   const { start = 0, step, comma = 0, stretch = 0, most = Infinity } = rhythm;
   const gaps = words.slice(0, -1).map((word) => {
-    const gap = step + (/[،,]$/u.test(word.text) ? comma : 0);
+    const gap = step + (/[،,.؟?!]$/u.test(word.text) ? comma : 0);
     return word.kashida === undefined ? gap : Math.max(gap, stretch);
   });
   const total = gaps.reduce((sum, gap) => sum + gap, 0);

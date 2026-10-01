@@ -21,10 +21,12 @@ for (const lang of ['ar', 'en'] as const) {
       expect(await meta(page, 'og:title')).toContain(title);
       expect((await meta(page, 'og:description'))?.length).toBeGreaterThan(20);
 
-      // WhatsApp and Instagram fetch the preview image by absolute URL; it must exist and stay small. Each
-      // page language has its own, with his name first in that language.
+      // WhatsApp, iMessage and Instagram fetch the preview image by absolute URL: the card in the
+      // page's language, which must exist and stay small enough for WhatsApp to show it large.
+      expect(await meta(page, 'og:locale')).toBe(lang === 'ar' ? 'ar_EG' : 'en_US');
       const image = await meta(page, 'og:image');
-      expect(image).toMatch(new RegExp(`^http://localhost:\\d+/mahmoud-khaled/media/.+/og${lang === 'en' ? '-en' : ''}\\.[0-9a-f]+\\.jpg$`));
+      expect(image).toMatch(new RegExp(`^http://localhost:\\d+/mahmoud-khaled/media/${work.slug}/og-${lang}\\.[0-9a-f]+\\.jpg$`));
+      expect(await meta(page, 'twitter:image')).toBe(image);
       expect([await meta(page, 'og:image:width'), await meta(page, 'og:image:height')]).toEqual(['1200', '630']);
       const imageResponse = await request.get(image!);
       expect(imageResponse.status()).toBe(200);

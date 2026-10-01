@@ -14,23 +14,18 @@ const root = site + base;
 const catalog = (): Catalog => JSON.parse(readFileSync('src/generated/catalog.json', 'utf8'));
 
 /**
- * Self-hosted variable fonts from Fontsource packages, one @font-face per script subset.
- * The local provider keeps builds offline and lets the browser fetch only the scripts a page uses.
+ * Self-hosted fonts, checked in under site/fonts (see its README): Noto Sans Arabic for all text, split
+ * so a page fetches only the scripts it uses, and Barlow Condensed for English display lines.
  */
-function fontsource(pkg: string, file: string, subsets: string[]) {
-  const ranges: Record<string, string> = JSON.parse(readFileSync(`node_modules/${pkg}/unicode.json`, 'utf8'));
-  const variants = subsets.map((subset) => {
-    const range = ranges[subset];
-    if (!range) throw new Error(`${pkg} has no "${subset}" subset`);
-    return {
-      src: [`./node_modules/${pkg}/files/${file}-${subset}-wght-normal.woff2`] as [string],
-      weight: '100 900',
-      style: 'normal' as const,
-      unicodeRange: range.split(',') as [string, ...string[]],
-    };
-  });
-  return { variants: variants as [(typeof variants)[number], ...typeof variants] };
-}
+/** Standard Arabic and the borrowed letters Egyptian text uses (پ چ ڤ گ ی); anything else falls back. */
+const ARABIC = ['U+0600-0670', 'U+067E', 'U+0686', 'U+06A4', 'U+06AF', 'U+06CC', 'U+06D4', 'U+200C-200F', 'U+FEFF'];
+const LATIN = ['U+0000-00FF', 'U+0131', 'U+0152-0153', 'U+02BB-02BC', 'U+02C6', 'U+02DA', 'U+02DC', 'U+0304', 'U+0308', 'U+0329', 'U+2000-206F', 'U+20AC', 'U+2122', 'U+2191', 'U+2193', 'U+2212', 'U+2215', 'U+FFFD'];
+const font = (file: string, weight: string, unicodeRange?: string[]) => ({
+  src: [`./site/fonts/${file}`] as [string],
+  weight,
+  style: 'normal' as const,
+  ...(unicodeRange && { unicodeRange: unicodeRange as [string, ...string[]] }),
+});
 
 export default defineConfig({
   site,
@@ -50,10 +45,17 @@ export default defineConfig({
   fonts: [
     {
       provider: fontProviders.local(),
-      name: 'Alexandria',
+      name: 'Noto Sans Arabic',
       cssVariable: '--font-sans',
       fallbacks: ['sans-serif'],
-      options: fontsource('@fontsource-variable/alexandria', 'alexandria', ['arabic', 'latin']),
+      options: { variants: [font('noto-sans-arabic.woff2', '400 800', ARABIC), font('noto-sans-latin.woff2', '400 800', LATIN)] },
+    },
+    {
+      provider: fontProviders.local(),
+      name: 'Barlow Condensed',
+      cssVariable: '--font-display',
+      fallbacks: ['sans-serif'],
+      options: { variants: [font('barlow-condensed-600.woff2', '600')] },
     },
   ],
 });

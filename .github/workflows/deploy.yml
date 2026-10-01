@@ -59,6 +59,10 @@ jobs:
           sudo apt-get update
           sudo apt-get install --yes --no-install-recommends ffmpeg
 
+      - name: Install Chromium (only when a link preview is new or changed)
+        if: steps.media.outputs.needs-browser == 'true'
+        run: npx playwright install --with-deps chromium
+
       - name: Build
         run: npm run build
         env:

@@ -21,7 +21,7 @@ const catalog = JSON.parse(readFileSync('src/generated/catalog.json', 'utf8')) a
 const pages = [
   ['home-en', ''],
   ['home-ar', 'ar/'],
-  ['work-en', `work/${catalog.works[0]!.slug}/`],
+  ['work-ar', `ar/work/${catalog.works[0]!.slug}/`],
 ];
 
 /** Runs a command without blocking this process, which is also serving the pages being audited. */

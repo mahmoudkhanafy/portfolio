@@ -13,6 +13,7 @@ interface Props {
 
 const { lang } = Astro.props;
 const t = ui[lang];
+const whatsapp = whatsappUrl(whatsappMessage(lang));
 const rows = [
   { icon: 'instagram', label: t.instagram, value: `@${CONTACT.instagramHandle}`, href: CONTACT.instagramUrl },
   { icon: 'phone', label: t.call, value: CONTACT.phoneDisplay, href: `tel:${CONTACT.phoneE164}` },
@@ -20,79 +21,158 @@ const rows = [
 ] as const;
 ---
 
-<section id="contact" class="contact" aria-labelledby="contact-heading">
-  <h2 id="contact-heading" data-build="view"><Words text={t.contactHeading} dir={dirOf(lang)} rhythm={RHYTHM.heading} /></h2>
+<section id="contact" class="contact band" aria-labelledby="contact-heading">
+  <p class="eyebrow"><span class="num" lang="en">04</span> / {t.contactEyebrow}</p>
+  <div class="contact__main">
+    <h2 id="contact-heading" data-build="view"><Words text={t.contactHeading} dir={dirOf(lang)} rhythm={RHYTHM.heading} /></h2>
+    <a class="contact__arrow" href={whatsapp} aria-hidden="true" tabindex="-1">
+      <Icon name="dive" size={64} />
+    </a>
+  </div>
   <p class="contact__lead">{t.contactLead}</p>
-  <a class="button button--primary contact__main" href={whatsappUrl(whatsappMessage(lang))}>
-    <Icon name="whatsapp" size={22} />
-    <span>{t.whatsapp}</span>
-    <span class="contact__number tabular" dir="ltr">{CONTACT.phoneDisplay}</span>
-  </a>
-  <ul class="contact__list" role="list">
-    {
-      rows.map((row) => (
-        <li>
-          <a class="contact__row" href={row.href}>
-            <Icon name={row.icon} size={20} />
-            <span class="contact__text">
-              <span class="contact__label">{row.label}</span>
-              <span class="contact__value" dir="ltr">
-                {row.value}
+  <div class="contact__bottom">
+    <a class="button contact__whatsapp" href={whatsapp}>
+      <Icon name="whatsapp" size={20} />
+      <span>{t.whatsapp}</span>
+      <span class="contact__number tabular" dir="ltr">{CONTACT.phoneDisplay}</span>
+    </a>
+    <ul class="contact__list" role="list">
+      {
+        rows.map((row) => (
+          <li>
+            <a class="contact__row" href={row.href}>
+              <Icon name={row.icon} size={20} />
+              <span class="contact__text">
+                <span class="contact__label">{row.label}</span>
+                <span class="contact__value" dir="ltr">
+                  {row.value}
+                </span>
               </span>
-            </span>
-          </a>
-        </li>
-      ))
-    }
-    <li>
-      <a class="contact__row" href={href('mahmoud-khaled.vcf')} download="mahmoud-khaled.vcf">
-        <Icon name="contact" size={20} />
-        <span class="contact__label">{t.saveContact}</span>
-      </a>
-    </li>
-  </ul>
+            </a>
+          </li>
+        ))
+      }
+      <li>
+        <a class="contact__row" href={href('mahmoud-khaled.vcf')} download="mahmoud-khaled.vcf">
+          <Icon name="contact" size={20} />
+          <span class="contact__label">{t.saveContact}</span>
+        </a>
+      </li>
+    </ul>
+  </div>
 </section>
 
 <style>
   .contact {
-    display: grid;
-    justify-items: start;
-    gap: 1rem;
-    padding: clamp(3rem, 2rem + 5vw, 6rem) var(--gutter) clamp(4rem, 3rem + 5vw, 7rem);
+    --band: var(--accent);
+    padding: clamp(2.5rem, 1.5rem + 4vw, 4.5rem) var(--gutter) clamp(2.5rem, 1.5rem + 3vw, 4rem);
+    color: var(--on-accent);
   }
 
+  .contact :focus-visible {
+    outline-color: var(--on-accent);
+  }
+
+  .contact .eyebrow,
   .contact h2 {
-    font-size: var(--step-3);
-    font-weight: 900;
+    color: var(--on-accent);
   }
 
-  .contact__lead {
-    max-width: var(--measure);
-    color: var(--text);
-    font-size: var(--step-1);
+  /* On orange the key word turns the darkest shade (3:1 or better as large text). */
+  .contact h2 :global(.w--key) {
+    color: var(--night);
   }
 
   .contact__main {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    margin-top: 1rem;
+  }
+
+  .contact h2 {
+    font-size: var(--step-4);
+    font-weight: 800;
+    line-height: 1.45;
+    letter-spacing: -0.03em;
+  }
+
+  .contact h2:lang(en) {
+    font-size: clamp(3.4rem, 1.5rem + 7vw, 7rem);
+    font-weight: 600;
+    line-height: 1.02;
+    letter-spacing: -0.02em;
+  }
+
+  /* A second way to WhatsApp for a pointer only: the button below is the one keyboards and screen
+     readers get. */
+  .contact__arrow {
+    display: none;
+    place-items: center;
+    flex: none;
+    width: 8.75rem;
+    aspect-ratio: 1;
+    border: 1px solid rgb(255 249 237 / 0.55);
+    border-radius: 50%;
+    color: var(--on-accent);
+    transition:
+      background-color 200ms var(--ease-cut),
+      rotate 200ms var(--ease-cut);
+  }
+
+  .contact__arrow :global(svg) {
+    stroke-width: 1;
+  }
+
+  @media (hover: hover) {
+    .contact__arrow:hover {
+      background: rgb(255 255 255 / 0.13);
+      rotate: 10deg;
+    }
+  }
+
+  .contact__lead {
+    max-width: 48ch;
+    margin-top: 1rem;
+    font-size: var(--step-0);
+    line-height: 1.9;
+  }
+
+  .contact__bottom {
+    display: grid;
+    gap: 1.5rem;
+    margin-top: 2rem;
+    padding-top: 1.75rem;
+    border-top: 1px solid rgb(255 249 237 / 0.35);
+  }
+
+  .contact__whatsapp {
     flex-wrap: wrap;
+    justify-self: start;
     min-height: 3.75rem;
-    margin-top: 0.75rem;
-    padding-inline: 1.6rem;
-    font-size: var(--step-1);
+    padding-inline: 1.5rem;
+    background: var(--paper);
+    color: var(--ink);
+    font-size: var(--step-0);
+  }
+
+  @media (hover: hover) {
+    .contact__whatsapp:hover {
+      background: #fff;
+    }
   }
 
   .contact__number {
+    color: var(--muted);
     font-weight: 500;
-    opacity: 0.8;
   }
 
   .contact__list {
     display: grid;
-    width: 100%;
-    max-width: 36rem;
-    margin: 1rem 0 0;
+    margin: 0;
     padding: 0;
     list-style: none;
-    border-top: 1px solid var(--rule);
   }
 
   .contact__row {
@@ -100,14 +180,16 @@ const rows = [
     align-items: center;
     gap: 0.9rem;
     min-height: 3.5rem;
-    border-bottom: 1px solid var(--rule);
-    color: var(--white);
+    border-bottom: 1px solid rgb(255 249 237 / 0.25);
+    color: var(--on-accent);
     text-decoration: none;
   }
 
-  .contact__row:hover .contact__label {
-    text-decoration: underline;
-    text-underline-offset: 0.25em;
+  @media (hover: hover) {
+    .contact__row:hover .contact__label {
+      text-decoration: underline;
+      text-underline-offset: 0.25em;
+    }
   }
 
   .contact__label {
@@ -117,12 +199,30 @@ const rows = [
   .contact__text {
     display: grid;
     justify-items: start;
-    padding-block: 0.6rem;
+    padding-block: 0.55rem;
   }
 
   .contact__value {
-    color: var(--dim);
     font-size: var(--step--1);
     unicode-bidi: isolate;
+  }
+
+  @media (min-width: 760px) {
+    .contact__arrow {
+      display: grid;
+    }
+
+    .contact__list {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      column-gap: 2rem;
+    }
+  }
+
+  @media (min-width: 1100px) {
+    .contact__bottom {
+      grid-template-columns: auto minmax(0, 1fr);
+      align-items: start;
+      column-gap: clamp(2rem, 4vw, 5rem);
+    }
   }
 </style>

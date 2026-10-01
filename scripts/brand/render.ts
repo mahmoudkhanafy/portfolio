@@ -7,6 +7,7 @@ import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { chromium } from '@playwright/test';
 import sharp from 'sharp';
+import { writeOgJpeg } from '../media/images.ts';
 import { ico } from './ico.ts';
 
 const root = process.cwd();
@@ -19,30 +20,15 @@ try {
   const page = await browser.newPage();
   const ready = () => page.evaluate(() => document.fonts.ready.then(() => document.fonts.size));
 
-  // One of each per page language: the Arabic pages' and the English pages' (?en) link previews.
-  const languages = [
-    ['', ''],
-    ['?en', '-en'],
-  ] as const;
-
-  if (wants('wordmark')) {
-    for (const [query, suffix] of languages) {
-      await page.goto(template('wordmark.html', query));
-      await ready();
-      await page.locator('#mark').screenshot({ path: resolve(root, `site/brand/og-wordmark${suffix}.png`), omitBackground: true });
-      console.log(`site/brand/og-wordmark${suffix}.png`);
-    }
-  }
-
   if (wants('og-home')) {
+    // The home page's link preview, one per language, written like every other preview (writeOgJpeg).
     await page.setViewportSize({ width: 1200, height: 630 });
-    for (const [query, suffix] of languages) {
-      await page.goto(template('og-home.html', query));
+    for (const lang of ['en', 'ar'] as const) {
+      await page.goto(template('og-home.html', `?${lang}`));
       await ready();
       await page.evaluate(() => Promise.all([...document.images].map((img) => img.decode())));
-      const png = await page.screenshot();
-      await sharp(png).jpeg({ quality: 84, mozjpeg: true }).toFile(resolve(root, `public/og-home${suffix}.jpg`));
-      console.log(`public/og-home${suffix}.jpg`);
+      const bytes = await writeOgJpeg(await page.screenshot(), resolve(root, `public/og-home-${lang}.jpg`));
+      console.log(`public/og-home-${lang}.jpg (${Math.round(bytes / 1000)} KB)`);
     }
   }
 

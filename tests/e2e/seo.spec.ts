@@ -7,7 +7,7 @@ const lds = async (page: import('@playwright/test').Page) =>
   (await page.locator('script[type="application/ld+json"]').allTextContents()).map((text) => JSON.parse(text));
 
 for (const [lang, path, card] of [
-  ['ar', 'ar/', 'og-home.jpg'],
+  ['ar', 'ar/', 'og-home-ar.jpg'],
   ['en', '', 'og-home-en.jpg'],
 ] as const) {
   test(`the ${lang} home page previews with its own card and tells search engines whose site it is`, async ({ page, request, baseURL }) => {

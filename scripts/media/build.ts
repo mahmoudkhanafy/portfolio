@@ -1,10 +1,10 @@
 /**
- * Prepares every video in work/ for the web: two MP4 renditions, cover images, a link-preview image,
- * the portrait, and src/generated/catalog.json for the site. Results are cached by content in
- * .media-cache/, so only new or changed files are processed.
+ * Prepares every video in work/ for the web: two MP4 renditions, cover images, a link-preview card in
+ * each language, the portrait, and src/generated/catalog.json for the site. Results are cached by
+ * content in .media-cache/, so only new or changed files are processed.
  *
  *   node scripts/media/build.ts               build
- *   node scripts/media/build.ts --plan        only report whether ffmpeg is needed (for CI)
+ *   node scripts/media/build.ts --plan        only report whether ffmpeg or a browser is needed (for CI)
  *   node scripts/media/build.ts --work <dir>  take the videos from another folder (the e2e build adds test pieces)
  */
 import { createHash } from 'node:crypto';
@@ -12,15 +12,18 @@ import { createReadStream, existsSync } from 'node:fs';
 import { appendFile, copyFile, link, mkdir, readdir, readFile, rename, rm, stat, writeFile } from 'node:fs/promises';
 import { join, relative, resolve, sep } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import type { Catalog, Portrait, Work } from '../../src/lib/catalog-types.ts';
-import type { Lang } from '../../src/lib/urls.ts';
+import type { Catalog, OgImage, Portrait, Work } from '../../src/lib/catalog-types.ts';
+import { typeLabel, ui } from '../../src/lib/i18n.ts';
+import { pick, ratioOf } from '../../src/lib/localize.ts';
 import { formatDuration } from '../../src/lib/time.ts';
+import type { Lang } from '../../src/lib/urls.ts';
 import { encodeArgs, frameArgs } from './encode.ts';
 import { buildEntries, readWorkDir, type Entry, type Problem } from './entries.ts';
 import { addedAt } from './git.ts';
-import { renderCover, renderOg, renderPortrait, type CoverSet, type FileRef, type PortraitSet } from './images.ts';
+import { renderCover, renderPortrait, renderStill, type CoverSet, type FileRef, type PortraitSet } from './images.ts';
 import { IMAGE_PIPELINE_VERSION, imageKey, videoKey } from './keys.ts';
 import { planRenditions } from './ladder.ts';
+import { cardKey, designHash, OG_SIZE, openCardRenderer, type Card, type CardRenderer } from './og.ts';
 import { sortWorks } from './order.ts';
 import { isHdr, parseProbe, type Probe } from './probe.ts';
 import { CommandError, FFMPEG, FFPROBE, runCommand, type Runner } from './run.ts';
@@ -41,11 +44,15 @@ export interface BuildOptions {
   /** Only report whether any video or image still has to be made (no ffmpeg needed). */
   plan?: boolean;
   runner?: Runner;
+  /** Draws the link-preview cards; a headless Chromium by default. */
+  cards?: () => Promise<CardRenderer>;
   log?: (line: string) => void;
 }
 
 export interface BuildResult {
   needsFfmpeg: boolean;
+  /** A link-preview card is new or changed, so a browser is needed to draw it. */
+  needsBrowser: boolean;
   warnings: Problem[];
   errors: Problem[];
   catalog?: Catalog;
@@ -58,8 +65,11 @@ interface VideoMeta {
 
 interface ImageMeta {
   cover: CoverSet;
-  og: Record<Lang, { file: string; bytes: number }>;
+  /** The frame the link-preview cards are drawn from. */
+  still: string;
 }
+
+const LANGS: readonly Lang[] = ['en', 'ar'];
 
 interface Job {
   entry: Entry;
@@ -70,6 +80,14 @@ interface Job {
 }
 
 const round3 = (n: number): number => Math.round(n * 1000) / 1000;
+
+/** What a piece's link-preview card shows in one language. */
+function cardOf(entry: Entry, probe: Probe, images: ImageMeta, lang: Lang): Card {
+  const t = ui[lang];
+  const title = pick(entry.title, lang)!;
+  const label = [typeLabel(entry.type, lang), ...(entry.client ? [t.forClient(entry.client)] : []), formatDuration(probe.duration)];
+  return { lang, title: title.text, titleLang: title.lang, label, name: t.name, role: t.role, ratio: ratioOf(probe.width, probe.height), tint: images.cover.color };
+}
 const sourceRate = (probe: Probe) => ({ videoKbps: probe.videoBitrate ? probe.videoBitrate / 1000 : null, codec: probe.codec });
 
 const problem = {
@@ -92,6 +110,11 @@ const problem = {
     file,
     en: `${file} is HDR, but this ffmpeg can't convert HDR colours, so they may look washed out. Export it as SDR (Rec. 709) to be safe.`,
     ar: `${file} متصوّر HDR، والـ ffmpeg ده مش بيحوّل ألوان HDR، فممكن تطلع باهتة. صدّره SDR (Rec. 709) أضمن.`,
+  }),
+  noBrowser: (): Problem => ({
+    file: 'chromium',
+    en: 'A browser is needed to draw the link previews but none was found. Run: npx playwright install chromium',
+    ar: 'محتاج متصفح عشان أرسم صور المعاينة ومش لاقيه. شغّل: npx playwright install chromium',
   }),
   noFfmpeg: (): Problem => ({
     file: 'ffmpeg',
@@ -150,35 +173,46 @@ async function inFreshDir<T>(dir: string, fill: (tmp: string) => Promise<T>): Pr
 }
 
 export async function buildMedia(options: BuildOptions): Promise<BuildResult> {
-  const { root, runner = runCommand, log = (line: string) => console.log(line) } = options;
+  const { root, runner = runCommand, cards: openCards = openCardRenderer, log = (line: string) => console.log(line) } = options;
   const paths = {
     work: resolve(root, options.work ?? 'work'),
     public: join(root, 'public'),
     media: join(root, 'public/media'),
     cache: join(root, '.media-cache'),
     catalog: join(root, 'src/generated/catalog.json'),
-    // The name label on each page language's link preview (npm run brand).
-    wordmarks: { ar: join(root, 'site/brand/og-wordmark.png'), en: join(root, 'site/brand/og-wordmark-en.png') },
     portrait: join(root, 'site/portrait.png'),
   };
-  const cacheDir = (kind: 'video' | 'image' | 'portrait', key: string) => join(paths.cache, kind, key);
+  const cacheDir = (kind: 'video' | 'image' | 'og' | 'portrait', key: string) => join(paths.cache, kind, key);
   const workLabel = relative(root, paths.work).split(sep).join('/');
 
   const { entries, warnings, errors } = buildEntries(await readWorkDir(paths.work));
   if (errors.length > 0) throw new MediaError(errors);
 
-  const brandHash = (await Promise.all(Object.values(paths.wordmarks).map((file) => (existsSync(file) ? hashFile(file) : 'no-wordmark')))).join(':');
   const jobs: Job[] = await Promise.all(
     entries
       .filter((entry) => !entry.hidden)
       .map(async (entry) => {
         const source = join(paths.work, entry.videoPath);
         const sourceHash = await hashFile(source);
-        return { entry, file: `${workLabel}/${entry.videoPath}`, source, vkey: videoKey(sourceHash), ikey: imageKey(sourceHash, entry.cover, brandHash) };
+        return { entry, file: `${workLabel}/${entry.videoPath}`, source, vkey: videoKey(sourceHash), ikey: imageKey(sourceHash, entry.cover) };
       }),
   );
   const needsFfmpeg = jobs.some((j) => !existsSync(join(cacheDir('video', j.vkey), 'meta.json')) || !existsSync(join(cacheDir('image', j.ikey), 'meta.json')));
-  if (options.plan) return { needsFfmpeg, warnings, errors: [] };
+  // A card shows the piece's shape and length, known once its video is probed; until then, a new
+  // piece needs a browser too.
+  const design = await designHash();
+  const cachedVideo = (job: Job) => readJson<VideoMeta>(join(cacheDir('video', job.vkey), 'meta.json'));
+  const cachedImages = (job: Job) => readJson<ImageMeta>(join(cacheDir('image', job.ikey), 'meta.json'));
+  const needsBrowser = (
+    await Promise.all(
+      jobs.map(async (job) => {
+        const [video, images] = await Promise.all([cachedVideo(job), cachedImages(job)]);
+        if (!video || !images) return true;
+        return LANGS.some((lang) => !existsSync(join(cacheDir('og', cardKey(job.ikey, cardOf(job.entry, video.probe, images, lang), design)), 'meta.json')));
+      }),
+    )
+  ).some(Boolean);
+  if (options.plan) return { needsFfmpeg, needsBrowser, warnings, errors: [] };
 
   if (needsFfmpeg) {
     try {
@@ -247,12 +281,9 @@ export async function buildMedia(options: BuildOptions): Promise<BuildResult> {
         throw new ItemFailure(problem.unreadable(job.file));
       }
       const cover = await renderCover(frame, tmp);
-      const og = {
-        ar: { file: 'og.jpg', bytes: await renderOg(frame, size, paths.wordmarks.ar, join(tmp, 'og.jpg')) },
-        en: { file: 'og-en.jpg', bytes: await renderOg(frame, size, paths.wordmarks.en, join(tmp, 'og-en.jpg')) },
-      };
+      await renderStill(frame, join(tmp, 'still.jpg'));
       await rm(frame);
-      return { cover, og };
+      return { cover, still: 'still.jpg' };
     });
   };
 
@@ -269,6 +300,39 @@ export async function buildMedia(options: BuildOptions): Promise<BuildResult> {
   }
   if (failures.length > 0) throw new MediaError(failures);
 
+  // Link-preview cards, one per piece and language; the browser starts only if one is missing.
+  let renderer: CardRenderer | null = null;
+  const og = new Map<string, Record<Lang, { key: string; bytes: number }>>();
+  try {
+    for (const { job, video, images } of ready) {
+      const set = {} as Record<Lang, { key: string; bytes: number }>;
+      for (const lang of LANGS) {
+        const card = cardOf(job.entry, video.probe, images, lang);
+        const key = cardKey(job.ikey, card, design);
+        const dir = cacheDir('og', key);
+        const cached = await readJson<{ bytes: number }>(join(dir, 'meta.json'));
+        if (cached) {
+          set[lang] = { key, bytes: cached.bytes };
+          continue;
+        }
+        if (!renderer) {
+          try {
+            renderer = await openCards();
+          } catch {
+            throw new MediaError([problem.noBrowser()]);
+          }
+        }
+        log(`▸ ${job.file}: drawing the ${lang === 'ar' ? 'Arabic' : 'English'} link preview`);
+        const active = renderer;
+        const meta = await inFreshDir(dir, async (tmp) => ({ bytes: await active.render(card, join(cacheDir('image', job.ikey), images.still), join(tmp, `og-${lang}.jpg`)) }));
+        set[lang] = { key, bytes: meta.bytes };
+      }
+      og.set(job.ikey, set);
+    }
+  } finally {
+    await renderer?.close();
+  }
+
   let portraitSet: PortraitSet | null = null;
   let portraitKey = '';
   if (existsSync(paths.portrait)) {
@@ -279,7 +343,7 @@ export async function buildMedia(options: BuildOptions): Promise<BuildResult> {
 
   // Publish: public/media is rebuilt from the cache on every run, with content keys in the file names.
   await rm(paths.media, { recursive: true, force: true });
-  const publish = async (kind: 'video' | 'image' | 'portrait', key: string, file: string, folder: string): Promise<string> => {
+  const publish = async (kind: 'video' | 'image' | 'og' | 'portrait', key: string, file: string, folder: string): Promise<string> => {
     const target = `media/${folder}/${keyed(file, key)}`;
     await mkdir(join(paths.public, 'media', folder), { recursive: true });
     await linkOrCopy(join(cacheDir(kind, key), file), join(paths.public, target));
@@ -287,6 +351,11 @@ export async function buildMedia(options: BuildOptions): Promise<BuildResult> {
   };
   const sources = (refs: FileRef[], key: string, folder: string, kind: 'image' | 'portrait') =>
     Promise.all(refs.map(async (ref) => ({ src: await publish(kind, key, ref.file, folder), width: ref.width })));
+
+  const ogImages = async (set: Record<Lang, { key: string; bytes: number }>, folder: string): Promise<Record<Lang, OgImage>> => {
+    const one = async (lang: Lang): Promise<OgImage> => ({ src: await publish('og', set[lang].key, `og-${lang}.jpg`, folder), ...OG_SIZE, bytes: set[lang].bytes });
+    return { en: await one('en'), ar: await one('ar') };
+  };
 
   const works: Work[] = [];
   for (const { job, video, images } of ready) {
@@ -318,10 +387,7 @@ export async function buildMedia(options: BuildOptions): Promise<BuildResult> {
         webp: await sources(images.cover.webp, job.ikey, entry.slug, 'image'),
         jpg: { src: await publish('image', job.ikey, images.cover.jpg.file, entry.slug), width: images.cover.jpg.width },
       },
-      og: {
-        ar: { src: await publish('image', job.ikey, images.og.ar.file, entry.slug), width: 1200, height: 630, bytes: images.og.ar.bytes },
-        en: { src: await publish('image', job.ikey, images.og.en.file, entry.slug), width: 1200, height: 630, bytes: images.og.en.bytes },
-      },
+      og: await ogImages(og.get(job.ikey)!, entry.slug),
     });
   }
 
@@ -344,9 +410,10 @@ export async function buildMedia(options: BuildOptions): Promise<BuildResult> {
   const used = {
     video: new Set(ready.map((r) => r.job.vkey)),
     image: new Set(ready.map((r) => r.job.ikey)),
+    og: new Set([...og.values()].flatMap((set) => LANGS.map((lang) => set[lang].key))),
     portrait: new Set(portraitKey ? [portraitKey] : []),
   };
-  for (const kind of ['video', 'image', 'portrait'] as const) {
+  for (const kind of ['video', 'image', 'og', 'portrait'] as const) {
     const dir = join(paths.cache, kind);
     if (!existsSync(dir)) continue;
     for (const name of await readdir(dir)) {
@@ -354,7 +421,7 @@ export async function buildMedia(options: BuildOptions): Promise<BuildResult> {
     }
   }
 
-  return { needsFfmpeg, warnings, errors: [], catalog };
+  return { needsFfmpeg, needsBrowser, warnings, errors: [], catalog };
 }
 
 // ——— command line ———
@@ -384,8 +451,9 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
     for (const w of result.warnings) console.warn(describe(w, 'warning'));
     await summarize(result.warnings, 'warning');
     if (plan) {
-      console.log(`needs-ffmpeg=${result.needsFfmpeg}`);
-      if (process.env.GITHUB_OUTPUT) await appendFile(process.env.GITHUB_OUTPUT, `needs-ffmpeg=${result.needsFfmpeg}\n`);
+      const outputs = `needs-ffmpeg=${result.needsFfmpeg}\nneeds-browser=${result.needsBrowser}\n`;
+      console.log(outputs.trim());
+      if (process.env.GITHUB_OUTPUT) await appendFile(process.env.GITHUB_OUTPUT, outputs);
     } else {
       console.log(`✓ ${result.catalog?.works.length ?? 0} videos ready in public/media`);
     }

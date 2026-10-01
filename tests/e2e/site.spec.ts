@@ -5,13 +5,25 @@ import { works } from './helpers.ts';
 
 const slug = works[0]!.slug;
 
+test('opens in English at the root and in Arabic under ar/, site and link preview alike', async ({ page }) => {
+  for (const [path, lang, dir, locale, image] of [['', 'en', 'ltr', 'en_US', 'og-home-en.jpg'], ['ar/', 'ar', 'rtl', 'ar_EG', 'og-home-ar.jpg']] as const) {
+    await page.goto(path);
+    await expect(page.locator('html')).toHaveAttribute('lang', lang);
+    await expect(page.locator('html')).toHaveAttribute('dir', dir);
+    await expect(page.locator('meta[property="og:locale"]')).toHaveAttribute('content', locale);
+    // Versioned by content (?v=), so an app that cached an older card fetches the new one.
+    await expect(page.locator('meta[property="og:image"]')).toHaveAttribute('content', new RegExp(`/mahmoud-khaled/${image.replace('.', '\\.')}\\?v=[0-9a-f]{10}$`));
+  }
+});
+
 test('the language switch keeps the same video', async ({ page }) => {
-  await page.goto(`ar/work/${slug}/`);
+  await page.goto(`work/${slug}/`);
+  await page.getByRole('link', { name: 'اقرأ الموقع باللغة العربية' }).first().click();
+  await expect(page).toHaveURL(new RegExp(`/mahmoud-khaled/ar/work/${slug}/$`));
+  await expect(page.locator('html')).toHaveAttribute('lang', 'ar');
   await page.getByRole('link', { name: 'Read this site in English' }).first().click();
   await expect(page).toHaveURL(new RegExp(`/mahmoud-khaled/work/${slug}/$`));
   await expect(page.locator('html')).toHaveAttribute('lang', 'en');
-  await page.getByRole('link', { name: 'اقرأ الموقع باللغة العربية' }).first().click();
-  await expect(page).toHaveURL(new RegExp(`/mahmoud-khaled/ar/work/${slug}/$`));
 });
 
 test('links shared without the trailing slash or with app tracking still open', async ({ page, baseURL }) => {
@@ -28,6 +40,7 @@ test('unknown addresses get a helpful bilingual 404, English first', async ({ pa
   expect(response?.status()).toBe(404);
   await expect(page.getByRole('heading', { level: 1 })).toHaveText("This page doesn't exist");
   await expect(page.getByRole('heading', { name: 'الصفحة دي مش موجودة' })).toBeVisible();
+  await expect(page.getByRole('link', { name: "Back to Mahmoud's work" })).toHaveAttribute('href', '/mahmoud-khaled/');
   await expect(page.getByRole('link', { name: 'ارجع لشغل محمود' })).toHaveAttribute('href', '/mahmoud-khaled/ar/');
   await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', 'noindex');
 });
@@ -36,8 +49,13 @@ test('search engines and phones get robots, sitemap, contact card and manifest',
   const robots = await (await request.get('robots.txt')).text();
   expect(robots).toContain(`Sitemap: ${new URL('sitemap-index.xml', baseURL).href}`);
   const sitemap = await (await request.get('sitemap-0.xml')).text();
-  for (const work of works) expect(sitemap).toContain(new URL(`ar/work/${work.slug}/`, baseURL).href);
+  for (const work of works) {
+    expect(sitemap).toContain(new URL(`work/${work.slug}/`, baseURL).href);
+    expect(sitemap).toContain(new URL(`ar/work/${work.slug}/`, baseURL).href);
+  }
+  // The same language codes as each page's hreflang links.
   expect(sitemap).toContain('hreflang="en"');
+  expect(sitemap).toContain('hreflang="ar"');
 
   const card = await request.get('mahmoud-khaled.vcf');
   expect(card.headers()['content-type']).toContain('text/vcard');
@@ -52,10 +70,11 @@ test('search engines and phones get robots, sitemap, contact card and manifest',
 for (const path of ['ar/', '', `ar/work/${slug}/`]) {
   test(`points each arrow the way its line reads, also where :dir() is unknown (${path || 'home'})`, async ({ page }) => {
     await page.goto(path);
-    /** For each arrow: whether it is mirrored, and whether its line reads right to left. */
+    /** For each arrow on screen: whether it is mirrored, and whether its line reads right to left. A
+        hidden arrow has no box, and so no transform to read. */
     const arrows = () =>
       page.locator('.icon--flip-rtl').evaluateAll((els) =>
-        els.map((el) => ({ mirrored: getComputedStyle(el).transform !== 'none', rtl: el.closest('[dir]')?.getAttribute('dir') === 'rtl' })),
+        els.filter((el) => el.getClientRects().length > 0).map((el) => ({ mirrored: getComputedStyle(el).transform !== 'none', rtl: el.closest('[dir]')?.getAttribute('dir') === 'rtl' })),
       );
     const expected = (found: Array<{ rtl: boolean }>) => found.map(({ rtl }) => ({ mirrored: rtl, rtl }));
     const found = await arrows();
@@ -93,10 +112,10 @@ test('writes the script every page runs into the page, so first paint waits on n
   expect(html).toMatch(/script\.src = '[^']*\/_astro\/language\.[\w-]+\.js'/);
 });
 
-test('keeps its own dark design under Dark Reader', async ({ page }) => {
+test('keeps its own paper design under Dark Reader', async ({ page }) => {
   await page.goto('ar/');
   await expect(page.locator('meta[name="darkreader-lock"]')).toHaveCount(1);
-  await expect(page.locator('meta[name="color-scheme"]')).toHaveAttribute('content', 'dark');
+  await expect(page.locator('meta[name="color-scheme"]')).toHaveAttribute('content', 'light');
 });
 
 test('share buttons appear where the browser can share or copy', async ({ page, browserName, context }) => {

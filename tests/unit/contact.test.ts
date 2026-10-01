@@ -17,14 +17,14 @@ describe('whatsappUrl', () => {
 
 describe('whatsappMessage', () => {
   it('names the video and ends with its link in Arabic', () => {
-    const message = whatsappMessage('ar', { title: 'NIMUN — ملخص', url: 'https://e.github.io/r/work/nimun-recap/' });
+    const message = whatsappMessage('ar', { title: 'NIMUN — ملخص', url: 'https://e.github.io/r/ar/work/nimun-recap/' });
     expect(message).toContain('«NIMUN — ملخص»');
-    expect(message.endsWith('\nhttps://e.github.io/r/work/nimun-recap/')).toBe(true);
+    expect(message.endsWith('\nhttps://e.github.io/r/ar/work/nimun-recap/')).toBe(true);
   });
   it('names the video and ends with its link in English', () => {
-    const message = whatsappMessage('en', { title: 'Run', url: 'https://e.github.io/r/en/work/run/' });
+    const message = whatsappMessage('en', { title: 'Run', url: 'https://e.github.io/r/work/run/' });
     expect(message).toContain('“Run”');
-    expect(message.endsWith('\nhttps://e.github.io/r/en/work/run/')).toBe(true);
+    expect(message.endsWith('\nhttps://e.github.io/r/work/run/')).toBe(true);
   });
   it('has a general greeting without a video', () => {
     expect(whatsappMessage('ar')).toMatch(/^أهلاً يا محمود/);

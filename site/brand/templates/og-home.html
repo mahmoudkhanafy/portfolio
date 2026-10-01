@@ -1,118 +1,133 @@
 <!doctype html>
-<html lang="ar">
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <link rel="stylesheet" href="fonts.css" />
+    <!-- The home page's link preview: "?en" or "?ar" (npm run brand renders both). -->
     <style>
       html,
       body {
         width: 1200px;
         height: 630px;
         overflow: hidden;
-        background: var(--screen);
+        background: var(--paper);
+        color: var(--ink);
       }
-      /* The same lit backdrop and lower third as the site's hero. */
-      .stage {
+      /* The home page's hero: his name large, his portrait in black and white on orange. */
+      .words {
         position: absolute;
-        inset: 0 520px 0 0;
-        background: radial-gradient(60% 70% at 50% 40%, #404040 0%, #1c1c1c 48%, #000 82%);
+        top: 64px;
+        inset-inline-start: 64px;
+        width: 620px;
+      }
+      .role {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        font-family: var(--display);
+        font-size: 25px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+      }
+      .role i {
+        width: 12px;
+        height: 12px;
+        background: var(--accent);
+      }
+      .name {
+        margin-top: 26px;
+        font-family: var(--display);
+        font-size: 158px;
+        font-weight: 600;
+        line-height: 0.9;
+        letter-spacing: -0.02em;
+      }
+      .name span {
+        display: block;
+        padding-inline-start: 70px;
+      }
+      .name b {
+        color: var(--accent);
+      }
+      .lead {
+        margin-top: 40px;
+        font-size: 34px;
+        font-weight: 600;
+        line-height: 1.35;
+      }
+      .lead small {
+        display: block;
+        margin-top: 8px;
+        color: var(--muted);
+        font-size: 26px;
+        font-weight: 500;
+      }
+      [lang='ar'] .role {
+        font-family: 'Noto Sans Arabic', sans-serif;
+        font-size: 28px;
+        font-weight: 600;
+        letter-spacing: 0;
+      }
+      [lang='ar'] .name {
+        margin-top: 18px;
+        font-family: 'Noto Sans Arabic', sans-serif;
+        font-size: 118px;
+        font-weight: 800;
+        line-height: 1.22;
+        letter-spacing: -0.02em;
+      }
+      [lang='ar'] .name span {
+        padding-inline-start: 0;
+      }
+      [lang='ar'] .lead {
+        margin-top: 22px;
+        line-height: 1.6;
+      }
+      .block {
+        position: absolute;
+        top: 70px;
+        inset-inline-end: 64px;
+        bottom: 46px;
+        width: 400px;
+        background: var(--accent);
       }
       .portrait {
         position: absolute;
+        inset-inline-end: 40px;
         bottom: 0;
-        left: 150px;
-        height: 600px;
+        height: 590px;
+        filter: grayscale(1);
       }
-      .third {
+      .rule {
         position: absolute;
-        left: 48px;
-        bottom: 58px;
-        display: grid;
-        justify-items: start;
-        gap: 10px;
-      }
-      .name {
-        padding: 0 28px 10px;
-        background: var(--caption);
-        color: var(--screen);
-        font-size: 84px;
-        font-weight: 900;
-        line-height: 1.3;
-      }
-      .role {
-        padding: 8px 20px 12px;
-        background: var(--screen);
-        color: var(--white);
-        font-size: 34px;
-        font-weight: 500;
-      }
-      .side {
-        position: absolute;
-        top: 0;
-        right: 64px;
-        bottom: 0;
-        width: 400px;
-        display: grid;
-        align-content: center;
-        gap: 18px;
-        color: var(--white);
-      }
-      .side .lead {
-        color: #d6d6d6;
-        font-size: 30px;
-        font-weight: 500;
-        line-height: 1.6;
-        direction: rtl;
-        text-align: right;
-      }
-      .side .place {
-        color: #cfcfcf;
-        font-size: 28px;
-        font-weight: 500;
-      }
-      .side .lead-en {
-        color: #d6d6d6;
-        font-size: 30px;
-        font-weight: 500;
-        line-height: 1.4;
-        direction: ltr;
-      }
-      /* ?en: the English pages' card. Each card is in its page's language only. */
-      .third[dir='ltr'] .name {
-        padding: 6px 26px 14px;
-        font-size: 62px;
-        line-height: 1.15;
-      }
-      .third[dir='ltr'] .role {
-        font-size: 32px;
-      }
-      .side hr {
-        width: 100%;
-        border: 0;
-        border-top: 2px solid #2a2a2a;
+        inset-inline: 64px 520px;
+        bottom: 46px;
+        border-top: 2px solid var(--line);
       }
     </style>
   </head>
   <body>
-    <div class="stage"></div>
+    <div class="block"></div>
     <img class="portrait" src="../../portrait.png" alt="" />
-    <div class="third" dir="rtl">
-      <div class="name">محمود خالد</div>
-      <div class="role">مونتير ومصوّر فيديو</div>
-    </div>
-    <div class="side">
-      <p class="lead">مونتاج ريلز، كتابة متحركة، تغطية فعاليات وبراندات</p>
-      <hr />
-      <p class="place" dir="rtl">الجيزة، القاهرة</p>
+    <div class="rule"></div>
+    <div class="words">
+      <p class="role"><i></i><span id="role"></span></p>
+      <p class="name" id="name"></p>
+      <p class="lead"><span id="lead"></span><small id="place"></small></p>
     </div>
     <script>
-      if (location.search === '?en') {
-        document.documentElement.lang = 'en';
-        document.querySelector('.third').outerHTML =
-          '<div class="third" dir="ltr"><div class="name">Mahmoud Khaled</div><div class="role">Video editor &amp; videographer</div></div>';
-        document.querySelector('.side').innerHTML =
-          '<p class="lead-en">Reels, kinetic captions, event and brand coverage</p><hr /><p class="place">Giza, Cairo</p>';
-      }
+      const text = {
+        en: { role: 'Video editor & videographer', first: 'Mahmoud', last: 'Khaled', lead: 'Every frame has a story.', place: 'Reels, kinetic captions, events and brands' },
+        ar: { role: 'مونتير ومصوّر فيديو', first: 'محمود', last: 'خالد', lead: 'كل لقطة ليها حكاية.', place: 'مونتاج ريلز، كتابة متحركة، فعاليات وبراندات' },
+      };
+      const lang = location.search.slice(1) === 'ar' ? 'ar' : 'en';
+      const t = text[lang];
+      document.documentElement.lang = lang;
+      document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+      document.getElementById('role').textContent = t.role;
+      document.getElementById('name').innerHTML = `${t.first}<span>${t.last}<b>.</b></span>`;
+      document.getElementById('lead').textContent = t.lead;
+      document.getElementById('place').textContent = t.place;
     </script>
   </body>
 </html>

@@ -3,7 +3,7 @@
  * to the trailing slash, 404.html with a 404 status, byte ranges (Safari needs them for video), gzip
  * for text and a 10-minute cache. Used for local runs, end-to-end tests and Lighthouse.
  *
- *   node scripts/serve.ts --dir dist [--base /mahmoud-khaled/] [--port 4747] [--host 0.0.0.0]
+ *   node scripts/serve.ts --dir dist [--base /mahmoud-khaled/] [--port 4750] [--host 0.0.0.0]
  */
 import { createReadStream, type Stats } from 'node:fs';
 import { readFile, stat } from 'node:fs/promises';
