@@ -421,49 +421,7 @@ export async function buildMedia(options: BuildOptions): Promise<BuildResult> {
     }
   }
 
-  if (!options.plan) {
-    await optimizeFinalll(root, runner, options.log);
-  }
-
   return { needsFfmpeg, needsBrowser, warnings, errors: [], catalog };
-}
-
-async function optimizeFinalll(root: string, runner: Runner, log?: (line: string) => void): Promise<void> {
-  const finalllPath = join(root, 'finalll.mp4');
-  if (!existsSync(finalllPath)) return;
-  try {
-    const fd = await readFile(finalllPath);
-    const hasFaststart = fd.subarray(0, 100).toString('latin1').includes('moov');
-    if (!hasFaststart) {
-      log?.('Optimizing finalll.mp4 with +faststart...');
-      const tmp = join(root, 'finalll.faststart.tmp.mp4');
-      await runner(FFMPEG, [
-        '-hide_banner', '-loglevel', 'error', '-nostdin', '-y',
-        '-i', finalllPath,
-        '-map', '0:v:0',
-        '-map', '0:a:0?',
-        '-vf', 'scale=1080:1080:flags=lanczos,setsar=1,format=yuv420p',
-        '-r', '30',
-        '-c:v', 'libx264',
-        '-pix_fmt', 'yuv420p',
-        '-profile:v', 'main',
-        '-level', '4.1',
-        '-preset', 'slow',
-        '-crf', '24',
-        '-maxrate', '2500k',
-        '-bufsize', '5000k',
-        '-c:a', 'aac',
-        '-b:a', '128k',
-        '-ac', '2',
-        '-movflags', '+faststart',
-        tmp,
-      ]);
-      await rename(tmp, finalllPath);
-      log?.('✓ finalll.mp4 faststart ready');
-    }
-  } catch (err) {
-    log?.(`Note: finalll.mp4 optimization notice: ${err}`);
-  }
 }
 
 // ——— command line ———
