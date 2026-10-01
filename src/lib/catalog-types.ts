@@ -29,6 +29,7 @@ export interface Work {
   duration: number;
   fps: number;
   hasAudio: boolean;
+  youtubeId?: string | null;
   /** hd first, then sd when the source is big enough for two. */
   renditions: Rendition[];
   cover: {

@@ -370,6 +370,7 @@ export async function buildMedia(options: BuildOptions): Promise<BuildResult> {
       client: entry.client,
       role: entry.role,
       order: entry.order,
+      youtubeId: entry.youtubeId ?? null,
       addedAt: await addedAt(job.source, root, runner),
       width: probe.width,
       height: probe.height,

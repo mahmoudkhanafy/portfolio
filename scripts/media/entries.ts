@@ -31,6 +31,7 @@ export interface Entry {
   cover: number | null;
   order: number;
   hidden: boolean;
+  youtubeId?: string | null;
 }
 
 export interface EntriesResult {
@@ -41,7 +42,7 @@ export interface EntriesResult {
 
 export const VIDEO_EXTENSIONS = ['.mp4', '.mov', '.m4v', '.webm', '.mkv', '.avi', '.wmv', '.mpg', '.mpeg', '.3gp', '.mts', '.m2ts'];
 const INFO_EXTENSIONS = ['.yml', '.yaml'];
-const KNOWN_KEYS = ['title', 'title_en', 'description', 'description_en', 'type', 'client', 'role', 'role_en', 'cover', 'order', 'video', 'hidden'];
+const KNOWN_KEYS = ['title', 'title_en', 'description', 'description_en', 'type', 'client', 'role', 'role_en', 'cover', 'order', 'video', 'hidden', 'youtube', 'youtube_id', 'youtubeId'];
 
 const TYPE_SYNONYMS: Record<string, WorkType> = {
   reels: 'reel', short: 'reel', shorts: 'reel', 'ريل': 'reel', 'ريلز': 'reel',
@@ -238,6 +239,7 @@ function readFields(source: string, file: string, warnings: Problem[], errors: P
     order,
     hidden,
     video: text('video'),
+    youtubeId: text('youtube') ?? text('youtube_id') ?? text('youtubeId'),
   };
   return ok ? fields : null;
 }
@@ -307,6 +309,7 @@ export function buildEntries(files: WorkFile[]): EntriesResult {
       cover: null,
       order: 0,
       hidden: false,
+      youtubeId: null,
     });
     warnings.push(messages.autoEntry(`work/${videoPath}`, title, stem));
   }

@@ -18,6 +18,15 @@ const { lang, works } = Astro.props;
 const t = ui[lang];
 const srcset = (list: Array<{ src: string; width: number }>) => list.map((s) => `${href(s.src)} ${s.width}w`).join(', ');
 
+const YOUTUBE_IDS: Record<string, string> = {
+  'muscle-up-basics': 'G_f04GBBKGU',
+  'finalll': 'aBPZhiIMj_s',
+  'skin-and-pain': '5LSBdHHF-0o',
+  'blood-sugar-test': 'eLpztUn5xTQ',
+  'nimun-recap': 'B4V5lTdMy1s',
+  'running-film': 'GsfitQei03w',
+};
+
 // Separate vertical videos (5 reels) and horizontal video (1 film)
 const verticalWorks = works.filter((w) => w.slug !== 'running-film' && (w.slug === 'nimun-recap' || w.width <= w.height));
 const horizontalWorks = works.filter((w) => w.slug === 'running-film' || (w.slug !== 'nimun-recap' && w.width > w.height));
@@ -48,6 +57,7 @@ const withBust = (url: string) => (url ? (url.includes('?') ? `${url}&${cacheBus
           const videoSrc = hd ? withBust(href(hd.src)) : '';
           const previewSrc = sd ? withBust(href(sd.src)) : videoSrc;
           const posterSrc = href(work.cover.jpg.src);
+          const youtubeId = work.youtubeId || YOUTUBE_IDS[work.slug] || '';
 
           const isNimun = work.slug === 'nimun-recap';
           const category = typeLabel(work.type, lang);
@@ -64,6 +74,7 @@ const withBust = (url: string) => (url ? (url.includes('?') ? `${url}&${cacheBus
               data-client={work.client || ''}
               data-category={category}
               data-year="2026"
+              data-youtube-id={youtubeId}
               data-video-src={videoSrc}
               data-poster-src={posterSrc}
               data-aspect-ratio="9/16.5"
@@ -122,6 +133,9 @@ const withBust = (url: string) => (url ? (url.includes('?') ? `${url}&${cacheBus
                         </svg>
                       </div>
                     </div>
+
+                    {/* Bottom Apple Home Indicator */}
+                    <div class="phone-home-indicator phone-home-indicator--vertical" aria-hidden="true"></div>
                   </div>
                 </div>
               </div>
@@ -154,6 +168,7 @@ const withBust = (url: string) => (url ? (url.includes('?') ? `${url}&${cacheBus
         const videoSrc = hd ? withBust(href(hd.src)) : '';
         const previewSrc = sd ? withBust(href(sd.src)) : videoSrc;
         const posterSrc = href(work.cover.jpg.src);
+        const youtubeId = work.youtubeId || YOUTUBE_IDS[work.slug] || '';
         const category = typeLabel(work.type, lang);
         const whatsappLink = whatsappUrl(whatsappMessage(lang, { title: title.text, url: pageAbs(lang, work.slug) }));
         const pageLink = pageHref(lang, work.slug);
@@ -169,6 +184,7 @@ const withBust = (url: string) => (url ? (url.includes('?') ? `${url}&${cacheBus
               data-client={work.client || ''}
               data-category={category}
               data-year="2026"
+              data-youtube-id={youtubeId}
               data-video-src={videoSrc}
               data-poster-src={posterSrc}
               data-aspect-ratio="16.5/9"
@@ -223,6 +239,9 @@ const withBust = (url: string) => (url ? (url.includes('?') ? `${url}&${cacheBus
                       </svg>
                     </div>
                   </div>
+
+                  {/* Bottom Apple Home Indicator */}
+                  <div class="phone-home-indicator phone-home-indicator--landscape" aria-hidden="true"></div>
                 </div>
               </div>
 
@@ -567,6 +586,31 @@ const withBust = (url: string) => (url ? (url.includes('?') ? `${url}&${cacheBus
     background: #050608;
     border: 0.5px solid #1a1a22;
     box-shadow: inset 0 0 1px 1px rgba(255, 255, 255, 0.12);
+  }
+
+  /* Sleek Apple Home Indicator Bar */
+  .phone-home-indicator {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 110px;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-radius: 9999px;
+    pointer-events: none;
+    z-index: 20;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  }
+
+  .phone-home-indicator--vertical {
+    bottom: 8px;
+  }
+
+  .phone-home-indicator--landscape {
+    bottom: 8px;
+    width: 140px;
   }
 
   /* Inner Screen: Compact 9:16.5 Proportions with 6px black bezel */
