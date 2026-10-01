@@ -44,13 +44,14 @@ test.describe('home page', () => {
   }
 
   for (const path of ['ar/', '']) {
-    // His first and last name each keep to one line, and the portrait on its orange block stays on screen.
+    // His first and last name each keep to one line, and the portrait on its orange block stays on screen,
+    // measured once it has arrived: a finished entrance must leave the photo its full size.
     test(`sets the name on two whole lines beside his portrait (${path || 'en'})`, async ({ page }) => {
-      for (const [width, height] of [[320, 640], [390, 844], [768, 1024], [1024, 768], [1280, 720], [1440, 900], [1920, 1080]] as const) {
+      for (const [width, height] of [[320, 640], [390, 844], [445, 800], [768, 1024], [1024, 768], [1280, 720], [1440, 900], [1920, 1080]] as const) {
         await page.setViewportSize({ width, height });
         await page.goto(path);
-        await page.evaluate(() => document.fonts.ready);
-        const { lines, name, art } = await page.evaluate(() => {
+        await page.evaluate(() => Promise.all([document.fonts.ready, ...document.querySelector('.hero__portrait')!.getAnimations().map((a) => a.finished)]));
+        const { lines, name, art, photo } = await page.evaluate(() => {
           const lineCount = (el: Element) => {
             const range = document.createRange();
             range.selectNodeContents(el);
@@ -61,11 +62,14 @@ test.describe('home page', () => {
             lines: [...document.querySelectorAll('.hero__name > span')].map(lineCount),
             name: rect(document.querySelector('.hero__name')!),
             art: rect(document.querySelector('.hero__art')!),
+            photo: rect(document.querySelector('.hero__portrait img')!),
           };
         });
         expect(lines, `${width}×${height}`).toEqual([1, 1]);
         expect([name.left >= 0, name.right <= width], `${width}×${height}: the name inside the screen`).toEqual([true, true]);
         expect([art.left >= 0, art.right <= width, art.width > 100], `${width}×${height}: the portrait on screen`).toEqual([true, true, true]);
+        const shown = Math.min(photo.bottom, art.bottom) - Math.max(photo.top, art.top);
+        expect(shown / art.height, `${width}×${height}: his photo fills its block`).toBeGreaterThan(0.75);
       }
     });
   }

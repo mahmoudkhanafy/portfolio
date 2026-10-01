@@ -97,6 +97,13 @@ const srcset = (list: Array<{ src: string; width: number }>) => list.map((s) => 
     background: var(--accent);
   }
 
+  /* The block's own size, so the photo's percentages never measure against a box of no height: while
+     its entrance (a translate) runs or rests, the picture is the photo's containing block. */
+  .hero__portrait {
+    position: absolute;
+    inset: 0;
+  }
+
   /* Head room above his hair; the picture runs on past the block's foot. */
   .hero__portrait img {
     position: absolute;
@@ -378,8 +385,6 @@ const srcset = (list: Array<{ src: string; width: number }>) => list.map((s) => 
     }
 
     .hero__portrait {
-      position: absolute;
-      inset: 0;
       overflow: hidden;
     }
 
