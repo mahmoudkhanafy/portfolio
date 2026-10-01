@@ -40,9 +40,6 @@ const { lang } = Astro.props;
     <span class="phone-btn phone-btn--vol-down" aria-hidden="true"></span>
     <span class="phone-btn phone-btn--power" aria-hidden="true"></span>
 
-    {/* Top Speaker Slit */}
-    <div id="modal-speaker" class="phone-speaker phone-speaker--vertical" aria-hidden="true"></div>
-
     {/* Top Badges (Category & WhatsApp) */}
     <div
       id="modal-badges"
@@ -82,20 +79,23 @@ const { lang } = Astro.props;
         class="modal-video-element"
       ></video>
 
-      {/* Authentic Dynamic Island Cutout */}
+      {/* Classic Apple Notch */}
       <div
-        id="modal-island"
-        class="modal-island modal-island--vertical"
+        id="modal-notch"
+        class="phone-notch phone-notch--vertical"
         aria-hidden="true"
       >
-        <div class="modal-island__dot-sensor"></div>
-        <div class="modal-island__dot-lens"></div>
+        <div class="phone-notch__speaker"></div>
+        <div class="phone-notch__details">
+          <div class="phone-notch__sensor"></div>
+          <div class="phone-notch__camera"></div>
+        </div>
       </div>
 
       {/* Sleek Apple Home Indicator Bar */}
       <div
         id="modal-home-bar"
-        class="phone-home-indicator phone-home-indicator--vertical"
+        class="phone-home-indicator"
         aria-hidden="true"
       ></div>
 
@@ -313,29 +313,19 @@ const { lang } = Astro.props;
     }) {
       if (!modal || !video) return;
 
-      // Update Aspect Ratio Container, Dynamic Island, Speaker, and Home Bar
-      const islandEl = document.getElementById('modal-island');
-      const speakerEl = document.getElementById('modal-speaker');
-      const homeBarEl = document.getElementById('modal-home-bar');
+      // Update Aspect Ratio Container, Notch, and Home Bar
+      const notchEl = document.getElementById('modal-notch');
       if (container) {
-        if (data.aspectRatio === '16/9' || data.aspectRatio === '19.5/9') {
+        if (data.aspectRatio === '16/9' || data.aspectRatio === '19.5/9' || data.aspectRatio === '18.5/9') {
           container.classList.remove('modal-container--vertical');
           container.classList.add('modal-container--landscape');
-          islandEl?.classList.remove('modal-island--vertical');
-          islandEl?.classList.add('modal-island--landscape');
-          speakerEl?.classList.remove('phone-speaker--vertical');
-          speakerEl?.classList.add('phone-speaker--landscape');
-          homeBarEl?.classList.remove('phone-home-indicator--vertical');
-          homeBarEl?.classList.add('phone-home-indicator--landscape');
+          notchEl?.classList.remove('phone-notch--vertical');
+          notchEl?.classList.add('phone-notch--landscape');
         } else {
           container.classList.remove('modal-container--landscape');
           container.classList.add('modal-container--vertical');
-          islandEl?.classList.remove('modal-island--landscape');
-          islandEl?.classList.add('modal-island--vertical');
-          speakerEl?.classList.remove('phone-speaker--landscape');
-          speakerEl?.classList.add('phone-speaker--vertical');
-          homeBarEl?.classList.remove('phone-home-indicator--landscape');
-          homeBarEl?.classList.add('phone-home-indicator--vertical');
+          notchEl?.classList.remove('phone-notch--landscape');
+          notchEl?.classList.add('phone-notch--vertical');
         }
       }
 
@@ -635,10 +625,10 @@ const { lang } = Astro.props;
     transform: scale(1.05);
   }
 
-  /* Modal Content Wrapper: Authentic iPhone 16 Pro Body */
+  /* Modal Content Wrapper: Traditional iPhone 15 Body */
   .modal-content-container {
     position: relative;
-    background-color: #1b1a19;
+    background-color: #181716;
     border: 1px solid rgba(189, 66, 37, 0.45);
     box-shadow:
       0 0 0 1px rgba(189, 66, 37, 0.25),
@@ -652,129 +642,103 @@ const { lang } = Astro.props;
     max-width: 95vw;
     width: auto;
     height: auto;
-    padding: 3.5px;
+    padding: 8px;
     transition: max-width 300ms ease, aspect-ratio 300ms ease, border-radius 300ms ease;
   }
 
-  /* Vertical container: authentic 9:19.5 with rounded-[46px] */
+  /* Vertical container: traditional 9:18.5 with rounded-[36px] */
   .modal-container--vertical {
-    aspect-ratio: 9 / 19.5;
+    aspect-ratio: 9 / 18.5;
     max-height: 85vh;
-    max-width: calc(85vh * 9 / 19.5);
+    max-width: calc(85vh * 9 / 18.5);
     width: 100%;
-    border-radius: 46px;
+    border-radius: 36px;
   }
 
-  /* Landscape container: authentic 19.5:9 with rounded-[38px] */
+  /* Landscape container: traditional 18.5:9 with rounded-[30px] */
   .modal-container--landscape {
-    aspect-ratio: 19.5 / 9;
+    aspect-ratio: 18.5 / 9;
     max-height: 85vh;
-    max-width: min(92vw, calc(85vh * 19.5 / 9));
+    max-width: min(92vw, calc(85vh * 18.5 / 9));
     width: 100%;
-    border-radius: 38px;
+    border-radius: 30px;
   }
 
-  /* Hardware Side Buttons (Ultra-Thin 2px Titanium Slivers) */
+  /* Hardware Side Buttons (Standard Clean Physical Buttons) */
   .modal-content-container .phone-btn {
     position: absolute;
-    background: #2b2a28;
+    background: #33312e;
+    border: 0.5px solid rgba(255, 255, 255, 0.1);
     z-index: 10;
     pointer-events: none;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
   }
 
   .modal-content-container .phone-btn--action {
-    top: clamp(65px, 12%, 76px);
-    left: -2px;
-    width: 2px;
+    top: clamp(65px, 12%, 78px);
+    left: -3px;
+    width: 3px;
     height: 24px;
     border-radius: 2px 0 0 2px;
   }
 
   .modal-content-container .phone-btn--vol-up {
-    top: clamp(100px, 18%, 112px);
-    left: -2px;
-    width: 2px;
-    height: 46px;
+    top: clamp(102px, 18%, 116px);
+    left: -3px;
+    width: 3px;
+    height: 48px;
     border-radius: 2px 0 0 2px;
   }
 
   .modal-content-container .phone-btn--vol-down {
-    top: clamp(156px, 28%, 168px);
-    left: -2px;
-    width: 2px;
-    height: 46px;
+    top: clamp(160px, 28%, 174px);
+    left: -3px;
+    width: 3px;
+    height: 48px;
     border-radius: 2px 0 0 2px;
   }
 
   .modal-content-container .phone-btn--power {
-    top: clamp(100px, 17%, 116px);
-    right: -2px;
-    width: 2px;
-    height: 72px;
+    top: clamp(102px, 17%, 120px);
+    right: -3px;
+    width: 3px;
+    height: 64px;
     border-radius: 0 2px 2px 0;
   }
 
   /* Landscape Modal Hardware Buttons */
   .modal-container--landscape .phone-btn--action {
-    top: -2px;
+    top: -3px;
     left: clamp(70px, 12%, 88px);
-    height: 2px;
+    height: 3px;
     width: 24px;
     border-radius: 2px 2px 0 0;
   }
 
   .modal-container--landscape .phone-btn--vol-up {
-    top: -2px;
+    top: -3px;
     left: clamp(106px, 18%, 124px);
-    height: 2px;
-    width: 46px;
+    height: 3px;
+    width: 48px;
     border-radius: 2px 2px 0 0;
   }
 
   .modal-container--landscape .phone-btn--vol-down {
-    top: -2px;
-    left: clamp(162px, 28%, 180px);
-    height: 2px;
-    width: 46px;
+    top: -3px;
+    left: clamp(164px, 28%, 182px);
+    height: 3px;
+    width: 48px;
     border-radius: 2px 2px 0 0;
   }
 
   .modal-container--landscape .phone-btn--power {
-    bottom: -2px;
+    bottom: -3px;
     top: auto;
     right: auto;
     left: clamp(106px, 18%, 124px);
-    height: 2px;
-    width: 72px;
+    height: 3px;
+    width: 64px;
     border-radius: 0 0 2px 2px;
-  }
-
-  /* Micro Speaker Slit */
-  .modal-content-container .phone-speaker--vertical {
-    position: absolute;
-    top: 3px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 48px;
-    height: 2px;
-    background: #262626;
-    border-radius: 9999px;
-    z-index: 35;
-    pointer-events: none;
-  }
-
-  .modal-content-container .phone-speaker--landscape {
-    position: absolute;
-    left: 3px;
-    top: 50%;
-    transform: translateY(-50%);
-    height: 48px;
-    width: 2px;
-    background: #262626;
-    border-radius: 9999px;
-    z-index: 35;
-    pointer-events: none;
   }
 
   .modal-badges {
@@ -834,14 +798,14 @@ const { lang } = Astro.props;
     background-color: #000000;
     cursor: pointer;
     overflow: hidden;
-    border-radius: 38px;
+    border-radius: 32px;
   }
 
   .modal-container--landscape .modal-video-canvas {
-    border-radius: 30px;
+    border-radius: 26px;
   }
 
-  /* Centered video element: edge-to-edge object-cover with rounded-[38px] (no letterboxing) */
+  /* Centered video element: edge-to-edge object-cover with rounded-[32px] */
   .modal-video-element {
     width: 100%;
     height: 100%;
@@ -851,58 +815,85 @@ const { lang } = Astro.props;
     margin: 0 auto;
     border: none;
     outline: none;
-    border-radius: 38px;
+    border-radius: 32px;
   }
 
   .modal-container--landscape .modal-video-element {
-    border-radius: 30px;
+    border-radius: 26px;
   }
 
-  /* Authentic Apple Dynamic Island in Modal */
-  .modal-island {
+  /* Classic Proportional Apple Notch in Modal */
+  .modal-content-container .phone-notch {
     position: absolute;
     background: #000000;
-    border-radius: 9999px;
     z-index: 35;
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
     pointer-events: none;
-    box-shadow:
-      0 0 0 0.5px rgba(255, 255, 255, 0.08),
-      0 2px 6px rgba(0, 0, 0, 0.8);
-    transition: all 300ms ease;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.7);
   }
 
-  .modal-island--vertical {
-    top: 10px;
+  .modal-content-container .phone-notch--vertical {
+    top: 0;
     left: 50%;
     transform: translateX(-50%);
-    width: clamp(96px, 28%, 108px);
-    height: 22px;
-    padding-right: 9px;
-    gap: 6px;
+    width: clamp(110px, 40%, 130px);
+    height: 24px;
+    border-radius: 0 0 14px 14px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 3px;
   }
 
-  .modal-island--landscape {
-    left: 10px;
+  .modal-content-container .phone-notch--landscape {
+    left: 0;
     top: 50%;
     transform: translateY(-50%);
-    width: 22px;
-    height: clamp(96px, 28%, 108px);
-    padding-bottom: 9px;
-    flex-direction: column;
-    gap: 6px;
+    height: clamp(110px, 40%, 130px);
+    width: 24px;
+    border-radius: 0 14px 14px 0;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding-left: 3px;
   }
 
-  .modal-island__dot-sensor {
+  /* Micro Speaker Slit inside Notch */
+  .modal-content-container .phone-notch__speaker {
+    background: #262626;
+    border-radius: 9999px;
+  }
+
+  .modal-content-container .phone-notch--vertical .phone-notch__speaker {
+    width: 38px;
+    height: 2.5px;
+    margin-bottom: 4px;
+  }
+
+  .modal-content-container .phone-notch--landscape .phone-notch__speaker {
+    height: 38px;
+    width: 2.5px;
+    margin-right: 4px;
+  }
+
+  .modal-content-container .phone-notch__details {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .modal-content-container .phone-notch--landscape .phone-notch__details {
+    flex-direction: column;
+  }
+
+  .modal-content-container .phone-notch__sensor {
     width: 5px;
     height: 5px;
     border-radius: 9999px;
     background: #0c0d10;
   }
 
-  .modal-island__dot-lens {
+  .modal-content-container .phone-notch__camera {
     width: 8px;
     height: 8px;
     border-radius: 9999px;
@@ -911,11 +902,12 @@ const { lang } = Astro.props;
     box-shadow: inset 0 0 1px 1px rgba(255, 255, 255, 0.12);
   }
 
-  /* Sleek Apple Home Indicator Bar */
+  /* Sleek Apple Home Indicator Bar: w-32 h-1 */
   .modal-content-container .phone-home-indicator {
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
+    width: 128px;
     height: 4px;
     background: rgba(255, 255, 255, 0.4);
     backdrop-filter: blur(12px);
@@ -924,16 +916,7 @@ const { lang } = Astro.props;
     pointer-events: none;
     z-index: 25;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
-  }
-
-  .modal-content-container .phone-home-indicator--vertical {
     bottom: 8px;
-    width: clamp(96px, 28%, 112px);
-  }
-
-  .modal-content-container .phone-home-indicator--landscape {
-    bottom: 8px;
-    width: clamp(96px, 20%, 120px);
   }
 
   .modal-spinner {

@@ -66,12 +66,12 @@ const withBust = (url: string) => (url ? (url.includes('?') ? `${url}&${cacheBus
               data-year="2026"
               data-video-src={videoSrc}
               data-poster-src={posterSrc}
-              data-aspect-ratio="9/16"
+              data-aspect-ratio="9/18.5"
               data-whatsapp-url={whatsappLink}
               data-duration={work.duration}
             >
               <div class="phone-frame-wrapper w-full flex-1 flex items-center justify-center">
-                {/* Authentic iPhone Pro Chassis */}
+                {/* Traditional iPhone 15 Aluminum Chassis */}
                 <div class="phone-frame phone-frame--vertical">
                   {/* Left Hardware Buttons: Action Button + Volume Up + Volume Down */}
                   <span class="phone-btn phone-btn--action" aria-hidden="true"></span>
@@ -81,15 +81,15 @@ const withBust = (url: string) => (url ? (url.includes('?') ? `${url}&${cacheBus
                   {/* Right Hardware Button: Power / Side Button */}
                   <span class="phone-btn phone-btn--power" aria-hidden="true"></span>
 
-                  {/* Top Speaker Slit */}
-                  <div class="phone-speaker phone-speaker--vertical" aria-hidden="true"></div>
-
-                  {/* Inner Screen: Aspect Ratio 9:19.5 */}
+                  {/* Inner Screen: Aspect Ratio 9:18.5 */}
                   <div class="phone-screen phone-screen--vertical">
-                    {/* Dynamic Island: h-6 w-28 */}
-                    <div class="phone-island phone-island--vertical" aria-hidden="true">
-                      <div class="phone-island__dot-sensor" />
-                      <div class="phone-island__dot-lens" />
+                    {/* Classic Proportional Apple Notch */}
+                    <div class="phone-notch phone-notch--vertical" aria-hidden="true">
+                      <div class="phone-notch__speaker" />
+                      <div class="phone-notch__details">
+                        <div class="phone-notch__sensor" />
+                        <div class="phone-notch__camera" />
+                      </div>
                     </div>
                     <picture class="phone-poster">
                       <source type="image/avif" srcset={srcset(work.cover.avif)} sizes="(min-width: 1024px) 340px, (min-width: 768px) 50vw, 100vw" />
@@ -197,7 +197,7 @@ const withBust = (url: string) => (url ? (url.includes('?') ? `${url}&${cacheBus
               data-year="2026"
               data-video-src={videoSrc}
               data-poster-src={posterSrc}
-              data-aspect-ratio="16/9"
+              data-aspect-ratio="18.5/9"
               data-whatsapp-url={whatsappLink}
               data-duration={work.duration}
             >
@@ -209,15 +209,15 @@ const withBust = (url: string) => (url ? (url.includes('?') ? `${url}&${cacheBus
                 <span class="phone-btn phone-btn--landscape-vol-down" aria-hidden="true"></span>
                 <span class="phone-btn phone-btn--landscape-power" aria-hidden="true"></span>
 
-                {/* Left Speaker Slit in Landscape */}
-                <div class="phone-speaker phone-speaker--landscape" aria-hidden="true"></div>
-
-                {/* Inner Screen: Aspect Ratio 19.5:9 */}
+                {/* Inner Screen: Aspect Ratio 18.5:9 */}
                 <div class="phone-screen phone-screen--landscape">
-                  {/* Dynamic Island on Left Edge */}
-                  <div class="phone-island phone-island--landscape" aria-hidden="true">
-                    <div class="phone-island__dot-sensor" />
-                    <div class="phone-island__dot-lens" />
+                  {/* Classic Apple Notch on Left Edge */}
+                  <div class="phone-notch phone-notch--landscape" aria-hidden="true">
+                    <div class="phone-notch__speaker" />
+                    <div class="phone-notch__details">
+                      <div class="phone-notch__sensor" />
+                      <div class="phone-notch__camera" />
+                    </div>
                   </div>
                   <picture class="phone-poster">
                     <source type="image/avif" srcset={srcset(work.cover.avif)} sizes="(min-width: 1200px) 1100px, 100vw" />
@@ -433,10 +433,10 @@ const withBust = (url: string) => (url ? (url.includes('?') ? `${url}&${cacheBus
     justify-content: center;
   }
 
-  /* Exact Avatar-Matched Orange iPhone 16 Pro Mockup Frame */
+  /* Exact Avatar-Matched Orange iPhone 15 Aluminum Mockup Frame */
   .phone-frame {
     width: 100%;
-    background: #1c1b1a;
+    background: #181716;
     border: 1px solid rgba(189, 66, 37, 0.45);
     position: relative;
     box-shadow:
@@ -450,14 +450,14 @@ const withBust = (url: string) => (url ? (url.includes('?') ? `${url}&${cacheBus
 
   .phone-frame--vertical {
     max-width: 320px;
-    border-radius: 46px;
-    padding: 3.5px;
+    border-radius: 36px;
+    padding: 8px;
   }
 
   .phone-frame--landscape {
     max-width: 100%;
-    border-radius: 38px;
-    padding: 3.5px;
+    border-radius: 30px;
+    padding: 8px;
   }
 
   @media (hover: hover) and (pointer: fine) {
@@ -472,159 +472,153 @@ const withBust = (url: string) => (url ? (url.includes('?') ? `${url}&${cacheBus
     }
   }
 
-  /* Ultra-Thin Titanium Hardware Slivers (1.5px to 2px, Flush & Minimal) */
+  /* Standard Clean Brushed Aluminum Physical Buttons */
   .phone-btn {
     position: absolute;
-    background: #2b2a28;
+    background: #33312e;
+    border: 0.5px solid rgba(255, 255, 255, 0.1);
     z-index: 10;
     pointer-events: none;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
   }
 
   .phone-btn--action {
-    top: clamp(65px, 12%, 76px);
-    left: -2px;
-    width: 2px;
+    top: clamp(65px, 12%, 78px);
+    left: -3px;
+    width: 3px;
     height: 24px;
     border-radius: 2px 0 0 2px;
   }
 
   .phone-btn--vol-up {
-    top: clamp(100px, 18%, 112px);
-    left: -2px;
-    width: 2px;
-    height: 46px;
+    top: clamp(102px, 18%, 116px);
+    left: -3px;
+    width: 3px;
+    height: 48px;
     border-radius: 2px 0 0 2px;
   }
 
   .phone-btn--vol-down {
-    top: clamp(156px, 28%, 168px);
-    left: -2px;
-    width: 2px;
-    height: 46px;
+    top: clamp(160px, 28%, 174px);
+    left: -3px;
+    width: 3px;
+    height: 48px;
     border-radius: 2px 0 0 2px;
   }
 
   .phone-btn--power {
-    top: clamp(100px, 17%, 116px);
-    right: -2px;
-    width: 2px;
-    height: 72px;
+    top: clamp(102px, 17%, 120px);
+    right: -3px;
+    width: 3px;
+    height: 64px;
     border-radius: 0 2px 2px 0;
   }
 
-  /* Landscape Hardware Slivers */
+  /* Landscape Hardware Buttons */
   .phone-btn--landscape-action {
-    top: -2px;
+    top: -3px;
     left: clamp(70px, 12%, 88px);
-    height: 2px;
+    height: 3px;
     width: 24px;
     border-radius: 2px 2px 0 0;
   }
 
   .phone-btn--landscape-vol-up {
-    top: -2px;
+    top: -3px;
     left: clamp(106px, 18%, 124px);
-    height: 2px;
-    width: 46px;
+    height: 3px;
+    width: 48px;
     border-radius: 2px 2px 0 0;
   }
 
   .phone-btn--landscape-vol-down {
-    top: -2px;
-    left: clamp(162px, 28%, 180px);
-    height: 2px;
-    width: 46px;
+    top: -3px;
+    left: clamp(164px, 28%, 182px);
+    height: 3px;
+    width: 48px;
     border-radius: 2px 2px 0 0;
   }
 
   .phone-btn--landscape-power {
-    bottom: -2px;
+    bottom: -3px;
     left: clamp(106px, 18%, 124px);
-    height: 2px;
-    width: 72px;
+    height: 3px;
+    width: 64px;
     border-radius: 0 0 2px 2px;
   }
 
-  /* Micro Speaker Slit */
-  .phone-speaker--vertical {
+  /* Classic Proportional Apple Notch */
+  .phone-notch {
     position: absolute;
-    top: 3px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 48px;
-    height: 2px;
-    background: #262626;
-    border-radius: 9999px;
+    background: #000000;
     z-index: 25;
     pointer-events: none;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.7);
   }
 
-  .phone-speaker--landscape {
-    position: absolute;
-    left: 3px;
-    top: 50%;
-    transform: translateY(-50%);
-    height: 48px;
-    width: 2px;
-    background: #262626;
-    border-radius: 9999px;
-    z-index: 25;
-    pointer-events: none;
-  }
-
-  /* Authentic Apple Dynamic Island */
-  .phone-island--vertical {
-    position: absolute;
-    top: 10px;
+  .phone-notch--vertical {
+    top: 0;
     left: 50%;
     transform: translateX(-50%);
-    width: clamp(96px, 28%, 108px);
-    height: 22px;
-    background: #000000;
-    border-radius: 9999px;
-    z-index: 20;
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    padding-right: 9px;
-    gap: 6px;
-    pointer-events: none;
-    box-shadow:
-      0 0 0 0.5px rgba(255, 255, 255, 0.08),
-      0 2px 6px rgba(0, 0, 0, 0.8);
-  }
-
-  .phone-island--landscape {
-    position: absolute;
-    left: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 22px;
-    height: clamp(96px, 28%, 108px);
-    background: #000000;
-    border-radius: 9999px;
-    z-index: 20;
+    width: clamp(110px, 40%, 130px);
+    height: 24px;
+    border-radius: 0 0 14px 14px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: flex-end;
-    padding-bottom: 9px;
-    gap: 6px;
-    pointer-events: none;
-    box-shadow:
-      0 0 0 0.5px rgba(255, 255, 255, 0.08),
-      0 2px 6px rgba(0, 0, 0, 0.8);
+    padding-top: 3px;
   }
 
-  .phone-island__dot-sensor {
+  .phone-notch--landscape {
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    height: clamp(110px, 40%, 130px);
+    width: 24px;
+    border-radius: 0 14px 14px 0;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding-left: 3px;
+  }
+
+  /* Micro Speaker Slit inside Notch */
+  .phone-notch__speaker {
+    background: #262626;
+    border-radius: 9999px;
+  }
+
+  .phone-notch--vertical .phone-notch__speaker {
+    width: 38px;
+    height: 2.5px;
+    margin-bottom: 4px;
+  }
+
+  .phone-notch--landscape .phone-notch__speaker {
+    height: 38px;
+    width: 2.5px;
+    margin-right: 4px;
+  }
+
+  .phone-notch__details {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .phone-notch--landscape .phone-notch__details {
+    flex-direction: column;
+  }
+
+  .phone-notch__sensor {
     width: 5px;
     height: 5px;
     border-radius: 9999px;
     background: #0c0d10;
   }
 
-  .phone-island__dot-lens {
+  .phone-notch__camera {
     width: 8px;
     height: 8px;
     border-radius: 9999px;
@@ -633,11 +627,12 @@ const withBust = (url: string) => (url ? (url.includes('?') ? `${url}&${cacheBus
     box-shadow: inset 0 0 1px 1px rgba(255, 255, 255, 0.12);
   }
 
-  /* Sleek Apple Home Indicator Bar */
+  /* Sleek Apple Home Indicator Bar: w-32 h-1 */
   .phone-home-indicator {
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
+    width: 128px;
     height: 4px;
     background: rgba(255, 255, 255, 0.4);
     backdrop-filter: blur(12px);
@@ -646,19 +641,18 @@ const withBust = (url: string) => (url ? (url.includes('?') ? `${url}&${cacheBus
     pointer-events: none;
     z-index: 20;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    bottom: 8px;
   }
 
   .phone-home-indicator--vertical {
     bottom: 8px;
-    width: clamp(96px, 28%, 112px);
   }
 
   .phone-home-indicator--landscape {
     bottom: 8px;
-    width: clamp(96px, 20%, 120px);
   }
 
-  /* Inner Mobile Screen: Authentic 9:19.5 Proportions & Edge-to-Edge rounded-[38px] */
+  /* Inner Screen: Traditional 9:18.5 Proportions & rounded-[32px] */
   .phone-screen {
     position: relative;
     overflow: hidden;
@@ -667,13 +661,13 @@ const withBust = (url: string) => (url ? (url.includes('?') ? `${url}&${cacheBus
   }
 
   .phone-screen--vertical {
-    aspect-ratio: 9 / 19.5;
-    border-radius: 38px;
+    aspect-ratio: 9 / 18.5;
+    border-radius: 32px;
   }
 
   .phone-screen--landscape {
-    aspect-ratio: 19.5 / 9;
-    border-radius: 30px;
+    aspect-ratio: 18.5 / 9;
+    border-radius: 26px;
   }
 
   /* Media */
@@ -709,11 +703,11 @@ const withBust = (url: string) => (url ? (url.includes('?') ? `${url}&${cacheBus
   }
 
   .phone-screen--vertical .phone-media {
-    border-radius: 38px;
+    border-radius: 32px;
   }
 
   .phone-screen--landscape .phone-media {
-    border-radius: 30px;
+    border-radius: 26px;
   }
 
   .phone-media--cover {
