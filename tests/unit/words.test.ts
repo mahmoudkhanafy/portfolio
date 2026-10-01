@@ -42,23 +42,25 @@ describe('kashidaAt', () => {
 });
 
 describe('captionWords', () => {
-  it('times the Arabic hero line: 270 ms apart, a beat after a comma, and a wait while «متحركة» stretches', () => {
-    const words = captionWords(ui.ar.heroCaption, 'rtl', RHYTHM.hero);
-    expect(words.map((w) => w.delay)).toEqual([1150, 1420, 1930, 2200, 2800, 3070, 3340]);
-    expect(words.filter((w) => w.key).map((w) => w.text)).toEqual(['كتابة', 'متحركة،']);
-    expect(words.filter((w) => w.kashida !== undefined)).toEqual([{ text: 'متحركة،', key: true, kashida: 3, delay: 2200 }]);
+  it('times the Arabic hero line: 270 ms apart, a beat after a sentence, and «حكايتك» orange and stretched', () => {
+    const words = captionWords(ui.ar.heroLead, 'rtl', RHYTHM.hero);
+    expect(words.map((w) => w.delay)).toEqual([1150, 1420, 1690, 1960, 2470, 2740, 3010]);
+    expect(words.filter((w) => w.key).map((w) => w.text)).toEqual(['حكايتك.']);
+    expect(words.filter((w) => w.kashida !== undefined)).toEqual([{ text: 'حكايتك.', key: true, kashida: 2, delay: 3010 }]);
   });
 
-  it('builds the English hero line with its key words gold and nothing stretched', () => {
-    const words = captionWords(ui.en.heroCaption, 'ltr', RHYTHM.hero);
-    expect(words.map((w) => w.delay)).toEqual([1150, 1660, 1930, 2440, 2710, 2980]);
-    expect(words.filter((w) => w.key).map((w) => w.text)).toEqual(['kinetic', 'captions,']);
+  it('builds the English hero line with its key word orange and nothing stretched', () => {
+    const words = captionWords(ui.en.heroLead, 'ltr', RHYTHM.hero);
+    expect(words.map((w) => w.delay)).toEqual([1150, 1420, 1690, 1960, 2230, 2740, 3010, 3280]);
+    expect(words.filter((w) => w.key).map((w) => w.text)).toEqual(['yours.']);
     expect(words.every((w) => w.kashida === undefined)).toBe(true);
   });
 
-  it('marks «سوا» and "together" in the contact heading', () => {
-    expect(captionWords(ui.ar.contactHeading, 'rtl', RHYTHM.heading).filter((w) => w.key).map((w) => w.text)).toEqual(['سوا']);
-    expect(captionWords(ui.en.contactHeading, 'ltr', RHYTHM.heading).filter((w) => w.key).map((w) => w.text)).toEqual(['together']);
+  it('marks the key words of the about and contact headings', () => {
+    expect(captionWords(ui.ar.contactHeading, 'rtl', RHYTHM.heading).filter((w) => w.key).map((w) => w.text)).toEqual(['صورة.']);
+    expect(captionWords(ui.en.contactHeading, 'ltr', RHYTHM.heading).filter((w) => w.key).map((w) => w.text)).toEqual(['visual.']);
+    expect(captionWords(ui.ar.aboutHeading, 'rtl', RHYTHM.heading).filter((w) => w.key).map((w) => w.text)).toEqual(['والصورة', 'عندي.']);
+    expect(captionWords(ui.en.aboutHeading, 'ltr', RHYTHM.heading).filter((w) => w.key).map((w) => w.text)).toEqual(['My', 'lens.']);
   });
 
   it('fails the build when a key word or the stretched word is not in the line, or cannot stretch', () => {

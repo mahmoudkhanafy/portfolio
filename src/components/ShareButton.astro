@@ -34,10 +34,10 @@ const t = ui[lang];
 </script>
 
 <style>
-  /* Copied: a caption-style confirmation replaces the label for a moment. */
+  /* Copied: a small orange label confirms it for a moment, on paper or on the dark band. */
   button:global(.is-copied) {
     position: relative;
-    border-color: var(--caption);
+    border-color: var(--accent);
   }
 
   button:global(.is-copied)::after {
@@ -47,9 +47,8 @@ const t = ui[lang];
     inset-inline-start: 50%;
     translate: -50% 0;
     padding: 0.3rem 0.7rem;
-    border-radius: 8px;
-    background: var(--caption);
-    color: var(--on-caption);
+    background: var(--accent);
+    color: var(--on-accent);
     font-size: var(--step--1);
     font-weight: 700;
     white-space: nowrap;

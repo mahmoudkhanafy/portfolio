@@ -12,34 +12,32 @@
       body {
         display: grid;
       }
-      /* The hero's lower third in miniature: his initials on caption gold over a white role strip.
-         Latin initials stay legible at favicon size, where a lone Arabic letter blurs into a blob. */
+      /* The header's mark, "mk" and the orange point, in paper on ink: it reads on light and dark tab
+         bars alike, and Latin letters stay legible at favicon size. */
       .tile {
-        --mk: 46vw;
+        --mk: 62vw;
         display: grid;
         place-content: center;
-        justify-items: start;
-        gap: calc(var(--mk) * 0.144);
         border-radius: 22.5vw;
-        background: var(--caption);
+        background: var(--ink);
       }
       .mk {
-        color: var(--screen);
+        color: var(--paper);
+        font-family: var(--display);
         font-size: var(--mk);
-        font-weight: 800;
+        font-weight: 600;
         line-height: 1;
-        letter-spacing: -0.035em;
+        letter-spacing: -0.07em;
         text-box: trim-both cap alphabetic;
+        translate: -2% 0;
       }
-      .strip {
-        width: calc(var(--mk) * 0.64);
-        height: calc(var(--mk) * 0.127);
-        margin-inline-start: calc(var(--mk) * 0.042);
-        background: var(--white);
+      .mk b {
+        color: var(--accent);
+        font-weight: 600;
       }
       /* Android crops maskable icons to any shape: full bleed, with the mark inside the central circle. */
       body.maskable .tile {
-        --mk: 37vw;
+        --mk: 46vw;
         border-radius: 0;
       }
       /* iOS rounds home-screen icons itself and turns transparency black: full bleed. */
@@ -49,7 +47,7 @@
     </style>
   </head>
   <body>
-    <div class="tile"><div class="mk">MK</div><div class="strip"></div></div>
+    <div class="tile"><div class="mk">mk<b>·</b></div></div>
     <script>
       const variant = location.search.slice(1);
       if (variant) document.body.classList.add(variant);

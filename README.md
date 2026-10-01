@@ -4,6 +4,11 @@ The video portfolio of Mahmoud Khaled, video editor and videographer in Giza / C
 (`/`), English at `/en/`. Every piece has its own page and link preview, plays with sound on one tap,
 and ends on a pre-written WhatsApp message.
 
+This branch (`orange`) is the "paper" look: ink on warm paper with one burnt orange, his portrait in
+black and white on an orange block, a dark band where a video plays, and the sections Work, About,
+Process and Contact. The video side (pipeline, frames, phone, rows, player, motion) is the same as
+on the black site's branch; only its colours follow the page.
+
 **Adding a video is documented for Mahmoud in [ADD-A-VIDEO.md](ADD-A-VIDEO.md)** (Arabic, then English).
 
 ## Run it locally
@@ -13,15 +18,15 @@ Ubuntu). ffmpeg is only needed when a video in `work/` is new or changed.
 
 ```sh
 npm ci
-npm run dev            # http://localhost:4747/mahmoud-khaled/ (media is prepared first)
+npm run dev            # http://localhost:4750/mahmoud-khaled/ (media is prepared first)
 npm run build          # production build in dist/
 npm run serve          # serves dist/ like GitHub Pages, on the local network too
 ```
 
 `SITE_URL` (origin, used for link previews and canonical URLs) and `BASE_PATH` (repo sub-path) control
-where the build expects to live. They default to `http://localhost:4747` and `/mahmoud-khaled/`; CI
+where the build expects to live. They default to `http://localhost:4750` and `/mahmoud-khaled/`; CI
 takes them from GitHub Pages. To test link previews from a phone on the same Wi-Fi, build with the
-LAN address: `SITE_URL=http://192.168.x.x:4747 npm run build && npm run serve`.
+LAN address: `SITE_URL=http://192.168.x.x:4750 npm run build && npm run serve`.
 
 ## Publish on GitHub Pages
 
@@ -56,7 +61,7 @@ site/portrait.png ────────────────────�
   motion script (`src/scripts/motion.ts`, inlined), plus a small inline script in `<head>`.
 - **Frames**: each frame takes its video's own shape at the largest size that fits the screen with its
   play button, so nothing is stretched or cropped: films run wide, squares stay square. On screens
-  760 px and wider, vertical reels stand in a drawn iPhone (cherry, measured on Apple's photo;
+  760 px and wider, vertical reels stand in a drawn iPhone (in shades of the site's orange, measured on Apple's photo;
   `src/lib/phone.ts`, drawn in `Player.astro`): the reel fills its 9:19.5 screen at rest and eases to
   its whole 9:16 frame when it plays with sound. On phones a frame runs edge to edge when it fits and
   otherwise sits centred.
@@ -65,7 +70,7 @@ site/portrait.png ────────────────────�
   its phone. Films get a row of their own and the next pieces move up to finish the row before; the
   screen's shape picks two, three or four a row so a row fits the screen.
 - **Motion** ("Captions"): text builds the way his reels build captions. The hero line pops on word by
-  word with «كتابة متحركة» in gold and «متحركة» stretching with kashida; headings, feed titles and
+  word with «حكايتك» / "yours" in orange and «حكايتك» stretching with kashida; headings, feed titles and
   the services build as they come into view, and a video's title as its page opens
   (`src/lib/words.ts`, `Words.astro`, `src/styles/motion.css`, `src/scripts/motion.ts`). Screen
   readers read every line whole; with Reduce Motion or without JavaScript the text is simply there.
@@ -109,7 +114,7 @@ covers both languages, link previews (absolute, reachable, < 300 KB), playback w
 start, `hd` → `sd` fallback, the end card, one-video-at-a-time, muted previews, reduced motion, 404s,
 shared URLs with tracking parameters, page weight, axe accessibility checks, frames (true shape,
 whole on screen with the play button, one height per row, full rows in his order at six screen
-sizes), motion (word-by-word builds, gold key words, kashida without layout shift, reduced motion, no
+sizes), motion (word-by-word builds, orange key words, kashida without layout shift, reduced motion, no
 JavaScript), the phone frame (9:19.5 screen, fill and whole, clear of its island, Safari's round
 corners) and the rules (a picture plays in place, a title opens its page, the glide pairs one frame
 each way, "All work" returns to the piece). `build:e2e` adds the
@@ -134,7 +139,8 @@ recording, 2.39:1 and 1:1), whose circles show any stretch.
 
 ## Credits
 
-- Typeface: [Alexandria](https://fonts.google.com/specimen/Alexandria) by Mohamed Gaber (SIL Open Font
-  License), via Fontsource.
+- Typefaces: [Noto Sans Arabic](https://fonts.google.com/noto/specimen/Noto+Sans+Arabic) and
+  [Barlow Condensed](https://fonts.google.com/specimen/Barlow+Condensed) (SIL Open Font License),
+  subset and checked in under `site/fonts/` (its README has the commands).
 - Icons: [Simple Icons](https://simpleicons.org) (CC0-1.0) for WhatsApp and Instagram,
   [Lucide](https://lucide.dev) (ISC) for the interface.

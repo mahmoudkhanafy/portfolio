@@ -20,7 +20,7 @@ export interface Rhythm {
   start?: number;
   /** From one word to the next, in ms. */
   step: number;
-  /** An extra beat after a comma, in ms. */
+  /** An extra beat after a comma or the end of a sentence, in ms. */
   comma?: number;
   /** After the stretched word, the next one waits at least this long, in ms, while the stretch plays. */
   stretch?: number;
@@ -145,10 +145,10 @@ export function captionWords(caption: Caption, dir: Dir, rhythm: Rhythm): Word[]
     }
     return word;
   });
-  // From one word to the next: a step, a beat more after a comma, a wait while a word stretches.
+  // From one word to the next: a step, a beat more after a comma or a sentence, a wait while a word stretches.
   const { start = 0, step, comma = 0, stretch = 0, most = Infinity } = rhythm;
   const gaps = words.slice(0, -1).map((word) => {
-    const gap = step + (/[،,]$/u.test(word.text) ? comma : 0);
+    const gap = step + (/[،,.؟?!]$/u.test(word.text) ? comma : 0);
     return word.kashida === undefined ? gap : Math.max(gap, stretch);
   });
   const total = gaps.reduce((sum, gap) => sum + gap, 0);

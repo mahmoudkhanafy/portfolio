@@ -121,7 +121,7 @@ test.describe('video frames', () => {
     });
   }
 
-  test('run edge to edge on phones, and sit centred with rounded corners when a tall video must be narrower', async ({ page, isMobile }) => {
+  test('run edge to edge on phones, and sit centred when a tall video must be narrower, square like the page', async ({ page, isMobile }) => {
     test.skip(!isMobile, 'The edge-to-edge feed is the phone layout.');
     const viewport = page.viewportSize()!;
     await page.goto('');
@@ -135,7 +135,7 @@ test.describe('video frames', () => {
       } else {
         narrower += 1;
         expect(Math.abs(x - (viewport.width - x - width)), `${work.slug} centred`).toBeLessThanOrEqual(1);
-        expect(radius, `${work.slug} rounded`).toBeGreaterThan(0);
+        expect(radius, `${work.slug} square`).toBe(0);
       }
     }
     expect(narrower, 'the 9:16 pieces are too tall to run edge to edge on this phone').toBeGreaterThan(0);

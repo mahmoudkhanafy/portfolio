@@ -26,7 +26,7 @@ export interface PortraitSet {
   png: FileRef;
 }
 
-const OG = { width: 1200, height: 630, pad: 40, radius: 18, maxBytes: 290_000 };
+const OG = { width: 1200, height: 630, pad: 40, maxBytes: 290_000 };
 
 /** Cover widths for srcset: phone and grid sizes, plus wide sizes for landscape work. Never upscaled. */
 export function coverWidths(size: Size): number[] {
@@ -64,17 +64,15 @@ export async function renderCover(framePng: string, dir: string): Promise<CoverS
   };
 }
 
+/** The site's play button: a play mark on the orange, square like the page. */
 const BADGE = 76;
 const playBadge = (): Buffer =>
   Buffer.from(
     `<svg xmlns="http://www.w3.org/2000/svg" width="${BADGE}" height="${BADGE}" viewBox="0 0 120 120">
-      <circle cx="60" cy="60" r="56" fill="rgba(0,0,0,0.66)" stroke="#ffffff" stroke-width="5"/>
-      <path d="M49 38 L85 60 L49 82 Z" fill="#ffffff"/>
+      <rect width="120" height="120" fill="#bd4225"/>
+      <path d="M48 38 L84 60 L48 82 Z" fill="#fff9ed"/>
     </svg>`,
   );
-
-const roundedMask = (width: number, height: number, radius: number): Buffer =>
-  Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}"><rect width="${width}" height="${height}" rx="${radius}" ry="${radius}"/></svg>`);
 
 /**
  * The link-preview image WhatsApp and Instagram show: 1200×630, the frame on a blurred fill of itself
@@ -91,11 +89,7 @@ export async function renderOg(framePng: string, size: Size, wordmarkPng: string
     base = await sharp(framePng).resize(OG.width, OG.height, { fit: 'cover' }).blur(28).modulate({ brightness: 0.42 }).toBuffer();
     const height = OG.height - OG.pad * 2;
     const width = Math.round((height * size.width) / size.height);
-    const framed = await sharp(framePng)
-      .resize(width, height, { fit: 'cover' })
-      .composite([{ input: roundedMask(width, height, OG.radius), blend: 'dest-in' }])
-      .png()
-      .toBuffer();
+    const framed = await sharp(framePng).resize(width, height, { fit: 'cover' }).png().toBuffer();
     const left = Math.round((OG.width - width) / 2);
     layers.push({ input: framed, left, top: OG.pad });
     badge = { left: left + width - BADGE - 20, top: OG.pad + height - BADGE - 20 };

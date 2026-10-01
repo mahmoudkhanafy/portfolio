@@ -76,7 +76,7 @@ const others = works.filter((w) => w.slug !== work.slug);
   ]}
   preload={{ imagesrcset: work.cover.avif.map((s) => `${href(s.src)} ${s.width}w`).join(', '), imagesizes: sizes, type: 'image/avif' }}
 >
-  <article class:list={['work', { 'work--landscape': landscape }]} aria-labelledby="work-title" style={layout}>
+  <article class:list={['work band', { 'work--landscape': landscape }]} aria-labelledby="work-title" style={layout}>
     <a class="work__back" href={`${pageHref(lang)}#reel-${work.slug}`}>
       <Icon name="back" size={18} />
       {t.allWork}
@@ -123,10 +123,17 @@ const others = works.filter((w) => w.slug !== work.slug);
 </Base>
 
 <style>
+  /* The piece plays in a dark band, as in a screening room; the page around it stays paper. */
   .work {
     /* The whole frame fits below the header and the back link, so the play button shows on arrival. */
-    --frame-h: calc(100svh - 9rem);
-    padding: 0 var(--gutter) clamp(2.5rem, 2rem + 3vw, 4rem);
+    --frame-h: calc(100svh - 10rem);
+    --band: var(--night);
+    padding: 0.25rem var(--gutter) clamp(2.5rem, 2rem + 3vw, 4rem);
+    color: var(--night-text);
+  }
+
+  .work :focus-visible {
+    outline-color: #f29a6c;
   }
 
   .work__back {
@@ -135,7 +142,7 @@ const others = works.filter((w) => w.slug !== work.slug);
     gap: 0.4rem;
     min-height: var(--tap);
     margin-bottom: 0.5rem;
-    color: var(--text);
+    color: var(--paper);
     font-size: var(--step--1);
     text-underline-offset: 0.3em;
   }
@@ -165,9 +172,20 @@ const others = works.filter((w) => w.slug !== work.slug);
   }
 
   .work__body h1 {
+    color: var(--paper);
     font-size: var(--step-3);
-    font-weight: 900;
-    line-height: 1.25;
+    font-weight: 700;
+    line-height: 1.4;
+  }
+
+  .work__body h1:lang(en) {
+    font-size: clamp(2.4rem, 1.6rem + 2.8vw, 4.1rem);
+    line-height: 1.08;
+  }
+
+  .work__body .chip {
+    border-color: var(--night-line);
+    color: var(--night-text);
   }
 
   .work__tags {
@@ -181,13 +199,18 @@ const others = works.filter((w) => w.slug !== work.slug);
 
   .work__description {
     max-width: var(--measure);
-    color: var(--text);
-    font-size: var(--step-1);
-    line-height: 1.75;
+    color: var(--paper);
+    font-size: var(--step-0);
+    line-height: 2;
+  }
+
+  .work__description:lang(en) {
+    line-height: 1.8;
   }
 
   .work__role {
-    color: var(--dim);
+    color: var(--night-text);
+    font-size: var(--step--1);
   }
 
   .work__cta {
@@ -196,13 +219,35 @@ const others = works.filter((w) => w.slug !== work.slug);
     width: 100%;
     margin-top: 1rem;
     padding-top: 1.25rem;
-    border-top: 1px solid var(--rule);
+    border-top: 1px solid var(--night-line);
   }
 
   .work__cta-lead {
-    color: var(--white);
+    color: var(--paper);
     font-size: var(--step-1);
-    font-weight: 700;
+    font-weight: 600;
+  }
+
+  /* On the dark band the actions turn light: orange to message him, a pale outline to share. */
+  .work__cta-actions .button--primary {
+    background: var(--accent);
+    color: var(--on-accent);
+  }
+
+  .work__cta-actions :global(.button--ghost) {
+    border-color: var(--night-line);
+    color: var(--paper);
+  }
+
+  @media (hover: hover) {
+    .work__cta-actions .button--primary:hover {
+      background: var(--accent-hover);
+    }
+
+    .work__cta-actions :global(.button--ghost:hover) {
+      border-color: var(--paper);
+      background: rgb(255 255 255 / 0.06);
+    }
   }
 
   .work__cta-actions {
@@ -213,7 +258,7 @@ const others = works.filter((w) => w.slug !== work.slug);
 
   @media (min-width: 1000px) {
     .work {
-      --frame-h: calc(100svh - 10rem);
+      --frame-h: calc(100svh - 11rem);
     }
 
     .work__layout {

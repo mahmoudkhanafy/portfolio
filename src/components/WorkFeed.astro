@@ -24,9 +24,13 @@ const rowsOf = (i: number) => Object.fromEntries(layouts.map(([name, places]) =>
 
 <section id="work" class="feed" aria-labelledby="work-heading">
   <div class="feed__head">
-    <h2 id="work-heading" data-build="view"><Words text={t.workHeading} dir={dirOf(lang)} rhythm={RHYTHM.heading} /></h2>
-    <p class="feed__count">{videoCount(works.length, lang)}</p>
+    <div>
+      <p class="eyebrow"><span class="num" lang="en">01</span> / {t.workEyebrow}</p>
+      <h2 id="work-heading" data-build="view"><Words text={t.workHeading} dir={dirOf(lang)} rhythm={RHYTHM.heading} /></h2>
+    </div>
+    <p class="feed__intro">{t.workIntro[0]}<br />{t.workIntro[1]}</p>
   </div>
+  <p class="feed__count eyebrow">{videoCount(works.length, lang)}</p>
   <div class="feed__list">
     {works.map((work, i) => <Reel work={work} lang={lang} rows={rowsOf(i)} />)}
   </div>
@@ -35,31 +39,45 @@ const rowsOf = (i: number) => Object.fromEntries(layouts.map(([name, places]) =>
 <style>
   .feed {
     padding-inline: var(--gutter);
-    padding-top: clamp(2rem, 1.5rem + 3vw, 4rem);
+    padding-top: clamp(3rem, 2rem + 4vw, 5.5rem);
+    /* The header links to #work: the heading lands just below the top of the screen. */
+    scroll-margin-top: 0.5rem;
   }
 
   .feed__head {
     display: flex;
-    align-items: baseline;
     flex-wrap: wrap;
-    gap: 0.25rem 1rem;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid var(--rule);
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 0.75rem 2rem;
+    padding-bottom: 1.5rem;
   }
 
   .feed__head h2 {
+    margin-top: 0.5rem;
     font-size: var(--step-3);
-    font-weight: 900;
+    letter-spacing: -0.02em;
+  }
+
+  .feed__head h2:lang(en) {
+    font-size: clamp(2.5rem, 1.6rem + 3vw, 3.9rem);
+  }
+
+  .feed__intro {
+    color: var(--muted);
+    font-size: var(--step--1);
+    line-height: 1.9;
   }
 
   .feed__count {
-    color: var(--dim);
+    padding-block: 1rem 0;
+    border-top: 1px solid var(--line);
   }
 
   .feed__list {
     display: grid;
     gap: 3.5rem;
-    padding-top: 1.75rem;
+    padding-top: 1.25rem;
   }
 
   /* Wider screens: rows laid out by lib/rows.ts, each piece sized by Reel.astro. Pieces keep the
@@ -72,7 +90,7 @@ const rowsOf = (i: number) => Object.fromEntries(layouts.map(([name, places]) =>
       flex-wrap: wrap;
       align-items: flex-start;
       gap: clamp(2.5rem, 1.5rem + 3vw, 4rem) var(--gap);
-      padding-top: 2.5rem;
+      padding-top: 1.5rem;
     }
   }
 </style>

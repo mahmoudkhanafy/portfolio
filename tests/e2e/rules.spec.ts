@@ -30,8 +30,8 @@ test.describe('play here, open there', () => {
     const mouse = await page.evaluate(() => matchMedia('(hover: hover)').matches);
     await expect
       .poll(() => link.locator('.reel__go').evaluate((el) => getComputedStyle(el).translate))
-      // An Arabic title's arrow steps forward, to the left.
-      .toBe(mouse ? '-5px' : 'none');
+      // An Arabic title's arrow steps down its reading way, to the left.
+      .toBe(mouse ? '-3px 3px' : 'none');
   });
 
   test('"All work" returns to the same piece, even the last one', async ({ page }) => {
@@ -128,7 +128,7 @@ test.describe('the glide', () => {
   test('sends no frame off screen when going home by the name in the header', async ({ page }) => {
     const work = works.at(-1)!;
     await open(page, `work/${work.slug}/`);
-    await page.locator('.site-header__name').click();
+    await page.locator('.site-header .brand').click();
     await page.waitForURL((url) => !url.pathname.includes('/work/'));
     await expect.poll(() => glide(page)).not.toBeNull();
     // Either no transition ran, or it named nothing on the new page.

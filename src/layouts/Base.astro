@@ -29,11 +29,9 @@ interface Props {
   /** The largest image above the fold, fetched early so it paints first. */
   preload?: { imagesrcset: string; imagesizes: string; type: string };
   noindex?: boolean;
-  /** Home page: the hero carries his name, so the header does not repeat it. */
-  home?: boolean;
 }
 
-const { lang, title, description, path, altPath, og, jsonLd = [], preload, noindex = false, home = false } = Astro.props;
+const { lang, title, description, path, altPath, og, jsonLd = [], preload, noindex = false } = Astro.props;
 const t = ui[lang];
 const url = abs(path);
 const [arPath, enPath] = lang === 'ar' ? [path, altPath] : [altPath, path];
@@ -64,8 +62,8 @@ const headScript = head
         </>
       )
     }
-    <meta name="color-scheme" content="dark" />
-    <meta name="theme-color" content="#000000" />
+    <meta name="color-scheme" content="light" />
+    <meta name="theme-color" content="#f2eee6" />
     <meta name="darkreader-lock" />
     <meta name="format-detection" content="telephone=no" />
     <link rel="icon" type="image/png" sizes="32x32" href={href('favicon-32.png')} />
@@ -103,12 +101,13 @@ const headScript = head
     <meta name="twitter:image:alt" content={og.alt} />
 
     <Font cssVariable="--font-sans" preload />
+    <Font cssVariable="--font-display" preload />
     {preload && <link rel="preload" as="image" imagesrcset={preload.imagesrcset} imagesizes={preload.imagesizes} type={preload.type} fetchpriority="high" />}
     {jsonLd.map((data) => <script is:inline type="application/ld+json" set:html={jsonLdScript(data)} />)}
   </head>
   <body>
     <a class="skip-link" href="#main">{t.skip}</a>
-    <Header lang={lang} altHref={href(altPath)} showName={!home} />
+    <Header lang={lang} altHref={href(altPath)} />
     <main id="main" tabindex="-1">
       <slot />
     </main>

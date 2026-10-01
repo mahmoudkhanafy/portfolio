@@ -12,7 +12,7 @@
 }
 
 .w--key {
-  color: var(--caption);
+  color: var(--accent-ink);
 }
 
 /* The whole line for screen readers; the visible words are copied, not this. It keeps its place at the

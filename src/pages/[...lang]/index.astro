@@ -2,6 +2,7 @@
 import About from '../../components/About.astro';
 import Contact from '../../components/Contact.astro';
 import Hero, { HERO_SIZES } from '../../components/Hero.astro';
+import Process from '../../components/Process.astro';
 import WorkFeed from '../../components/WorkFeed.astro';
 import Base from '../../layouts/Base.astro';
 import { catalog } from '../../lib/catalog.ts';
@@ -32,10 +33,10 @@ const preload = portrait
   og={{ image: ogImage, width: 1200, height: 630, alt: t.ogHomeAlt, type: 'website' }}
   jsonLd={[personLd({ url: pageAbs(lang), image: portrait ? abs(portrait.webp.at(-1)!.src) : ogImage })]}
   preload={preload}
-  home
 >
   <Hero lang={lang} portrait={portrait} />
   <WorkFeed lang={lang} works={works} />
   <About lang={lang} />
+  <Process lang={lang} />
   <Contact lang={lang} />
 </Base>

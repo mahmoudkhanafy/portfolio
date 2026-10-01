@@ -3,7 +3,7 @@ import { createHash } from 'node:crypto';
 /** Bump when encoding settings change, so every video is re-encoded once. */
 export const VIDEO_PIPELINE_VERSION = 3;
 /** Bump when cover/OG rendering changes, so every image is re-rendered once. */
-export const IMAGE_PIPELINE_VERSION = 4;
+export const IMAGE_PIPELINE_VERSION = 5;
 
 const short = (text: string): string => createHash('sha256').update(text).digest('hex').slice(0, 10);
 

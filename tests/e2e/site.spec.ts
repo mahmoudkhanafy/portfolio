@@ -52,10 +52,11 @@ test('search engines and phones get robots, sitemap, contact card and manifest',
 for (const path of ['', 'en/', `work/${slug}/`]) {
   test(`points each arrow the way its line reads, also where :dir() is unknown (${path || 'home'})`, async ({ page }) => {
     await page.goto(path);
-    /** For each arrow: whether it is mirrored, and whether its line reads right to left. */
+    /** For each arrow on screen: whether it is mirrored, and whether its line reads right to left. A
+        hidden arrow has no box, and so no transform to read. */
     const arrows = () =>
       page.locator('.icon--flip-rtl').evaluateAll((els) =>
-        els.map((el) => ({ mirrored: getComputedStyle(el).transform !== 'none', rtl: el.closest('[dir]')?.getAttribute('dir') === 'rtl' })),
+        els.filter((el) => el.getClientRects().length > 0).map((el) => ({ mirrored: getComputedStyle(el).transform !== 'none', rtl: el.closest('[dir]')?.getAttribute('dir') === 'rtl' })),
       );
     const expected = (found: Array<{ rtl: boolean }>) => found.map(({ rtl }) => ({ mirrored: rtl, rtl }));
     const found = await arrows();
@@ -85,10 +86,10 @@ test('carries its <head> script on every page without comments, in little more t
   expect(gzipSync(script).length).toBeLessThan(1_300);
 });
 
-test('keeps its own dark design under Dark Reader', async ({ page }) => {
+test('keeps its own paper design under Dark Reader', async ({ page }) => {
   await page.goto('');
   await expect(page.locator('meta[name="darkreader-lock"]')).toHaveCount(1);
-  await expect(page.locator('meta[name="color-scheme"]')).toHaveAttribute('content', 'dark');
+  await expect(page.locator('meta[name="color-scheme"]')).toHaveAttribute('content', 'light');
 });
 
 test('share buttons appear where the browser can share or copy', async ({ page, browserName, context }) => {

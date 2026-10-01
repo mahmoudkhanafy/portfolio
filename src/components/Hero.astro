@@ -1,6 +1,6 @@
 ---
 import type { Portrait } from '../lib/catalog.ts';
-import { CONTACT, whatsappMessage, whatsappUrl } from '../lib/contact.ts';
+import { whatsappMessage, whatsappUrl } from '../lib/contact.ts';
 import { ui } from '../lib/i18n.ts';
 import { dirOf, href } from '../lib/site.ts';
 import type { Lang } from '../lib/urls.ts';
@@ -13,15 +13,41 @@ interface Props {
   portrait: Portrait | null;
 }
 
-export const HERO_SIZES = '(min-width: 900px) 26rem, 62vw';
+/** On phones the portrait is cropped closer: drawn at 160% of a column about half the screen wide. */
+export const HERO_SIZES = '(min-width: 900px) 42vw, (min-width: 600px) min(30.4rem, calc(82vw - 3rem)), min(24rem, calc(82vw - 3rem))';
 
 const { lang, portrait } = Astro.props;
 const t = ui[lang];
+const [first, ...rest] = t.name.split(' ');
 const srcset = (list: Array<{ src: string; width: number }>) => list.map((s) => `${href(s.src)} ${s.width}w`).join(', ');
 ---
 
 <section class="hero" aria-labelledby="hero-name">
-  <div class="hero__stage">
+  <p class="hero__eyebrow eyebrow">
+    <span class="hero__square" aria-hidden="true"></span>
+    {t.role}
+    <span class="hero__place">{t.place}</span>
+  </p>
+  <h1 id="hero-name" class="hero__name">
+    <span class="hero__first">{first}</span>
+    <span class="hero__last">{rest.join(' ')}<span class="hero__dot" aria-hidden="true">.</span></span>
+  </h1>
+  <div class="hero__copy">
+    <p class="hero__lead" data-build="load"><Words text={t.heroLead} dir={dirOf(lang)} rhythm={RHYTHM.hero} /></p>
+    <p class="hero__summary">{t.heroSummary}</p>
+  </div>
+  <div class="hero__actions">
+    <a class="button button--primary" href={whatsappUrl(whatsappMessage(lang))}>
+      <Icon name="whatsapp" />
+      {t.whatsapp}
+    </a>
+    <a class="button button--ghost hero__next" href="#work">
+      {t.seeWork}
+      <span class="hero__cue" aria-hidden="true"><Icon name="down" size={18} /></span>
+    </a>
+  </div>
+  <div class="hero__art">
+    <span class="hero__vertical" aria-hidden="true">{t.heroVertical}</span>
     {
       portrait && (
         <picture class="hero__portrait">
@@ -31,197 +57,213 @@ const srcset = (list: Array<{ src: string; width: number }>) => list.map((s) => 
         </picture>
       )
     }
-    <div class="hero__third">
-      <h1 id="hero-name" class="hero__name">{t.name}</h1>
-      <p class="hero__role">{t.role}</p>
-    </div>
+    <p class="hero__caption" aria-hidden="true">
+      <span>{t.portraitCaption[0]}<br />{t.portraitCaption[1]}</span>
+      <span class="hero__cross">+</span>
+    </p>
   </div>
-
-  <div class="hero__body">
-    <p class="hero__lead" data-build="load"><Words text={t.heroCaption} dir={dirOf(lang)} rhythm={RHYTHM.hero} /></p>
-    <p class="hero__place">{t.place}</p>
-    <div class="hero__actions">
-      <a class="button button--primary" href={whatsappUrl(whatsappMessage(lang))}>
-        <Icon name="whatsapp" />
-        {t.whatsapp}
-      </a>
-      <a class="button button--ghost" href={CONTACT.instagramUrl}>
-        <Icon name="instagram" size={18} />
-        {t.instagram}
-      </a>
-    </div>
-    <a class="hero__next" href="#work">
-      <span class="hero__next-label">{t.seeWork}</span>
-      <span class="hero__next-cue" aria-hidden="true"><span><Icon name="down" size={18} /></span></span>
-    </a>
-  </div>
+  <p class="hero__strip" aria-hidden="true">
+    <span lang="en" dir="ltr">Mahmoud Khaled</span>
+    <span class="hero__strip-arrow">↓</span>
+    <span>{t.selectedWork}</span>
+  </p>
 </section>
 
 <style>
+  /* Phones: name, then the line beside a close crop of the portrait, then the actions. */
   .hero {
     display: grid;
-    gap: 1.5rem;
-    padding-inline: var(--gutter);
-    padding-bottom: clamp(2.5rem, 2rem + 3vw, 4.5rem);
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+    grid-template-areas:
+      'eyebrow eyebrow'
+      'name name'
+      'copy art'
+      'actions actions'
+      'strip strip';
+    column-gap: 1.1rem;
+    padding: 1.5rem var(--gutter) 0;
   }
 
-  /* A studio backdrop: light falls behind him so the black suit separates from the black page. */
-  .hero__stage {
-    --third-inset: var(--gutter);
-    container-type: inline-size; /* the name is sized to this frame, not to the window */
-    position: relative;
-    display: grid;
-    justify-items: center;
-    align-items: end;
-    min-height: 22rem;
-    margin-inline: calc(var(--gutter) * -1);
-    padding-top: 1.5rem;
-    background: radial-gradient(58% 62% at 50% 42%, #3d3d3d 0%, #1c1c1c 46%, #000 80%);
-    overflow: hidden;
+  .hero__eyebrow {
+    grid-area: eyebrow;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.6rem;
+    color: var(--ink);
   }
 
-  .hero__portrait img {
-    width: min(62vw, 26rem);
-    height: auto;
+  .hero__square {
+    width: 7px;
+    height: 7px;
+    background: var(--accent);
   }
 
-  /* The lower third: how his own edits introduce a person on screen. */
-  .hero__third {
-    position: absolute;
-    inset-inline: var(--third-inset);
-    bottom: 1.1rem;
-    display: grid;
-    justify-items: start;
-    gap: 0.35rem;
+  .hero__place {
+    padding-inline-start: 0.6rem;
+    border-inline-start: 1px solid var(--line);
+    color: var(--muted);
+    font-weight: 400;
   }
 
-  /* One line, never larger than the frame allows: a wrapped name doubles the caption and covers his
-     face. --name-em is the name's width at weight 800 plus its 0.64em padding, with 4% to spare. */
   .hero__name {
-    --name-em: 6.9;
-    padding: 0.02em 0.32em 0.14em;
-    background: var(--caption);
-    color: var(--on-caption);
-    font-size: clamp(2.5rem, 1.35rem + 6.2vw, 5.25rem);
-    font-size: min(clamp(2.5rem, 1.35rem + 6.2vw, 5.25rem), (100cqi - 2 * var(--third-inset)) / var(--name-em));
-    font-weight: 800;
-    line-height: 1.3;
-  }
-
-  /* "Mahmoud Khaled" runs 1.5 times as wide as "محمود خالد". */
-  .hero__name:lang(en) {
-    --name-em: 10.25;
-  }
-
-  .hero__role {
-    padding: 0.3em 0.75em 0.4em;
-    background: var(--white);
-    color: var(--on-caption);
-    font-size: var(--step-1);
-    font-weight: 500;
-    line-height: 1.35;
-  }
-
-  .hero__body {
+    grid-area: name;
     display: grid;
     justify-items: start;
-    gap: 0.4rem;
+    margin-block: 0.5rem 1.25rem;
+    font-size: clamp(3.1rem, 1.6rem + 7vw, 4.4rem);
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: -0.03em;
+  }
+
+  .hero__name:lang(en) {
+    font-size: clamp(3.75rem, 1.8rem + 11vw, 5.25rem);
+    font-weight: 600;
+    line-height: 0.95;
+    letter-spacing: -0.02em;
+  }
+
+  .hero__dot {
+    color: var(--accent);
+  }
+
+  .hero__copy {
+    grid-area: copy;
+    align-self: end;
+    display: grid;
+    gap: 0.6rem;
+    padding-bottom: 0.25rem;
   }
 
   /* Positioned: the kashida stretch (motion.ts) measures the room left on its line against it. */
   .hero__lead {
     position: relative;
-    color: var(--white);
+    color: var(--ink);
+    text-wrap: balance;
     font-size: var(--step-1);
-    font-weight: 500;
-    line-height: 1.5;
-    max-width: 30ch;
+    font-weight: 600;
+    line-height: 1.6;
   }
 
-  .hero__place {
-    color: var(--dim);
+  .hero__lead:lang(en) {
+    line-height: 1.4;
+  }
+
+  .hero__summary {
+    color: var(--muted);
     font-size: var(--step--1);
+    line-height: 1.7;
   }
 
   .hero__actions {
+    grid-area: actions;
     display: flex;
     flex-wrap: wrap;
-    gap: 0.75rem;
-    margin-top: 1rem;
+    gap: 0.6rem;
+    margin-top: 1.5rem;
   }
 
-  /* "See the work": a quiet scroll cue. Once the lower third has landed, the arrow drops through its
-     circle a few times and rests; hover or focus draws the underline in from the reading start. */
-  .hero__next {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.75rem;
-    min-height: var(--tap);
-    margin-top: 0.5rem;
-    color: var(--text);
-    font-size: var(--step--1);
-    text-decoration: none;
-  }
-
-  .hero__next-label {
-    padding-block: 0.2em;
-    background:
-      linear-gradient(var(--white), var(--white)) no-repeat 100% 100% / 0% 1px,
-      linear-gradient(var(--rule-strong), var(--rule-strong)) no-repeat 100% 100% / 100% 1px;
-    transition:
-      background-size 420ms var(--ease-cut),
-      color 160ms linear;
-  }
-
-  :global([dir='ltr']) .hero__next-label {
-    background-position: 0% 100%, 0% 100%;
-  }
-
-  .hero__next-cue {
+  .hero__cue {
     display: grid;
-    place-items: center;
-    width: 2.25rem;
-    height: 2.25rem;
-    border: 1.5px solid var(--rule-strong);
-    border-radius: 50%;
-    color: var(--white);
     overflow: hidden;
-    transition: border-color 160ms linear;
   }
 
-  .hero__next-cue > span {
-    display: grid;
+  /* The portrait stands on an orange block, in black and white, its head and shoulders on phones. */
+  .hero__art {
+    grid-area: art;
+    position: relative;
+    align-self: end;
+    justify-self: end;
+    width: 100%;
+    max-width: 15rem;
+    aspect-ratio: 0.78;
+    overflow: hidden;
+    isolation: isolate;
   }
 
-  .hero__next:hover .hero__next-label,
-  .hero__next:focus-visible .hero__next-label {
-    background-size: 100% 1px, 100% 1px;
-    color: var(--white);
+  .hero__art::before {
+    content: '';
+    position: absolute;
+    inset: 25% 0 0;
+    z-index: -1;
+    background: var(--accent);
   }
 
-  .hero__next:hover .hero__next-cue,
-  .hero__next:focus-visible .hero__next-cue {
-    border-color: var(--white);
+  .hero__portrait img {
+    position: absolute;
+    top: -0.5rem;
+    left: 50%;
+    width: 160%;
+    max-width: none;
+    height: auto;
+    filter: grayscale(1);
+    translate: -50% 0;
+  }
+
+  .hero__vertical,
+  .hero__caption {
+    display: none;
+  }
+
+  .hero__strip {
+    grid-area: strip;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 2.75rem;
+    margin-top: 1.75rem;
+    border-top: 1px solid var(--line);
+    font-size: 0.7rem;
+    direction: ltr;
+  }
+
+  /* Spaced capitals for the English words only: spacing would break the joins of Arabic letters. */
+  .hero__strip :lang(en) {
+    font-family: var(--display);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  .hero__strip .hero__strip-arrow {
+    font-family: Arial, sans-serif;
+    font-size: 1.25rem;
+    letter-spacing: 0;
   }
 
   @media (prefers-reduced-motion: no-preference) {
-    .hero__name {
-      animation: wipe-in 560ms var(--ease-cut) 180ms both;
+    .hero__first,
+    .hero__last {
+      animation: wipe-in 620ms var(--ease-cut) 120ms both;
     }
-    .hero__role {
-      animation: wipe-in 460ms var(--ease-cut) 560ms both;
+
+    .hero__last {
+      animation-delay: 300ms;
     }
-    /* Starts once the hero line has built (3.5 s), then three cues and rest. */
-    .hero__next-cue :global(svg) {
-      animation: cue-drop 2.4s 3.9s 3 both;
+
+    .hero__art {
+      animation: arrive 800ms var(--ease-cut) 80ms both;
     }
-    .hero__next:hover .hero__next-cue > span,
-    .hero__next:focus-visible .hero__next-cue > span {
-      animation: cue-drop 1.1s;
+
+    .hero__cue :global(svg) {
+      animation: cue-drop 2.4s 3.6s 3 both;
+    }
+
+    @media (hover: hover) {
+      .hero__next:hover .hero__cue :global(svg) {
+        animation: cue-drop 1.1s;
+      }
     }
   }
 
-  /* Out through the bottom of the circle, back in from the top, then a rest before the next cue. */
+  @keyframes arrive {
+    from {
+      opacity: 0;
+      translate: 0 15px;
+    }
+  }
+
+  /* Out through the bottom, back in from the top, then a rest before the next cue. */
   @keyframes cue-drop {
     0%,
     12% {
@@ -245,7 +287,7 @@ const srcset = (list: Array<{ src: string; width: number }>) => list.map((s) => 
     }
   }
 
-  /* Wipes open from the reading start: the right edge in Arabic, the left edge in English. */
+  /* Each line of the name wipes open from the reading start: the right edge in Arabic, the left in English. */
   @keyframes wipe-in {
     from {
       clip-path: inset(0 0 0 100%);
@@ -255,8 +297,8 @@ const srcset = (list: Array<{ src: string; width: number }>) => list.map((s) => 
     }
   }
 
-  :global([dir='ltr']) .hero__name,
-  :global([dir='ltr']) .hero__role {
+  :global([dir='ltr']) .hero__first,
+  :global([dir='ltr']) .hero__last {
     animation-name: wipe-in-ltr;
   }
 
@@ -269,37 +311,131 @@ const srcset = (list: Array<{ src: string; width: number }>) => list.map((s) => 
     }
   }
 
-  @media (min-width: 900px) {
-    .hero {
-      grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
-      align-items: center;
-      gap: clamp(2rem, 1rem + 4vw, 5rem);
-      padding-top: 1rem;
-    }
-
-    .hero__stage {
-      --third-inset: 2rem;
-      min-height: min(70svh, 42rem);
-      margin-inline: 0;
-      border-radius: 28px;
-    }
-
-    /* Keep the whole lower third on screen in a laptop-height window. */
-    .hero__portrait img {
-      width: auto;
-      max-width: 100%;
-      height: min(64svh, 40rem);
-    }
-
-    .hero__third {
-      bottom: 2rem;
+  @media (min-width: 600px) {
+    .hero__art {
+      max-width: 19rem;
     }
 
     .hero__lead {
-      font-size: clamp(1.6rem, 1.1rem + 1.2vw, 2.3rem);
-      font-weight: 500;
-      line-height: 1.45;
-      max-width: 20ch;
+      font-size: var(--step-2);
+    }
+  }
+
+  /* Wider screens: the words on one side, the portrait whole on its block on the other. */
+  @media (min-width: 900px) {
+    .hero {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      grid-template-rows: 1fr auto auto auto auto 1fr auto;
+      grid-template-areas:
+        '. art'
+        'eyebrow art'
+        'name art'
+        'copy art'
+        'actions art'
+        '. art'
+        'strip strip';
+      column-gap: clamp(2rem, 3vw, 4rem);
+      min-height: min(48rem, calc(100svh - 5.25rem));
+      padding-top: clamp(1.5rem, 4svh, 3.5rem);
+    }
+
+    .hero__name {
+      margin-block: 1.25rem 1.5rem;
+      font-size: clamp(4.25rem, 1rem + 6.6vw, 8.25rem);
+      line-height: 1.1;
+    }
+
+    .hero__name:lang(en) {
+      font-size: clamp(5.25rem, 1.2rem + 7.4vw, 9.4rem);
+      line-height: 0.91;
+    }
+
+    .hero__last {
+      padding-inline-start: 0.6em;
+    }
+
+    .hero__copy {
+      align-self: start;
+      max-width: 28rem;
+      padding-bottom: 0;
+    }
+
+    .hero__actions {
+      margin-top: 1.75rem;
+    }
+
+    .hero__art {
+      align-self: stretch;
+      max-width: none;
+      aspect-ratio: auto;
+      min-height: 26rem;
+      overflow: visible;
+    }
+
+    .hero__art::before {
+      inset: 8% 8% 5% 0;
+    }
+
+    .hero__art:dir(ltr)::before {
+      inset: 8% 0 5% 8%;
+    }
+
+    .hero__portrait {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+    }
+
+    .hero__portrait img {
+      top: auto;
+      bottom: 0;
+      width: auto;
+      height: 108%;
+      max-height: 40rem;
+      max-width: 100%;
+      object-fit: contain;
+      object-position: 50% 100%;
+      translate: -50% 4%;
+    }
+
+    .hero__vertical {
+      display: block;
+      position: absolute;
+      top: 0;
+      inset-inline-end: 0.25rem;
+      writing-mode: vertical-rl;
+      font-size: 0.8rem;
+    }
+
+    .hero__vertical:lang(en) {
+      font-family: var(--display);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    .hero__caption {
+      display: flex;
+      align-items: center;
+      gap: 2.5rem;
+      position: absolute;
+      bottom: 0;
+      inset-inline-start: 0;
+      z-index: 1;
+      padding: 0.85rem 1.25rem;
+      background: var(--paper);
+      font-size: var(--step--1);
+      line-height: 1.7;
+    }
+
+    .hero__cross {
+      font-size: 2.5rem;
+      font-weight: 400;
+      line-height: 1;
+    }
+
+    .hero__strip {
+      margin-top: clamp(1.5rem, 4svh, 3rem);
+      font-size: 0.75rem;
     }
   }
 </style>

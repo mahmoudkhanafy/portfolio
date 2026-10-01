@@ -13,33 +13,33 @@ async function load(file: string) {
 }
 
 const near = (a: Pixel, b: Pixel, tolerance = 3): boolean => a.every((v, i) => Math.abs(v - b[i]!) <= tolerance);
-const GOLD: Pixel = [0xe8, 0xb1, 0x00, 255];
+const INK: Pixel = [0x24, 0x25, 0x1f, 255];
 
 describe('icons (rendered by npm run brand)', () => {
   it.each(['public/icon-512.png', 'public/icon-192.png', 'public/favicon-32.png'])(
-    '%s is a gold tile with see-through corners, so it sits on light and dark tab bars alike',
+    '%s is an ink tile with see-through corners, so it sits on light and dark tab bars alike',
     async (file) => {
       const icon = await load(file);
       expect(icon.at(0, 0)[3]).toBe(0);
       expect(icon.at(icon.width - 1, icon.height - 1)[3]).toBe(0);
-      expect(near(icon.at(icon.width / 2, icon.height * 0.06), GOLD)).toBe(true);
+      expect(near(icon.at(icon.width / 2, icon.height * 0.06), INK)).toBe(true);
     },
   );
 
-  it('the iPhone home-screen icon is gold to the corners (iOS rounds it, and turns transparency black)', async () => {
+  it('the iPhone home-screen icon is ink to the corners (iOS rounds it, and turns transparency black)', async () => {
     const icon = await load('public/apple-touch-icon.png');
     for (const [x, y] of [[0, 0], [icon.width - 1, 0], [0, icon.height - 1], [icon.width - 1, icon.height - 1]] as const) {
-      expect(near(icon.at(x, y), GOLD), `${x},${y}`).toBe(true);
+      expect(near(icon.at(x, y), INK), `${x},${y}`).toBe(true);
     }
   });
 
-  it('the maskable icon keeps everything but flat gold inside the circle Android always shows', async () => {
+  it('the maskable icon keeps everything but flat ink inside the circle Android always shows', async () => {
     const icon = await load('public/icon-maskable-512.png');
     const safe = icon.width * 0.4;
     const outside: string[] = [];
     for (let y = 0; y < icon.height; y += 4) {
       for (let x = 0; x < icon.width; x += 4) {
-        if (Math.hypot(x - icon.width / 2, y - icon.height / 2) > safe && !near(icon.at(x, y), GOLD)) outside.push(`${x},${y}`);
+        if (Math.hypot(x - icon.width / 2, y - icon.height / 2) > safe && !near(icon.at(x, y), INK)) outside.push(`${x},${y}`);
       }
     }
     expect(outside.slice(0, 5)).toEqual([]);
