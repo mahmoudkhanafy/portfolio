@@ -52,9 +52,12 @@ const withBust = (url: string) => (url ? (url.includes('?') ? `${url}&${cacheBus
           const sd = work.renditions.find((r) => r.id === 'sd') || work.renditions[work.renditions.length - 1];
           const videoSrc = hd ? withBust(href(hd.src)) : '';
           const previewSrc = sd ? withBust(href(sd.src)) : videoSrc;
-          const posterSrc = href(work.cover.jpg.src);
           const youtubeId = work.youtubeId || YOUTUBE_IDS[work.slug] || '';
           const isLandscape = work.slug === 'running-film' || work.width > work.height;
+          const posterWebp = href(`posters/${work.slug}.webp`);
+          const posterJpg = href(`posters/${work.slug}.jpg`);
+          const ytThumbnail = youtubeId ? `https://i.ytimg.com/vi/${youtubeId}/maxresdefault.jpg` : '';
+          const posterSrc = posterJpg;
 
           const category = typeLabel(work.type, lang);
           const whatsappLink = whatsappUrl(whatsappMessage(lang, { title: title.text, url: pageAbs(lang, work.slug) }));
@@ -98,20 +101,21 @@ const withBust = (url: string) => (url ? (url.includes('?') ? `${url}&${cacheBus
                       <div class="phone-island__dot-lens" />
                     </div>
 
+                    {/* High-Resolution Static Thumbnail Poster (Rendered by default on ALL devices) */}
                     <picture class:list={['phone-poster', isLandscape ? 'phone-poster--letterbox' : '']}>
-                      <source type="image/avif" srcset={srcset(work.cover.avif)} sizes="(min-width: 1024px) 340px, (min-width: 768px) 50vw, 100vw" />
-                      <source type="image/webp" srcset={srcset(work.cover.webp)} sizes="(min-width: 1024px) 340px, (min-width: 768px) 50vw, 100vw" />
+                      <source type="image/webp" srcset={posterWebp} />
+                      <source type="image/jpeg" srcset={posterJpg} />
                       <img
-                        src={posterSrc}
-                        width={work.cover.width}
-                        height={work.cover.height}
+                        src={posterJpg}
                         alt={title.text}
                         loading="lazy"
                         decoding="async"
+                        onerror={ytThumbnail ? `this.onerror=null;this.src='${ytThumbnail}';` : undefined}
                         class:list={['phone-media', isLandscape ? 'phone-media--letterbox' : 'phone-media--cover']}
                       />
                     </picture>
 
+                    {/* Muted Loop Video Preview (Desktop Hover Only, hidden on touch/mobile) */}
                     <video
                       data-src={previewSrc}
                       preload="none"
@@ -522,42 +526,67 @@ const withBust = (url: string) => (url ? (url.includes('?') ? `${url}&${cacheBus
     border-radius: 40px;
   }
 
-  /* Media */
+  /* Media: Static poster visible by default on ALL devices */
   .phone-poster {
-    display: block;
+    position: absolute;
+    inset: 0;
     width: 100%;
     height: 100%;
-    pointer-events: none;
-  }
-
-  .phone-poster--letterbox {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 100%;
-    aspect-ratio: 16 / 9;
-    margin-block: auto;
+    pointer-events: none;
+    z-index: 1;
+    opacity: 1;
+    transition: opacity 300ms cubic-bezier(0.4, 0, 0.2, 1);
   }
 
+  .phone-poster--letterbox {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Video Preview element */
   .phone-video {
-    display: none;
+    position: absolute;
+    inset: 0;
     width: 100%;
     height: 100%;
     pointer-events: none;
+    z-index: 2;
+    opacity: 0;
+    transition: opacity 300ms cubic-bezier(0.4, 0, 0.2, 1);
+    display: none; /* Disabled on touch/mobile by default */
   }
 
   @media (hover: hover) and (pointer: fine) {
-    .phone-poster {
-      display: none;
-    }
     .phone-video {
       display: block;
     }
-    .phone-poster--letterbox {
-      display: none;
+
+    .phone-card.is-previewing .phone-video,
+    .phone-video.is-playing {
+      opacity: 1;
     }
-    .phone-video.phone-media--letterbox {
-      display: block;
+
+    .phone-card.is-previewing .phone-play-wrap {
+      opacity: 0;
+      transition: opacity 250ms ease;
+    }
+
+    .phone-card:hover .phone-media {
+      transform: scale(1.04);
+    }
+  }
+
+  @media (hover: none) {
+    .phone-video {
+      display: none !important;
     }
   }
 
@@ -573,25 +602,20 @@ const withBust = (url: string) => (url ? (url.includes('?') ? `${url}&${cacheBus
     border-radius: 30px;
   }
 
+  .phone-media--cover {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 30px;
+  }
+
   .phone-media--letterbox {
     width: 100%;
+    height: auto;
     aspect-ratio: 16 / 9;
     object-fit: contain;
-    margin-block: auto;
-  }
-
-  .phone-media--cover {
-    object-fit: cover;
-  }
-
-  .phone-media--contain {
-    object-fit: cover;
-  }
-
-  @media (hover: hover) and (pointer: fine) {
-    .phone-card:hover .phone-media {
-      transform: scale(1.04);
-    }
+    margin: auto 0;
+    border-radius: 0;
   }
 
   /* Vignette */

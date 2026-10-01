@@ -71,6 +71,16 @@ const { lang } = Astro.props;
       id="modal-video-canvas"
       class="modal-video-canvas bg-black"
     >
+      {/* Background Poster to prevent black screen flickering before YouTube player loads */}
+      <img
+        id="modal-poster-img"
+        src=""
+        alt=""
+        class="modal-poster-img"
+        aria-hidden="true"
+        style="display: none;"
+      />
+
       <iframe
         id="modal-youtube-iframe"
         src=""
@@ -108,6 +118,7 @@ const { lang } = Astro.props;
 
     const closeBtn = document.getElementById('modal-close-btn');
     const iframe = document.getElementById('modal-youtube-iframe') as HTMLIFrameElement | null;
+    const posterImg = document.getElementById('modal-poster-img') as HTMLImageElement | null;
     const categoryEl = document.getElementById('modal-category');
     const whatsappLinkEl = document.getElementById('modal-whatsapp-link') as HTMLAnchorElement | null;
 
@@ -121,6 +132,10 @@ const { lang } = Astro.props;
       if (iframe) {
         iframe.src = '';
       }
+      if (posterImg) {
+        posterImg.src = '';
+        posterImg.style.display = 'none';
+      }
     }
 
     function openModal(data: {
@@ -132,6 +147,7 @@ const { lang } = Astro.props;
       whatsappUrl: string;
       aspectRatio: string;
       orientation?: string;
+      posterSrc?: string;
     }) {
       if (!modal || !iframe) return;
 
@@ -140,11 +156,27 @@ const { lang } = Astro.props;
         data.aspectRatio === '16/9' ||
         data.aspectRatio === '16.5/9';
 
+      // Display project poster behind iframe immediately to eliminate black screen flicker
+      if (posterImg) {
+        if (data.posterSrc) {
+          posterImg.src = data.posterSrc;
+          posterImg.alt = data.title || '';
+          if (isLandscape) {
+            posterImg.className = 'modal-poster-img modal-poster-img--letterbox';
+          } else {
+            posterImg.className = 'modal-poster-img modal-poster-img--cover';
+          }
+          posterImg.style.display = 'block';
+        } else {
+          posterImg.style.display = 'none';
+        }
+      }
+
       // For landscape (6th video / running-film), letterbox horizontally in the vertical phone
       if (isLandscape) {
-        iframe.className = 'modal-video-element modal-video-element--letterbox w-full aspect-video border-0';
+        iframe.className = 'modal-video-element modal-video-element--letterbox';
       } else {
-        iframe.className = 'modal-video-element modal-video-element--cover w-full h-full object-cover rounded-[30px] border-0';
+        iframe.className = 'modal-video-element modal-video-element--cover';
       }
 
       // Metadata
@@ -186,6 +218,16 @@ const { lang } = Astro.props;
         const ds = card.dataset;
         const isLandscape = ds.slug === 'running-film' || ds.orientation === 'landscape' || ds.aspectRatio?.includes('16');
         const yid = ds.youtubeId || (isLandscape ? 'm_MjsGfVXVc' : '');
+
+        // Stop any active desktop hover preview
+        const previewVideo = card.querySelector<HTMLVideoElement>('.phone-video');
+        if (previewVideo) {
+          card.classList.remove('is-previewing');
+          previewVideo.classList.remove('is-playing');
+          previewVideo.pause();
+          previewVideo.currentTime = 0;
+        }
+
         openModal({
           youtubeId: yid,
           title: ds.title || '',
@@ -195,25 +237,49 @@ const { lang } = Astro.props;
           whatsappUrl: ds.whatsappUrl || '',
           aspectRatio: ds.aspectRatio || (isLandscape ? '16/9' : '9/16.5'),
           orientation: isLandscape ? 'landscape' : 'vertical',
+          posterSrc: ds.posterSrc || '',
         });
       });
 
       // Desktop Hover-to-play with Mobile Stability
       const previewVideo = card.querySelector<HTMLVideoElement>('.phone-video');
       if (previewVideo) {
+        let playPromise: Promise<void> | null = null;
+
         card.addEventListener('mouseenter', () => {
-          if (window.matchMedia('(hover: hover)').matches) {
-            if (!previewVideo.src && previewVideo.dataset.src) {
-              previewVideo.src = previewVideo.dataset.src;
-            }
-            previewVideo.muted = true;
-            previewVideo.volume = 0;
-            previewVideo.play().catch(() => {});
+          if (!window.matchMedia('(hover: hover)').matches) return;
+
+          if (!previewVideo.src && previewVideo.dataset.src) {
+            previewVideo.src = previewVideo.dataset.src;
+          }
+          previewVideo.muted = true;
+          previewVideo.volume = 0;
+          playPromise = previewVideo.play();
+          if (playPromise !== undefined) {
+            playPromise
+              .then(() => {
+                card.classList.add('is-previewing');
+                previewVideo.classList.add('is-playing');
+              })
+              .catch(() => {});
           }
         });
 
         card.addEventListener('mouseleave', () => {
-          if (window.matchMedia('(hover: hover)').matches) {
+          if (!window.matchMedia('(hover: hover)').matches) return;
+
+          card.classList.remove('is-previewing');
+          previewVideo.classList.remove('is-playing');
+
+          if (playPromise !== null) {
+            playPromise
+              .catch(() => {})
+              .finally(() => {
+                previewVideo.pause();
+                previewVideo.currentTime = 0;
+                playPromise = null;
+              });
+          } else {
             previewVideo.pause();
             previewVideo.currentTime = 0;
           }
@@ -228,6 +294,7 @@ const { lang } = Astro.props;
   } else {
     initVideoModal();
   }
+  document.addEventListener('astro:page-load', initVideoModal);
 </script>
 
 <style>
@@ -445,17 +512,46 @@ const { lang } = Astro.props;
     border-radius: 40px;
   }
 
+  /* Background Poster behind Iframe to eliminate black screen flicker */
+  .modal-poster-img {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    background-color: #000000;
+  }
+
+  .modal-poster-img--cover {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 30px;
+  }
+
+  .modal-poster-img--letterbox {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+    object-fit: contain;
+    margin: auto 0;
+    border-radius: 0;
+  }
+
   /* Video iframe styling */
   .modal-video-element {
-    background-color: #000000;
+    background-color: transparent;
     display: block;
     margin: 0 auto;
     border: 0;
     outline: none;
+    position: relative;
+    z-index: 2;
   }
 
   /* Vertical Reels: full cover */
   .modal-video-element--cover {
+    position: absolute;
+    inset: 0;
     width: 100%;
     height: 100%;
     object-fit: cover;
@@ -464,9 +560,12 @@ const { lang } = Astro.props;
 
   /* Landscape Video: Letterboxed in the vertical phone with black margins top and bottom */
   .modal-video-element--letterbox {
+    position: absolute;
+    inset: 0;
     width: 100%;
+    height: auto;
     aspect-ratio: 16 / 9;
-    margin-block: auto;
+    margin: auto 0;
     border-radius: 0;
   }
 
