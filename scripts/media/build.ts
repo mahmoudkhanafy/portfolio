@@ -246,6 +246,7 @@ export async function buildMedia(options: BuildOptions): Promise<BuildResult> {
         const started = Date.now();
         try {
           await runner(FFMPEG, encodeArgs(job.source, out, plan, { toneMap }));
+          await ensureFaststart(out, runner);
         } catch (error) {
           const detail = error instanceof CommandError ? error.stderr.split('\n').at(-1) || error.message : String(error);
           throw new ItemFailure(problem.encodeFailed(job.file, detail));
@@ -421,7 +422,40 @@ export async function buildMedia(options: BuildOptions): Promise<BuildResult> {
     }
   }
 
+  if (needsFfmpeg && !options.plan) {
+    for (const job of jobs) {
+      if (job.source.endsWith('.mp4') && existsSync(job.source)) {
+        await ensureFaststart(job.source, runner);
+      }
+    }
+    const rootFinalll = join(root, 'finalll.mp4');
+    if (existsSync(rootFinalll)) {
+      await ensureFaststart(rootFinalll, runner);
+    }
+  }
+
   return { needsFfmpeg, needsBrowser, warnings, errors: [], catalog };
+}
+
+async function ensureFaststart(filePath: string, runner: Runner): Promise<void> {
+  try {
+    const fd = await readFile(filePath);
+    const hasMoovAtStart = fd.subarray(0, 100).toString('latin1').includes('moov');
+    if (!hasMoovAtStart) {
+      const ext = filePath.endsWith('.mov') ? '.mov' : '.mp4';
+      const tmp = `${filePath}.fs.tmp${ext}`;
+      await runner(FFMPEG, [
+        '-hide_banner', '-loglevel', 'error', '-nostdin', '-y',
+        '-i', filePath,
+        '-c', 'copy',
+        '-movflags', '+faststart',
+        tmp,
+      ]);
+      await rename(tmp, filePath);
+    }
+  } catch {
+    // If stream-copy fails, keep original file
+  }
 }
 
 // ——— command line ———
