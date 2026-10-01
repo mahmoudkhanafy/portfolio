@@ -52,15 +52,8 @@ const EFFICIENT_CODECS = ['hevc', 'h265', 'av1', 'vp9'];
  * Sources already at or below 720 get a single rendition. With the source bitrate known, hd is capped
  * near it (×1.15 for H.264, ×1.6 for newer codecs) and sd at 60% of hd.
  */
-export function planRenditions(src: Size, source?: SourceRate): RenditionPlan[] {
-  const hdSize = fit(src, 1080, 1920);
-  const hdLadder = clamp(Math.round(((hdSize.width * hdSize.height) / 1000) * 3.5), 1500, 6000);
-  const factor = EFFICIENT_CODECS.includes((source?.codec ?? '').toLowerCase()) ? 1.6 : 1.15;
-  const hdRate = source?.videoKbps ? Math.min(hdLadder, Math.max(600, Math.round(source.videoKbps * factor))) : hdLadder;
-  const hd: RenditionPlan = { id: 'hd', ...hdSize, crf: 22, maxrateKbps: Math.min(2800, hdRate), bufsizeKbps: 4000, audioKbps: 128, fpsMax: 30 };
-  const sdSize = fit(src, 720, 1280);
-  if (sdSize.width === hdSize.width && sdSize.height === hdSize.height) return [hd];
-  const sdLadder = clamp(Math.round(((sdSize.width * sdSize.height) / 1000) * 3), 800, 2500);
-  const sdRate = source?.videoKbps ? Math.min(sdLadder, Math.max(400, Math.round(hdRate * 0.6))) : sdLadder;
-  return [hd, { id: 'sd', ...sdSize, crf: 26, maxrateKbps: sdRate, bufsizeKbps: sdRate * 2, audioKbps: 128, fpsMax: 30 }];
+export function planRenditions(src: Size, _source?: SourceRate): RenditionPlan[] {
+  const hdSize = fit(src, 720, 1280);
+  const hd: RenditionPlan = { id: 'hd', ...hdSize, crf: 26, maxrateKbps: 1400, bufsizeKbps: 2000, audioKbps: 96, fpsMax: 30 };
+  return [hd];
 }

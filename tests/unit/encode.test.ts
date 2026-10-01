@@ -24,7 +24,7 @@ describe('encodeArgs', () => {
   });
 
   it('encodes web-safe H.264 with the plan rates and 2-second keyframes', () => {
-    expect([after(args, '-c:v'), after(args, '-profile:v'), after(args, '-level'), after(args, '-crf'), after(args, '-maxrate'), after(args, '-bufsize')]).toEqual(['libx264', 'main', '4.1', '23', '1944k', '3888k']);
+    expect([after(args, '-c:v'), after(args, '-profile:v'), after(args, '-level'), after(args, '-b:v'), after(args, '-crf'), after(args, '-maxrate'), after(args, '-bufsize')]).toEqual(['libx264', 'main', '3.1', '1100k', '23', '1400k', '2000k']);
     expect(after(args, '-r')).toBe('30');
     expect(after(args, '-force_key_frames')).toBe('expr:gte(t,n_forced*2)');
     expect([after(args, '-colorspace'), after(args, '-color_primaries'), after(args, '-color_trc')]).toEqual(['bt709', 'bt709', 'bt709']);

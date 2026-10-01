@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 
 /** Bump when encoding settings change, so every video is re-encoded once. */
-export const VIDEO_PIPELINE_VERSION = 6;
+export const VIDEO_PIPELINE_VERSION = 7;
 /** Bump when cover or still rendering changes, so every image is re-rendered once. (Link-preview cards
     re-render on their own when their design changes: scripts/media/og.ts.) */
 export const IMAGE_PIPELINE_VERSION = 6;

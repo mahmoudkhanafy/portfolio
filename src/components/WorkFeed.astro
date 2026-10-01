@@ -21,6 +21,9 @@ const srcset = (list: Array<{ src: string; width: number }>) => list.map((s) => 
 // Separate vertical videos (5 reels) and horizontal video (1 film)
 const verticalWorks = works.filter((w) => w.slug !== 'running-film' && (w.slug === 'nimun-recap' || w.width <= w.height));
 const horizontalWorks = works.filter((w) => w.slug === 'running-film' || (w.slug !== 'nimun-recap' && w.width > w.height));
+
+const cacheBust = `v=fast_${Date.now()}`;
+const withBust = (url: string) => (url ? (url.includes('?') ? `${url}&${cacheBust}` : `${url}?${cacheBust}`) : '');
 ---
 
 <section id="work" class="feed" aria-labelledby="work-heading">
@@ -42,8 +45,8 @@ const horizontalWorks = works.filter((w) => w.slug === 'running-film' || (w.slug
           const description = pick(work.description, lang);
           const hd = work.renditions.find((r) => r.id === 'hd') || work.renditions[0];
           const sd = work.renditions.find((r) => r.id === 'sd') || work.renditions[work.renditions.length - 1];
-          const videoSrc = hd ? href(hd.src) : '';
-          const previewSrc = sd ? href(sd.src) : videoSrc;
+          const videoSrc = hd ? withBust(href(hd.src)) : '';
+          const previewSrc = sd ? withBust(href(sd.src)) : videoSrc;
           const posterSrc = href(work.cover.jpg.src);
 
           const isNimun = work.slug === 'nimun-recap';
@@ -162,8 +165,8 @@ const horizontalWorks = works.filter((w) => w.slug === 'running-film' || (w.slug
         const description = pick(work.description, lang);
         const hd = work.renditions.find((r) => r.id === 'hd') || work.renditions[0];
         const sd = work.renditions.find((r) => r.id === 'sd') || work.renditions[work.renditions.length - 1];
-        const videoSrc = hd ? href(hd.src) : '';
-        const previewSrc = sd ? href(sd.src) : videoSrc;
+        const videoSrc = hd ? withBust(href(hd.src)) : '';
+        const previewSrc = sd ? withBust(href(sd.src)) : videoSrc;
         const posterSrc = href(work.cover.jpg.src);
         const category = typeLabel(work.type, lang);
         const whatsappLink = whatsappUrl(whatsappMessage(lang, { title: title.text, url: pageAbs(lang, work.slug) }));
