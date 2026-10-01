@@ -68,7 +68,7 @@ const { lang } = Astro.props;
         id="modal-video"
         playsinline
         webkit-playsinline="true"
-        preload="metadata"
+        preload="auto"
         loop
         class="modal-video-element"
       ></video>
@@ -322,11 +322,7 @@ const { lang } = Astro.props;
       updateMuteState(false);
       spinner?.classList.remove('hidden');
 
-      // Create video source
-      const source = document.createElement('source');
-      source.src = data.videoSrc;
-      source.type = data.videoSrc.endsWith('.mov') ? 'video/quicktime' : 'video/mp4';
-      video.appendChild(source);
+      // Only attach the <video> source when the user actually clicks to open a video
       video.src = data.videoSrc;
 
       modal.classList.remove('hidden');
