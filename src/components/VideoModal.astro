@@ -139,6 +139,7 @@ const { lang } = Astro.props;
     }
 
     function openModal(data: {
+      slug?: string;
       youtubeId: string;
       title: string;
       client: string;
@@ -151,10 +152,9 @@ const { lang } = Astro.props;
     }) {
       if (!modal || !iframe) return;
 
-      const isLandscape = data.orientation === 'landscape' ||
-        data.youtubeId === 'm_MjsGfVXVc' ||
-        data.aspectRatio === '16/9' ||
-        data.aspectRatio === '16.5/9';
+      const isLandscape = data.slug === 'running-film' ||
+        data.orientation === 'landscape' ||
+        data.youtubeId === 'm_MjsGfVXVc';
 
       // Display project poster behind iframe immediately to eliminate black screen flicker
       if (posterImg) {
@@ -172,7 +172,7 @@ const { lang } = Astro.props;
         }
       }
 
-      // For landscape (6th video / running-film), letterbox horizontally in the vertical phone
+      // Items 1 to 5: full bleed cover edge-to-edge. Item 6 ONLY: letterboxed 16:9
       if (isLandscape) {
         iframe.className = 'modal-video-element modal-video-element--letterbox';
       } else {
@@ -216,7 +216,7 @@ const { lang } = Astro.props;
         const target = e.target as HTMLElement;
         if (target.closest('a')) return;
         const ds = card.dataset;
-        const isLandscape = ds.slug === 'running-film' || ds.orientation === 'landscape' || ds.aspectRatio?.includes('16');
+        const isLandscape = ds.slug === 'running-film' || ds.orientation === 'landscape';
         const yid = ds.youtubeId || (isLandscape ? 'm_MjsGfVXVc' : '');
 
         // Stop any active desktop hover preview
@@ -229,6 +229,7 @@ const { lang } = Astro.props;
         }
 
         openModal({
+          slug: ds.slug || '',
           youtubeId: yid,
           title: ds.title || '',
           client: ds.client || '',
@@ -521,44 +522,48 @@ const { lang } = Astro.props;
     background-color: #000000;
   }
 
+  /* Items 1 to 5: Vertical Reels full screen edge-to-edge */
   .modal-poster-img--cover {
     width: 100%;
     height: 100%;
-    object-fit: cover;
-    border-radius: 30px;
+    object-fit: cover !important;
+    border-radius: 34px;
+    display: block;
   }
 
+  /* Item 6 ONLY: Landscape letterboxed in middle */
   .modal-poster-img--letterbox {
     width: 100%;
     height: auto;
     aspect-ratio: 16 / 9;
-    object-fit: contain;
+    object-fit: contain !important;
     margin: auto 0;
     border-radius: 0;
+    display: block;
   }
 
   /* Video iframe styling */
   .modal-video-element {
     background-color: transparent;
     display: block;
-    margin: 0 auto;
     border: 0;
     outline: none;
     position: relative;
     z-index: 2;
   }
 
-  /* Vertical Reels: full cover */
+  /* Items 1 to 5: Vertical Reels iframe edge-to-edge full bleed */
   .modal-video-element--cover {
     position: absolute;
     inset: 0;
     width: 100%;
     height: 100%;
-    object-fit: cover;
-    border-radius: 30px;
+    object-fit: cover !important;
+    border-radius: 34px;
+    border: 0;
   }
 
-  /* Landscape Video: Letterboxed in the vertical phone with black margins top and bottom */
+  /* Item 6 ONLY: Landscape Video letterboxed in middle with black bars top and bottom */
   .modal-video-element--letterbox {
     position: absolute;
     inset: 0;
@@ -567,6 +572,7 @@ const { lang } = Astro.props;
     aspect-ratio: 16 / 9;
     margin: auto 0;
     border-radius: 0;
+    border: 0;
   }
 
   /* Centered Dynamic Island in Modal: h-5 w-24 bg-black rounded-full mx-auto mt-2.5 z-20 pointer-events-none */

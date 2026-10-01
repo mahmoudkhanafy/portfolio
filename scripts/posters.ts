@@ -9,6 +9,7 @@ interface Project {
   source: string;
   time: string;
   youtubeId: string;
+  isLandscape?: boolean;
 }
 
 export const PROJECTS: Project[] = [
@@ -17,7 +18,7 @@ export const PROJECTS: Project[] = [
   { slug: 'skin-and-pain', source: 'work/skin-and-pain.mp4', time: '00:00:02.5', youtubeId: '5LSBdHHF-0o' },
   { slug: 'blood-sugar-test', source: 'work/blood-sugar-test.mp4', time: '00:00:02.5', youtubeId: 'eLpztUn5xTQ' },
   { slug: 'nimun-recap', source: 'work/nimun-recap.mov', time: '00:00:02.5', youtubeId: 'B4V5lTdMy1s' },
-  { slug: 'running-film', source: 'work/running-film.mp4', time: '00:00:02.5', youtubeId: 'm_MjsGfVXVc' },
+  { slug: 'running-film', source: 'work/running-film.mp4', time: '00:00:02.5', youtubeId: 'm_MjsGfVXVc', isLandscape: true },
 ];
 
 async function downloadYoutubeThumbnail(youtubeId: string, dest: string): Promise<boolean> {
@@ -62,29 +63,64 @@ export async function generatePosters(force = false): Promise<void> {
 
     let extracted = false;
 
-    // 1. Try local extraction with ffmpeg
+    // 1. Try local extraction with ffmpeg ensuring full-frame vertical (9:16) for reels and landscape (16:9) for film
     if (existsSync(p.source)) {
       try {
-        execSync(`ffmpeg -y -ss ${p.time} -i "${p.source}" -frames:v 1 -q:v 2 "${tmpJpg}"`, { stdio: 'ignore' });
+        let vfFilter = '';
+        if (p.isLandscape) {
+          // Full HD 16:9 landscape
+          vfFilter = 'scale=1920:1080:flags=lanczos,setsar=1';
+        } else if (p.slug === 'nimun-recap') {
+          // 4:5 source -> crop to full vertical 9:16 frame (1080x1920)
+          vfFilter = 'scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,setsar=1';
+        } else {
+          // Anamorphic vertical 9:16 source (1080x1080 with SAR 9:16) -> expand to true 1080x1920
+          vfFilter = 'scale=1080:1920:flags=lanczos,setsar=1';
+        }
+
+        execSync(`ffmpeg -y -ss ${p.time} -i "${p.source}" -vf "${vfFilter}" -frames:v 1 -q:v 2 "${tmpJpg}"`, { stdio: 'ignore' });
+
         if (existsSync(tmpJpg)) {
-          await sharp(tmpJpg).webp({ quality: 90 }).toFile(webpPath);
-          await sharp(tmpJpg).jpeg({ quality: 90 }).toFile(jpgPath);
+          await sharp(tmpJpg).webp({ quality: 92 }).toFile(webpPath);
+          await sharp(tmpJpg).jpeg({ quality: 92 }).toFile(jpgPath);
           unlinkSync(tmpJpg);
           extracted = true;
-          console.log(`✓ Generated poster from source for ${p.slug}`);
+          console.log(`✓ Generated full-frame poster for ${p.slug} (${p.isLandscape ? '16:9 landscape' : '9:16 vertical'})`);
         }
       } catch {
         extracted = false;
       }
     }
 
-    // 2. Fallback to YouTube maxresdefault thumbnail
+    // 2. Fallback to YouTube maxresdefault thumbnail with intelligent center crop for vertical shorts
     if (!extracted) {
       console.log(`Fetching YouTube fallback for ${p.slug}...`);
       const downloaded = await downloadYoutubeThumbnail(p.youtubeId, tmpJpg);
       if (downloaded && existsSync(tmpJpg)) {
-        await sharp(tmpJpg).webp({ quality: 90 }).toFile(webpPath);
-        await sharp(tmpJpg).jpeg({ quality: 90 }).toFile(jpgPath);
+        if (!p.isLandscape) {
+          // If fallback image is horizontal (16:9 like YouTube shorts thumbnails with pillarboxes), crop the center 9:16
+          const meta = await sharp(tmpJpg).metadata();
+          if (meta.width && meta.height && meta.width > meta.height) {
+            const cropWidth = Math.round((meta.height * 9) / 16);
+            const left = Math.round((meta.width - cropWidth) / 2);
+            await sharp(tmpJpg)
+              .extract({ left, top: 0, width: cropWidth, height: meta.height })
+              .resize(1080, 1920)
+              .webp({ quality: 92 })
+              .toFile(webpPath);
+            await sharp(tmpJpg)
+              .extract({ left, top: 0, width: cropWidth, height: meta.height })
+              .resize(1080, 1920)
+              .jpeg({ quality: 92 })
+              .toFile(jpgPath);
+            unlinkSync(tmpJpg);
+            console.log(`✓ Cropped and saved vertical 9:16 YouTube fallback for ${p.slug}`);
+            continue;
+          }
+        }
+
+        await sharp(tmpJpg).webp({ quality: 92 }).toFile(webpPath);
+        await sharp(tmpJpg).jpeg({ quality: 92 }).toFile(jpgPath);
         unlinkSync(tmpJpg);
         console.log(`✓ Fetched YouTube thumbnail fallback for ${p.slug}`);
       }

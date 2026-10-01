@@ -53,7 +53,7 @@ const withBust = (url: string) => (url ? (url.includes('?') ? `${url}&${cacheBus
           const videoSrc = hd ? withBust(href(hd.src)) : '';
           const previewSrc = sd ? withBust(href(sd.src)) : videoSrc;
           const youtubeId = work.youtubeId || YOUTUBE_IDS[work.slug] || '';
-          const isLandscape = work.slug === 'running-film' || work.width > work.height;
+          const isLandscape = work.slug === 'running-film';
           const posterWebp = href(`posters/${work.slug}.webp`);
           const posterJpg = href(`posters/${work.slug}.jpg`);
           const ytThumbnail = youtubeId ? `https://i.ytimg.com/vi/${youtubeId}/maxresdefault.jpg` : '';
@@ -93,16 +93,16 @@ const withBust = (url: string) => (url ? (url.includes('?') ? `${url}&${cacheBus
                   <span class="phone-btn phone-btn--power" aria-hidden="true"></span>
                   <span class="phone-btn phone-btn--camera-control" aria-hidden="true"></span>
 
-                  {/* Inner Screen: Aspect Ratio 9:16.5, border-[6px] border-black bg-black */}
-                  <div class="phone-screen phone-screen--vertical bg-black">
+                  {/* Inner Screen: Aspect Ratio 9:16.5 */}
+                  <div class:list={['phone-screen', 'phone-screen--vertical', isLandscape ? 'phone-screen--landscape-wrap' : 'phone-screen--vertical-reel']}>
                     {/* Centered Dynamic Island: h-5 w-24 */}
                     <div class="phone-island phone-island--vertical" aria-hidden="true">
                       <div class="phone-island__dot-sensor" />
                       <div class="phone-island__dot-lens" />
                     </div>
 
-                    {/* High-Resolution Static Thumbnail Poster (Rendered by default on ALL devices) */}
-                    <picture class:list={['phone-poster', isLandscape ? 'phone-poster--letterbox' : '']}>
+                    {/* Static Thumbnail Poster: Full bleed edge-to-edge for reels, letterbox for film */}
+                    <picture class:list={['phone-poster', isLandscape ? 'phone-poster--letterbox' : 'phone-poster--full']}>
                       <source type="image/webp" srcset={posterWebp} />
                       <source type="image/jpeg" srcset={posterJpg} />
                       <img
@@ -111,7 +111,7 @@ const withBust = (url: string) => (url ? (url.includes('?') ? `${url}&${cacheBus
                         loading="lazy"
                         decoding="async"
                         onerror={ytThumbnail ? `this.onerror=null;this.src='${ytThumbnail}';` : undefined}
-                        class:list={['phone-media', isLandscape ? 'phone-media--letterbox' : 'phone-media--cover']}
+                        class:list={['phone-media', isLandscape ? 'phone-media--letterbox' : 'phone-media--full']}
                       />
                     </picture>
 
@@ -123,7 +123,7 @@ const withBust = (url: string) => (url ? (url.includes('?') ? `${url}&${cacheBus
                       webkit-playsinline="true"
                       loop
                       muted
-                      class:list={['phone-video', isLandscape ? 'phone-media--letterbox' : 'phone-media--cover']}
+                      class:list={['phone-video', isLandscape ? 'phone-media--letterbox' : 'phone-media--full']}
                     ></video>
 
                     {/* Clean Screen: Hover Play Icon Button Only */}
@@ -512,13 +512,8 @@ const withBust = (url: string) => (url ? (url.includes('?') ? `${url}&${cacheBus
   .phone-screen {
     position: relative;
     overflow: hidden;
-    background-color: #000000;
     width: 100%;
     border: 6px solid #000000;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
   }
 
   .phone-screen--vertical {
@@ -526,8 +521,55 @@ const withBust = (url: string) => (url ? (url.includes('?') ? `${url}&${cacheBus
     border-radius: 40px;
   }
 
-  /* Media: Static poster visible by default on ALL devices */
-  .phone-poster {
+  /* Vertical Reels: 100% full bleed screen filling edge-to-edge like Instagram Reel / TikTok */
+  .phone-screen--vertical-reel {
+    background-color: #000000;
+  }
+
+  .phone-poster--full {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    pointer-events: none;
+    z-index: 1;
+    opacity: 1;
+    transition: opacity 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .phone-media--full {
+    width: 100%;
+    height: 100%;
+    object-fit: cover !important;
+    border-radius: 34px;
+    display: block;
+  }
+
+  .phone-video.phone-media--full {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover !important;
+    border-radius: 34px;
+    z-index: 2;
+    display: none;
+    opacity: 0;
+    transition: opacity 300ms cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+  }
+
+  /* Landscape Film ONLY (Item 6): Letterbox centered horizontally with black bars top and bottom */
+  .phone-screen--landscape-wrap {
+    background-color: #000000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .phone-poster--letterbox {
     position: absolute;
     inset: 0;
     width: 100%;
@@ -541,31 +583,35 @@ const withBust = (url: string) => (url ? (url.includes('?') ? `${url}&${cacheBus
     transition: opacity 300ms cubic-bezier(0.4, 0, 0.2, 1);
   }
 
-  .phone-poster--letterbox {
-    position: absolute;
-    inset: 0;
+  .phone-media--letterbox {
     width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    height: auto;
+    aspect-ratio: 16 / 9;
+    object-fit: contain !important;
+    margin: auto 0;
+    border-radius: 0;
+    display: block;
   }
 
-  /* Video Preview element */
-  .phone-video {
+  .phone-video.phone-media--letterbox {
     position: absolute;
     inset: 0;
     width: 100%;
-    height: 100%;
-    pointer-events: none;
+    height: auto;
+    aspect-ratio: 16 / 9;
+    object-fit: contain !important;
+    margin: auto 0;
+    border-radius: 0;
     z-index: 2;
+    display: none;
     opacity: 0;
     transition: opacity 300ms cubic-bezier(0.4, 0, 0.2, 1);
-    display: none; /* Disabled on touch/mobile by default */
+    pointer-events: none;
   }
 
   @media (hover: hover) and (pointer: fine) {
-    .phone-video {
+    .phone-video.phone-media--full,
+    .phone-video.phone-media--letterbox {
       display: block;
     }
 
@@ -591,31 +637,8 @@ const withBust = (url: string) => (url ? (url.includes('?') ? `${url}&${cacheBus
   }
 
   .phone-media {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
     pointer-events: none;
     transition: transform 700ms ease;
-  }
-
-  .phone-screen--vertical .phone-media--cover {
-    border-radius: 30px;
-  }
-
-  .phone-media--cover {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 30px;
-  }
-
-  .phone-media--letterbox {
-    width: 100%;
-    height: auto;
-    aspect-ratio: 16 / 9;
-    object-fit: contain;
-    margin: auto 0;
-    border-radius: 0;
   }
 
   /* Vignette */
