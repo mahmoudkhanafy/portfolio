@@ -9,7 +9,7 @@
   },
   "scripts": {
     "posters": "node scripts/posters.ts",
-    "media": "node scripts/posters.ts && node scripts/media/build.ts",
+    "media": "node scripts/media/build.ts",
     "dev": "npm run media && astro dev",
     "build": "npm run media && astro build",
     "build:e2e": "node scripts/e2e-work.ts && node scripts/media/build.ts --work .e2e-work && SITE_URL=http://localhost:4751 astro build",

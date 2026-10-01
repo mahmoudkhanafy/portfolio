@@ -161,6 +161,11 @@ const { lang } = Astro.props;
         if (data.posterSrc) {
           posterImg.src = data.posterSrc;
           posterImg.alt = data.title || '';
+          posterImg.onerror = () => {
+            if (data.youtubeId && !posterImg.src.includes('hqdefault.jpg')) {
+              posterImg.src = `https://i.ytimg.com/vi/${data.youtubeId}/hqdefault.jpg`;
+            }
+          };
           if (isLandscape) {
             posterImg.className = 'modal-poster-img modal-poster-img--letterbox';
           } else {
