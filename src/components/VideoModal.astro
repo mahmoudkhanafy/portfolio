@@ -68,7 +68,7 @@ const { lang } = Astro.props;
         id="modal-video"
         playsinline
         webkit-playsinline="true"
-        preload="auto"
+        preload="metadata"
         loop
         class="modal-video-element"
       ></video>
@@ -362,6 +362,9 @@ const { lang } = Astro.props;
     // Video Event Listeners
     if (video) {
       video.addEventListener('timeupdate', () => {
+        if (video.currentTime > 0.1) {
+          spinner?.classList.add('hidden');
+        }
         const now = performance.now();
         if (now - lastTimeUpdate >= 250) {
           lastTimeUpdate = now;
@@ -377,9 +380,13 @@ const { lang } = Astro.props;
 
       video.addEventListener('play', () => updatePlayState(true));
       video.addEventListener('pause', () => updatePlayState(false));
+      video.addEventListener('loadstart', () => spinner?.classList.remove('hidden'));
       video.addEventListener('waiting', () => spinner?.classList.remove('hidden'));
+      video.addEventListener('seeking', () => spinner?.classList.remove('hidden'));
       video.addEventListener('playing', () => spinner?.classList.add('hidden'));
       video.addEventListener('canplay', () => spinner?.classList.add('hidden'));
+      video.addEventListener('canplaythrough', () => spinner?.classList.add('hidden'));
+      video.addEventListener('seeked', () => spinner?.classList.add('hidden'));
       video.addEventListener('loadeddata', () => spinner?.classList.add('hidden'));
       video.addEventListener('error', () => {
         spinner?.classList.add('hidden');
