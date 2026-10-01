@@ -29,7 +29,7 @@ const { lang } = Astro.props;
     </svg>
   </button>
 
-  {/* Modal Content Wrapper - Strictly bounded to 85vh and centered */}
+  {/* Modal Content Wrapper - Strictly bounded to 85vh and centered in vertical portrait mockup */}
   <div
     id="modal-content-container"
     class="modal-content-container modal-container--vertical"
@@ -66,19 +66,19 @@ const { lang } = Astro.props;
       </a>
     </div>
 
-    {/* Video Canvas Container */}
+    {/* Video Canvas Container: Pure Black Screen */}
     <div
       id="modal-video-canvas"
-      class="modal-video-canvas"
+      class="modal-video-canvas bg-black"
     >
       <iframe
         id="modal-youtube-iframe"
         src=""
         title="YouTube video player"
         frameborder="0"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
         allowfullscreen
-        class="modal-video-element w-full h-full object-cover rounded-[30px] border-0"
+        class="modal-video-element border-0"
       ></iframe>
 
       {/* Centered Dynamic Island: h-5 w-24 bg-black rounded-full mx-auto mt-2.5 z-20 pointer-events-none */}
@@ -107,12 +107,9 @@ const { lang } = Astro.props;
     if (!modal) return;
 
     const closeBtn = document.getElementById('modal-close-btn');
-    const container = document.getElementById('modal-content-container');
     const iframe = document.getElementById('modal-youtube-iframe') as HTMLIFrameElement | null;
     const categoryEl = document.getElementById('modal-category');
     const whatsappLinkEl = document.getElementById('modal-whatsapp-link') as HTMLAnchorElement | null;
-    const islandEl = document.getElementById('modal-island');
-    const homeIndicatorEl = document.getElementById('modal-home-indicator');
 
     function closeModal() {
       if (!modal) return;
@@ -139,36 +136,24 @@ const { lang } = Astro.props;
       if (!modal || !iframe) return;
 
       const isLandscape = data.orientation === 'landscape' ||
+        data.youtubeId === 'm_MjsGfVXVc' ||
         data.aspectRatio === '16/9' ||
-        data.aspectRatio === '16.5/9' ||
-        data.aspectRatio === '18.5/9' ||
-        data.aspectRatio === '19.5/9';
+        data.aspectRatio === '16.5/9';
 
-      if (container) {
-        if (isLandscape) {
-          container.classList.remove('modal-container--vertical');
-          container.classList.add('modal-container--landscape');
-          islandEl?.classList.remove('phone-island--vertical');
-          islandEl?.classList.add('phone-island--landscape');
-          homeIndicatorEl?.classList.remove('phone-home-indicator--vertical');
-          homeIndicatorEl?.classList.add('phone-home-indicator--landscape');
-        } else {
-          container.classList.remove('modal-container--landscape');
-          container.classList.add('modal-container--vertical');
-          islandEl?.classList.remove('phone-island--landscape');
-          islandEl?.classList.add('phone-island--vertical');
-          homeIndicatorEl?.classList.remove('phone-home-indicator--landscape');
-          homeIndicatorEl?.classList.add('phone-home-indicator--vertical');
-        }
+      // For landscape (6th video / running-film), letterbox horizontally in the vertical phone
+      if (isLandscape) {
+        iframe.className = 'modal-video-element modal-video-element--letterbox w-full aspect-video border-0';
+      } else {
+        iframe.className = 'modal-video-element modal-video-element--cover w-full h-full object-cover rounded-[30px] border-0';
       }
 
       // Metadata
       if (categoryEl) categoryEl.textContent = data.category;
       if (whatsappLinkEl) whatsappLinkEl.href = data.whatsappUrl;
 
-      // Load YouTube embed strictly with highest HD resolution
+      // Load YouTube embed strictly with fs=1 for native fullscreen and highest HD resolution
       if (data.youtubeId) {
-        iframe.src = `https://www.youtube-nocookie.com/embed/${data.youtubeId}?autoplay=1&playsinline=1&rel=0&modestbranding=1&controls=1&iv_load_policy=3&vq=hd1080&enablejsapi=1`;
+        iframe.src = `https://www.youtube-nocookie.com/embed/${data.youtubeId}?autoplay=1&playsinline=1&rel=0&modestbranding=1&controls=1&fs=1&enablejsapi=1`;
       }
 
       modal.classList.remove('hidden');
@@ -199,8 +184,8 @@ const { lang } = Astro.props;
         const target = e.target as HTMLElement;
         if (target.closest('a')) return;
         const ds = card.dataset;
-        const yid = ds.youtubeId || (ds.slug === 'running-film' ? 'm_MjsGfVXVc' : '');
-        const orientation = ds.orientation || (ds.aspectRatio?.includes('16') ? 'landscape' : 'vertical');
+        const isLandscape = ds.slug === 'running-film' || ds.orientation === 'landscape' || ds.aspectRatio?.includes('16');
+        const yid = ds.youtubeId || (isLandscape ? 'm_MjsGfVXVc' : '');
         openModal({
           youtubeId: yid,
           title: ds.title || '',
@@ -208,8 +193,8 @@ const { lang } = Astro.props;
           category: ds.category || '',
           year: ds.year || '2026',
           whatsappUrl: ds.whatsappUrl || '',
-          aspectRatio: ds.aspectRatio || (orientation === 'landscape' ? '16.5/9' : '9/16.5'),
-          orientation,
+          aspectRatio: ds.aspectRatio || (isLandscape ? '16/9' : '9/16.5'),
+          orientation: isLandscape ? 'landscape' : 'vertical',
         });
       });
 
@@ -322,7 +307,7 @@ const { lang } = Astro.props;
     transform: scale(1.05);
   }
 
-  /* Modal Content Wrapper: Desert Titanium / Avatar Orange iPhone Body */
+  /* Modal Content Wrapper: Desert Titanium / Avatar Orange iPhone Body (Strictly Vertical) */
   .modal-content-container {
     position: relative;
     background-color: #141312;
@@ -334,30 +319,17 @@ const { lang } = Astro.props;
     display: flex;
     align-items: center;
     justify-content: center;
-    max-height: 85vh;
-    max-width: 95vw;
-    width: auto;
-    height: auto;
     padding: 0;
-    transition: max-width 300ms ease, aspect-ratio 300ms ease, border-radius 300ms ease;
   }
 
-  /* Vertical container: compact 9:16.5 with rounded-[42px] */
+  /* Strictly vertical compact 9:16.5 proportions with rounded-[42px] */
   .modal-container--vertical {
     aspect-ratio: 9 / 16.5;
+    height: min(85vh, calc(92vw * 16.5 / 9));
+    width: calc(min(85vh, calc(92vw * 16.5 / 9)) * 9 / 16.5);
     max-height: 85vh;
-    max-width: calc(85vh * 9 / 16.5);
-    width: 100%;
+    max-width: 92vw;
     border-radius: 42px;
-  }
-
-  /* Landscape container: compact 16.5:9 with rounded-[34px] */
-  .modal-container--landscape {
-    aspect-ratio: 16.5 / 9;
-    max-height: 85vh;
-    max-width: min(92vw, calc(85vh * 16.5 / 9));
-    width: 100%;
-    border-radius: 34px;
   }
 
   /* Hardware Side Buttons (Thin Metallic Orange Slivers) */
@@ -412,52 +384,6 @@ const { lang } = Astro.props;
     box-shadow: 0 1px 1px rgba(0, 0, 0, 0.4);
   }
 
-  /* Landscape Modal Hardware Buttons */
-  .modal-container--landscape .phone-btn--action {
-    top: -3px;
-    left: clamp(65px, 12%, 80px);
-    height: 2px;
-    width: 18px;
-    border-radius: 2px 2px 0 0;
-  }
-
-  .modal-container--landscape .phone-btn--vol-up {
-    top: -3px;
-    left: clamp(96px, 18%, 112px);
-    height: 2px;
-    width: 38px;
-    border-radius: 2px 2px 0 0;
-  }
-
-  .modal-container--landscape .phone-btn--vol-down {
-    top: -3px;
-    left: clamp(144px, 28%, 160px);
-    height: 2px;
-    width: 38px;
-    border-radius: 2px 2px 0 0;
-  }
-
-  .modal-container--landscape .phone-btn--power {
-    bottom: -3px;
-    top: auto;
-    right: auto;
-    left: clamp(94px, 17%, 110px);
-    height: 2px;
-    width: 54px;
-    border-radius: 0 0 2px 2px;
-  }
-
-  .modal-container--landscape .phone-btn--camera-control {
-    bottom: -2.5px;
-    top: auto;
-    right: auto;
-    left: clamp(170px, 36%, 195px);
-    height: 1.5px;
-    width: 34px;
-    border-radius: 0 0 2px 2px;
-    background: linear-gradient(90deg, #bd4225 0%, #872811 100%);
-  }
-
   .modal-badges {
     position: absolute;
     top: clamp(0.6rem, 1.5vw, 1.25rem);
@@ -504,12 +430,13 @@ const { lang } = Astro.props;
     background-color: rgba(0, 0, 0, 0.85);
   }
 
-  /* Inner Screen Canvas with 6px black bezel */
+  /* Inner Screen Canvas with 6px black bezel: Pure Black Screen */
   .modal-video-canvas {
     position: relative;
     width: 100%;
     height: 100%;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     background-color: #000000;
@@ -518,25 +445,29 @@ const { lang } = Astro.props;
     border-radius: 40px;
   }
 
-  .modal-container--landscape .modal-video-canvas {
-    border-radius: 32px;
-  }
-
-  /* Centered video/iframe element: edge-to-edge with rounded-[30px] border-0 */
+  /* Video iframe styling */
   .modal-video-element {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
     background-color: #000000;
     display: block;
     margin: 0 auto;
     border: 0;
     outline: none;
+  }
+
+  /* Vertical Reels: full cover */
+  .modal-video-element--cover {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
     border-radius: 30px;
   }
 
-  .modal-container--landscape .modal-video-element {
-    border-radius: 22px;
+  /* Landscape Video: Letterboxed in the vertical phone with black margins top and bottom */
+  .modal-video-element--letterbox {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    margin-block: auto;
+    border-radius: 0;
   }
 
   /* Centered Dynamic Island in Modal: h-5 w-24 bg-black rounded-full mx-auto mt-2.5 z-20 pointer-events-none */
@@ -559,17 +490,6 @@ const { lang } = Astro.props;
     width: 96px;
     height: 20px;
     padding-right: 9px;
-    gap: 6px;
-  }
-
-  .modal-content-container .phone-island--landscape {
-    left: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 20px;
-    height: 96px;
-    padding-bottom: 9px;
-    flex-direction: column;
     gap: 6px;
   }
 
@@ -603,14 +523,6 @@ const { lang } = Astro.props;
     pointer-events: none;
     z-index: 20;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
-  }
-
-  .modal-content-container .phone-home-indicator--vertical {
     bottom: 8px;
-  }
-
-  .modal-content-container .phone-home-indicator--landscape {
-    bottom: 8px;
-    width: 140px;
   }
 </style>

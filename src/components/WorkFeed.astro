@@ -27,10 +27,6 @@ const YOUTUBE_IDS: Record<string, string> = {
   'running-film': 'm_MjsGfVXVc',
 };
 
-// Separate vertical videos (5 reels) and horizontal video (1 film)
-const verticalWorks = works.filter((w) => w.slug !== 'running-film' && (w.slug === 'nimun-recap' || w.width <= w.height));
-const horizontalWorks = works.filter((w) => w.slug === 'running-film' || (w.slug !== 'nimun-recap' && w.width > w.height));
-
 const cacheBust = `v=fast_${Date.now()}`;
 const withBust = (url: string) => (url ? (url.includes('?') ? `${url}&${cacheBust}` : `${url}?${cacheBust}`) : '');
 ---
@@ -46,10 +42,10 @@ const withBust = (url: string) => (url ? (url.includes('?') ? `${url}&${cacheBus
   <p class="feed__count eyebrow">{videoCount(works.length, lang)}</p>
 
   <div class="feed__list max-w-7xl mx-auto w-full">
-    {/* VERTICAL VIDEOS GRID: 1 column on mobile, 3 columns on desktop */}
+    {/* UNIFIED 6-PROJECT VERTICAL MOCKUP GRID: 1 column on mobile, 2 on tablet, 3 on desktop */}
     <div class="feed__vertical-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 w-full">
       {
-        verticalWorks.map((work) => {
+        works.map((work) => {
           const title = pick(work.title, lang)!;
           const description = pick(work.description, lang);
           const hd = work.renditions.find((r) => r.id === 'hd') || work.renditions[0];
@@ -58,8 +54,8 @@ const withBust = (url: string) => (url ? (url.includes('?') ? `${url}&${cacheBus
           const previewSrc = sd ? withBust(href(sd.src)) : videoSrc;
           const posterSrc = href(work.cover.jpg.src);
           const youtubeId = work.youtubeId || YOUTUBE_IDS[work.slug] || '';
+          const isLandscape = work.slug === 'running-film' || work.width > work.height;
 
-          const isNimun = work.slug === 'nimun-recap';
           const category = typeLabel(work.type, lang);
           const whatsappLink = whatsappUrl(whatsappMessage(lang, { title: title.text, url: pageAbs(lang, work.slug) }));
           const pageLink = pageHref(lang, work.slug);
@@ -74,11 +70,11 @@ const withBust = (url: string) => (url ? (url.includes('?') ? `${url}&${cacheBus
               data-client={work.client || ''}
               data-category={category}
               data-year="2026"
-              data-orientation="vertical"
+              data-orientation={isLandscape ? 'landscape' : 'vertical'}
               data-youtube-id={youtubeId}
               data-video-src={videoSrc}
               data-poster-src={posterSrc}
-              data-aspect-ratio="9/16.5"
+              data-aspect-ratio={isLandscape ? '16/9' : '9/16.5'}
               data-whatsapp-url={whatsappLink}
               data-duration={work.duration}
             >
@@ -94,15 +90,15 @@ const withBust = (url: string) => (url ? (url.includes('?') ? `${url}&${cacheBus
                   <span class="phone-btn phone-btn--power" aria-hidden="true"></span>
                   <span class="phone-btn phone-btn--camera-control" aria-hidden="true"></span>
 
-                  {/* Inner Screen: Aspect Ratio 9:16.5, border-[6px] border-black */}
-                  <div class="phone-screen phone-screen--vertical">
+                  {/* Inner Screen: Aspect Ratio 9:16.5, border-[6px] border-black bg-black */}
+                  <div class="phone-screen phone-screen--vertical bg-black">
                     {/* Centered Dynamic Island: h-5 w-24 */}
                     <div class="phone-island phone-island--vertical" aria-hidden="true">
                       <div class="phone-island__dot-sensor" />
                       <div class="phone-island__dot-lens" />
                     </div>
 
-                    <picture class="phone-poster">
+                    <picture class:list={['phone-poster', isLandscape ? 'phone-poster--letterbox' : '']}>
                       <source type="image/avif" srcset={srcset(work.cover.avif)} sizes="(min-width: 1024px) 340px, (min-width: 768px) 50vw, 100vw" />
                       <source type="image/webp" srcset={srcset(work.cover.webp)} sizes="(min-width: 1024px) 340px, (min-width: 768px) 50vw, 100vw" />
                       <img
@@ -112,7 +108,7 @@ const withBust = (url: string) => (url ? (url.includes('?') ? `${url}&${cacheBus
                         alt={title.text}
                         loading="lazy"
                         decoding="async"
-                        class="phone-media phone-media--cover"
+                        class:list={['phone-media', isLandscape ? 'phone-media--letterbox' : 'phone-media--cover']}
                       />
                     </picture>
 
@@ -123,7 +119,7 @@ const withBust = (url: string) => (url ? (url.includes('?') ? `${url}&${cacheBus
                       webkit-playsinline="true"
                       loop
                       muted
-                      class="phone-video phone-media--cover"
+                      class:list={['phone-video', isLandscape ? 'phone-media--letterbox' : 'phone-media--cover']}
                     ></video>
 
                     {/* Clean Screen: Hover Play Icon Button Only */}
@@ -146,7 +142,7 @@ const withBust = (url: string) => (url ? (url.includes('?') ? `${url}&${cacheBus
                   {title.text}
                 </a>
                 <span class="phone-footer-action">
-                  <span>{lang === 'ar' ? 'شاهد الفيديو' : 'Watch Reel'}</span>
+                  <span>{lang === 'ar' ? 'شاهد الفيديو' : (isLandscape ? 'Watch Film' : 'Watch Reel')}</span>
                   <svg class="phone-footer-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <line x1="7" y1="17" x2="17" y2="7" />
                     <polyline points="7 7 17 7 17 17" />
@@ -158,113 +154,6 @@ const withBust = (url: string) => (url ? (url.includes('?') ? `${url}&${cacheBus
         })
       }
     </div>
-
-    {/* HORIZONTAL WORK: Placed below 3-column grid, spanning full width in landscape mockup */}
-    {
-      horizontalWorks.map((work) => {
-        const title = pick(work.title, lang)!;
-        const description = pick(work.description, lang);
-        const hd = work.renditions.find((r) => r.id === 'hd') || work.renditions[0];
-        const sd = work.renditions.find((r) => r.id === 'sd') || work.renditions[work.renditions.length - 1];
-        const videoSrc = hd ? withBust(href(hd.src)) : '';
-        const previewSrc = sd ? withBust(href(sd.src)) : videoSrc;
-        const posterSrc = href(work.cover.jpg.src);
-        const youtubeId = work.youtubeId || YOUTUBE_IDS[work.slug] || '';
-        const category = typeLabel(work.type, lang);
-        const whatsappLink = whatsappUrl(whatsappMessage(lang, { title: title.text, url: pageAbs(lang, work.slug) }));
-        const pageLink = pageHref(lang, work.slug);
-
-        return (
-          <div class="feed__horizontal-wrap mt-8 md:mt-14 w-full">
-            <article
-              class="phone-card phone-card--horizontal group relative cursor-pointer flex flex-col items-center w-full select-none touch-manipulation"
-              id={`reel-${work.slug}`}
-              data-reel
-              data-slug={work.slug}
-              data-title={title.text}
-              data-client={work.client || ''}
-              data-category={category}
-              data-year="2026"
-              data-orientation="landscape"
-              data-youtube-id="m_MjsGfVXVc"
-              data-video-src={videoSrc}
-              data-poster-src={posterSrc}
-              data-aspect-ratio="16.5/9"
-              data-whatsapp-url={whatsappLink}
-              data-duration={work.duration}
-            >
-              {/* Landscape Phone Mockup Frame - full width of section */}
-              <div class="phone-frame phone-frame--landscape w-full">
-                {/* Landscape Hardware Buttons */}
-                <span class="phone-btn phone-btn--landscape-action" aria-hidden="true"></span>
-                <span class="phone-btn phone-btn--landscape-vol-up" aria-hidden="true"></span>
-                <span class="phone-btn phone-btn--landscape-vol-down" aria-hidden="true"></span>
-                <span class="phone-btn phone-btn--landscape-power" aria-hidden="true"></span>
-                <span class="phone-btn phone-btn--landscape-camera-control" aria-hidden="true"></span>
-
-                {/* Inner Screen: Aspect Ratio 16.5:9 */}
-                <div class="phone-screen phone-screen--landscape">
-                  {/* Dynamic Island on Left Edge */}
-                  <div class="phone-island phone-island--landscape" aria-hidden="true">
-                    <div class="phone-island__dot-sensor" />
-                    <div class="phone-island__dot-lens" />
-                  </div>
-
-                  <picture class="phone-poster">
-                    <source type="image/avif" srcset={srcset(work.cover.avif)} sizes="(min-width: 1200px) 1100px, 100vw" />
-                    <source type="image/webp" srcset={srcset(work.cover.webp)} sizes="(min-width: 1200px) 1100px, 100vw" />
-                    <img
-                      src={posterSrc}
-                      width={work.cover.width}
-                      height={work.cover.height}
-                      alt={title.text}
-                      loading="lazy"
-                      decoding="async"
-                      class="phone-media phone-media--cover"
-                    />
-                  </picture>
-
-                  <video
-                    data-src={previewSrc}
-                    preload="none"
-                    playsinline
-                    webkit-playsinline="true"
-                    loop
-                    muted
-                    class="phone-video phone-media--cover"
-                  ></video>
-
-                  <div class="phone-play-wrap">
-                    <div class="phone-play-btn phone-play-btn--landscape">
-                      <svg class="phone-play-icon" viewBox="0 0 24 24">
-                        <polygon points="6 3 20 12 6 21 6 3" />
-                      </svg>
-                    </div>
-                  </div>
-
-                  {/* Bottom Apple Home Indicator */}
-                  <div class="phone-home-indicator phone-home-indicator--landscape" aria-hidden="true"></div>
-                </div>
-              </div>
-
-              {/* Card Footer below Landscape Mockup */}
-              <div class="phone-card-footer phone-card-footer--landscape">
-                <a href={pageLink} class="phone-footer-title">
-                  {title.text}
-                </a>
-                <span class="phone-footer-action">
-                  <span>{lang === 'ar' ? 'شاهد الفيديو' : 'Watch Film'}</span>
-                  <svg class="phone-footer-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="7" y1="17" x2="17" y2="7" />
-                    <polyline points="7 7 17 7 17 17" />
-                  </svg>
-                </span>
-              </div>
-            </article>
-          </div>
-        );
-      })
-    }
   </div>
 
   {/* Video Modal with WebKit Cleanup */}
@@ -622,16 +511,15 @@ const withBust = (url: string) => (url ? (url.includes('?') ? `${url}&${cacheBus
     background-color: #000000;
     width: 100%;
     border: 6px solid #000000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
   }
 
   .phone-screen--vertical {
     aspect-ratio: 9 / 16.5;
     border-radius: 40px;
-  }
-
-  .phone-screen--landscape {
-    aspect-ratio: 16.5 / 9;
-    border-radius: 32px;
   }
 
   /* Media */
@@ -640,6 +528,15 @@ const withBust = (url: string) => (url ? (url.includes('?') ? `${url}&${cacheBus
     width: 100%;
     height: 100%;
     pointer-events: none;
+  }
+
+  .phone-poster--letterbox {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    margin-block: auto;
   }
 
   .phone-video {
@@ -656,6 +553,12 @@ const withBust = (url: string) => (url ? (url.includes('?') ? `${url}&${cacheBus
     .phone-video {
       display: block;
     }
+    .phone-poster--letterbox {
+      display: none;
+    }
+    .phone-video.phone-media--letterbox {
+      display: block;
+    }
   }
 
   .phone-media {
@@ -666,12 +569,15 @@ const withBust = (url: string) => (url ? (url.includes('?') ? `${url}&${cacheBus
     transition: transform 700ms ease;
   }
 
-  .phone-screen--vertical .phone-media {
+  .phone-screen--vertical .phone-media--cover {
     border-radius: 30px;
   }
 
-  .phone-screen--landscape .phone-media {
-    border-radius: 22px;
+  .phone-media--letterbox {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: contain;
+    margin-block: auto;
   }
 
   .phone-media--cover {
