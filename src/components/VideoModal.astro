@@ -78,7 +78,7 @@ const { lang } = Astro.props;
         frameborder="0"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
         allowfullscreen
-        class="modal-video-element w-full h-full rounded-[30px] border-0"
+        class="modal-video-element w-full h-full object-cover rounded-[30px] border-0"
       ></iframe>
 
       {/* Centered Dynamic Island: h-5 w-24 bg-black rounded-full mx-auto mt-2.5 z-20 pointer-events-none */}
@@ -134,10 +134,15 @@ const { lang } = Astro.props;
       year: string;
       whatsappUrl: string;
       aspectRatio: string;
+      orientation?: string;
     }) {
       if (!modal || !iframe) return;
 
-      const isLandscape = data.aspectRatio === '16/9' || data.aspectRatio === '16.5/9' || data.aspectRatio === '18.5/9' || data.aspectRatio === '19.5/9';
+      const isLandscape = data.orientation === 'landscape' ||
+        data.aspectRatio === '16/9' ||
+        data.aspectRatio === '16.5/9' ||
+        data.aspectRatio === '18.5/9' ||
+        data.aspectRatio === '19.5/9';
 
       if (container) {
         if (isLandscape) {
@@ -161,9 +166,9 @@ const { lang } = Astro.props;
       if (categoryEl) categoryEl.textContent = data.category;
       if (whatsappLinkEl) whatsappLinkEl.href = data.whatsappUrl;
 
-      // Load YouTube embed only when opened
+      // Load YouTube embed strictly with highest HD resolution
       if (data.youtubeId) {
-        iframe.src = `https://www.youtube-nocookie.com/embed/${data.youtubeId}?autoplay=1&playsinline=1&rel=0&modestbranding=1&controls=1&iv_load_policy=3`;
+        iframe.src = `https://www.youtube-nocookie.com/embed/${data.youtubeId}?autoplay=1&playsinline=1&rel=0&modestbranding=1&controls=1&iv_load_policy=3&vq=hd1080&enablejsapi=1`;
       }
 
       modal.classList.remove('hidden');
@@ -189,19 +194,22 @@ const { lang } = Astro.props;
     });
 
     // Attach click listeners to cards on page
-    document.querySelectorAll<HTMLElement>('.phone-card').forEach((card) => {
+    document.querySelectorAll<HTMLElement>('.phone-card, [data-reel]').forEach((card) => {
       card.addEventListener('click', (e) => {
         const target = e.target as HTMLElement;
         if (target.closest('a')) return;
         const ds = card.dataset;
+        const yid = ds.youtubeId || (ds.slug === 'running-film' ? 'GsfitQei03w' : '');
+        const orientation = ds.orientation || (ds.aspectRatio?.includes('16') ? 'landscape' : 'vertical');
         openModal({
-          youtubeId: ds.youtubeId || '',
+          youtubeId: yid,
           title: ds.title || '',
           client: ds.client || '',
           category: ds.category || '',
           year: ds.year || '2026',
           whatsappUrl: ds.whatsappUrl || '',
-          aspectRatio: ds.aspectRatio || '9/16.5',
+          aspectRatio: ds.aspectRatio || (orientation === 'landscape' ? '16.5/9' : '9/16.5'),
+          orientation,
         });
       });
 
@@ -518,6 +526,7 @@ const { lang } = Astro.props;
   .modal-video-element {
     width: 100%;
     height: 100%;
+    object-fit: cover;
     background-color: #000000;
     display: block;
     margin: 0 auto;
