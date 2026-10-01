@@ -6,13 +6,15 @@
 
 export type Dir = 'rtl' | 'ltr';
 
-/** A line, with its gold words and, optionally, the one word that stretches. */
+/** A line, with its key words and, optionally, the one word that stretches. */
 export interface Caption {
   text: string;
-  /** The words shown in gold, as they appear in `text`; trailing punctuation may be left off. */
+  /** The words shown in the key colour, as they appear in `text`; trailing punctuation may be left off. */
   key?: string;
   /** A word that stretches with kashida as it appears (Arabic). */
   stretch?: string;
+  /** The word after which the line breaks, so a caption of two sentences shows one to a line. */
+  breakAfter?: string;
 }
 
 export interface Rhythm {
@@ -34,6 +36,8 @@ export interface Word {
   key: boolean;
   /** Where the kashida goes in `text`, for the word that stretches. */
   kashida?: number;
+  /** The line breaks after it. */
+  breakAfter?: true;
   /** When it appears, in ms. */
   delay: number;
 }
@@ -136,8 +140,10 @@ export function captionWords(caption: Caption, dir: Dir, rhythm: Rhythm): Word[]
   const texts = splitWords(caption.text, dir);
   const keys = new Set(caption.key ? find(texts, caption.key, dir) : []);
   const stretched = caption.stretch ? find(texts, caption.stretch, dir)[0] : undefined;
+  const broken = caption.breakAfter ? find(texts, caption.breakAfter, dir)[0] : undefined;
   const words = texts.map((text, i): Word => {
     const word: Word = { text, key: keys.has(i), delay: 0 };
+    if (i === broken) word.breakAfter = true;
     if (i === stretched) {
       const at = kashidaAt(text);
       if (at === null) throw new Error(`"${text}" has no letter a kashida can follow`);

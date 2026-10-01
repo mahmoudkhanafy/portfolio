@@ -56,6 +56,11 @@ describe('captionWords', () => {
     expect(words.every((w) => w.kashida === undefined)).toBe(true);
   });
 
+  it('breaks the hero line after its first sentence, in both languages', () => {
+    expect(captionWords(ui.ar.heroLead, 'rtl', RHYTHM.hero).filter((w) => w.breakAfter).map((w) => w.text)).toEqual(['حكاية.']);
+    expect(captionWords(ui.en.heroLead, 'ltr', RHYTHM.hero).filter((w) => w.breakAfter).map((w) => w.text)).toEqual(['story.']);
+  });
+
   it('marks the key words of the about and contact headings', () => {
     expect(captionWords(ui.ar.contactHeading, 'rtl', RHYTHM.heading).filter((w) => w.key).map((w) => w.text)).toEqual(['صورة.']);
     expect(captionWords(ui.en.contactHeading, 'ltr', RHYTHM.heading).filter((w) => w.key).map((w) => w.text)).toEqual(['visual.']);

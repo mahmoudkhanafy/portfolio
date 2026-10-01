@@ -32,7 +32,7 @@ const trailDelay = (words.at(-1)?.delay ?? 0) + rhythm.step;
       <span class="words" aria-hidden="true">
         {words.map((word, i) => (
           <>
-            {i > 0 && ' '}
+            {i > 0 && (words[i - 1]!.breakAfter ? <br /> : ' ')}
             {trail && i === words.length - 1 ? (
               <span class="words__tail">
                 <span class:list={['w', { 'w--key': word.key }]} data-kashida={word.kashida} style={`--d: ${word.delay}ms`}>{word.text}</span>{' '}
