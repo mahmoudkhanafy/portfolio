@@ -57,7 +57,7 @@ export function planRenditions(src: Size, source?: SourceRate): RenditionPlan[] 
   const hdLadder = clamp(Math.round(((hdSize.width * hdSize.height) / 1000) * 3.5), 1500, 6000);
   const factor = EFFICIENT_CODECS.includes((source?.codec ?? '').toLowerCase()) ? 1.6 : 1.15;
   const hdRate = source?.videoKbps ? Math.min(hdLadder, Math.max(600, Math.round(source.videoKbps * factor))) : hdLadder;
-  const hd: RenditionPlan = { id: 'hd', ...hdSize, crf: 24, maxrateKbps: hdRate, bufsizeKbps: hdRate * 2, audioKbps: 128, fpsMax: 30 };
+  const hd: RenditionPlan = { id: 'hd', ...hdSize, crf: 22, maxrateKbps: Math.min(2800, hdRate), bufsizeKbps: 4000, audioKbps: 128, fpsMax: 30 };
   const sdSize = fit(src, 720, 1280);
   if (sdSize.width === hdSize.width && sdSize.height === hdSize.height) return [hd];
   const sdLadder = clamp(Math.round(((sdSize.width * sdSize.height) / 1000) * 3), 800, 2500);

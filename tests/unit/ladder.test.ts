@@ -52,7 +52,7 @@ describe('planRenditions', () => {
 
   it('sets audio and frame-rate ceilings per rendition', () => {
     const [hd, sd] = planRenditions({ width: 1920, height: 1080 });
-    expect([hd?.audioKbps, hd?.fpsMax, hd?.crf]).toEqual([128, 30, 24]);
+    expect([hd?.audioKbps, hd?.fpsMax, hd?.crf]).toEqual([128, 30, 22]);
     expect([sd?.audioKbps, sd?.fpsMax, sd?.crf]).toEqual([128, 30, 26]);
   });
 });
