@@ -1,5 +1,5 @@
 import { execFileSync } from 'node:child_process';
-import { copyFileSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterAll, describe, expect, it } from 'vitest';
@@ -26,8 +26,7 @@ describe.runIf(canRun)('HDR footage (iPhone HLG)', () => {
   it('is tone-mapped to SDR BT.709 in both renditions and the cover', async () => {
     root = mkdtempSync(join(tmpdir(), 'portfolio-hdr-'));
     mkdirSync(join(root, 'work'));
-    mkdirSync(join(root, 'site/brand'), { recursive: true });
-    copyFileSync('site/brand/og-wordmark.png', join(root, 'site/brand/og-wordmark.png'));
+    mkdirSync(join(root, 'site'), { recursive: true });
     execFileSync('ffmpeg', [
       '-hide_banner', '-loglevel', 'error', '-y',
       '-f', 'lavfi', '-i', 'testsrc2=size=1080x1920:rate=30', '-t', '2',

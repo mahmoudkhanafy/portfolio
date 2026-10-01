@@ -7,6 +7,7 @@ import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { chromium } from '@playwright/test';
 import sharp from 'sharp';
+import { writeOgJpeg } from '../media/images.ts';
 
 const root = process.cwd();
 const template = (name: string, hash = ''): string => pathToFileURL(resolve(root, 'site/brand/templates', name)).href + hash;
@@ -18,21 +19,16 @@ try {
   const page = await browser.newPage();
   const ready = () => page.evaluate(() => document.fonts.ready.then(() => document.fonts.size));
 
-  if (wants('wordmark')) {
-    await page.goto(template('wordmark.html'));
-    await ready();
-    await page.locator('#mark').screenshot({ path: resolve(root, 'site/brand/og-wordmark.png'), omitBackground: true });
-    console.log('site/brand/og-wordmark.png');
-  }
-
   if (wants('og-home')) {
+    // The home page's link preview, one per language, written like every other preview (writeOgJpeg).
     await page.setViewportSize({ width: 1200, height: 630 });
-    await page.goto(template('og-home.html'));
-    await ready();
-    await page.evaluate(() => Promise.all([...document.images].map((img) => img.decode())));
-    const png = await page.screenshot();
-    await sharp(png).jpeg({ quality: 84, mozjpeg: true }).toFile(resolve(root, 'public/og-home.jpg'));
-    console.log('public/og-home.jpg');
+    for (const lang of ['en', 'ar'] as const) {
+      await page.goto(template('og-home.html', `?${lang}`));
+      await ready();
+      await page.evaluate(() => Promise.all([...document.images].map((img) => img.decode())));
+      const bytes = await writeOgJpeg(await page.screenshot(), resolve(root, `public/og-home-${lang}.jpg`));
+      console.log(`public/og-home-${lang}.jpg (${Math.round(bytes / 1000)} KB)`);
+    }
   }
 
   if (wants('icons')) {

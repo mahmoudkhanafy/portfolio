@@ -1,0 +1,252 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="fonts.css" />
+    <!--
+      A piece's link preview, 1200×630, in the page's language (scripts/media/og.ts fills it from the
+      query string). Big enough to read in a chat bubble: the frame at full height beside its title,
+      or a wide film full bleed with the title over it.
+    -->
+    <style>
+      html,
+      body {
+        width: 1200px;
+        height: 630px;
+        overflow: hidden;
+        background: var(--paper);
+        color: var(--ink);
+      }
+      .card {
+        position: absolute;
+        inset: 0;
+        display: flex;
+      }
+      .text {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        padding: 54px 60px 46px;
+      }
+      .label {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        min-width: 0;
+        font-family: var(--display);
+        font-size: 25px;
+        line-height: 1.2;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+      }
+      .label i {
+        flex: none;
+        width: 12px;
+        height: 12px;
+        background: var(--accent);
+      }
+      .label span {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .title {
+        margin-block: auto;
+        padding-block: 18px;
+        font-family: var(--display);
+        font-weight: 600;
+        font-size: var(--size);
+        line-height: 1.02;
+        letter-spacing: -0.01em;
+        overflow-wrap: anywhere;
+      }
+      .title:lang(ar) {
+        font-family: 'Noto Sans Arabic', sans-serif;
+        font-weight: 700;
+        line-height: 1.38;
+        letter-spacing: 0;
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        padding-top: 24px;
+        border-top: 2px solid var(--line);
+      }
+      .mk {
+        direction: ltr;
+        font-family: var(--display);
+        font-size: 62px;
+        line-height: 1;
+        letter-spacing: -0.07em;
+      }
+      .mk b {
+        color: var(--accent);
+        font-weight: 600;
+      }
+      .who {
+        font-size: 22px;
+        line-height: 1.35;
+      }
+      .who b {
+        display: block;
+        font-size: 28px;
+        font-weight: 700;
+      }
+      .who span {
+        color: var(--muted);
+      }
+      [lang='ar'] .label {
+        font-family: 'Noto Sans Arabic', sans-serif;
+        font-size: 26px;
+        font-weight: 600;
+        letter-spacing: 0;
+      }
+      /* The frame at full height on the far side, an orange edge where it meets the words. */
+      .media {
+        position: relative;
+        flex: none;
+        width: var(--media-w);
+        height: 630px;
+        background: var(--tint, #1b1c17);
+      }
+      /* With the play square, an orange L along the frame's inner edge. */
+      .media::before {
+        content: '';
+        position: absolute;
+        inset-block: 48px 0;
+        inset-inline-start: -26px;
+        width: 26px;
+        background: var(--accent);
+      }
+      .media img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      .play {
+        position: absolute;
+        bottom: 0;
+        inset-inline-start: 0;
+        display: grid;
+        place-items: center;
+        width: 104px;
+        height: 104px;
+        background: var(--accent);
+      }
+      .play svg {
+        width: 40px;
+        height: 40px;
+        margin-left: 6px;
+      }
+      /* A wide film runs full bleed, the words over its darkened lower half. */
+      .wide .media {
+        position: absolute;
+        inset: 0;
+        width: auto;
+        height: auto;
+      }
+      .wide .media::before {
+        display: none;
+      }
+      .wide .media::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(to top, rgb(27 28 23 / 0.92), rgb(27 28 23 / 0.55) 48%, rgb(27 28 23 / 0) 78%);
+      }
+      .wide .play {
+        top: 40px;
+        bottom: auto;
+        inset-inline: auto 40px;
+      }
+      .wide .text {
+        position: relative;
+        z-index: 1;
+        justify-content: flex-end;
+        max-width: 1000px;
+        padding: 40px 56px 40px;
+        color: var(--paper);
+      }
+      .wide .title {
+        margin-block: 0;
+        padding-block: 16px 22px;
+      }
+      .wide .brand {
+        border-top-color: rgb(242 238 230 / 0.35);
+      }
+      .wide .who span {
+        color: #d3d3c9;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <div class="text">
+        <p class="label"><i></i><span id="label"></span></p>
+        <h1 class="title" id="title"></h1>
+        <div class="brand">
+          <span class="mk">mk<b>·</b></span>
+          <p class="who"><b id="name"></b><span id="role"></span></p>
+        </div>
+      </div>
+      <div class="media">
+        <img id="still" alt="" />
+        <span class="play"><svg viewBox="0 0 24 24" fill="#fff9ed"><path d="M6 3.5v17l14-8.5z" /></svg></span>
+      </div>
+    </div>
+    <script type="module">
+      const card = JSON.parse(new URLSearchParams(location.search).get('card'));
+      const root = document.documentElement;
+      root.lang = card.lang;
+      root.dir = card.lang === 'ar' ? 'rtl' : 'ltr';
+      const wide = card.ratio >= 1.3;
+      document.querySelector('.card').classList.toggle('wide', wide);
+      // A frame beside the words never takes more than about half the card; a square-ish one is cropped a little.
+      root.style.setProperty('--media-w', `${Math.min(630 * card.ratio, 640)}px`);
+      if (card.tint) root.style.setProperty('--tint', card.tint);
+      // Each part keeps its own direction ("لـ V7" stays whole); a middle dot reads as an Arabic zero
+      // beside Arabic words, so the Arabic parts are divided by slashes.
+      const label = document.getElementById('label');
+      card.label.forEach((part, i) => {
+        if (i > 0) label.append(card.lang === 'ar' ? ' / ' : ' · ');
+        const bdi = document.createElement('bdi');
+        bdi.textContent = part;
+        label.append(bdi);
+      });
+      const title = document.getElementById('title');
+      title.textContent = card.title;
+      title.lang = card.titleLang;
+      title.dir = card.titleLang === 'ar' ? 'rtl' : 'ltr';
+      document.getElementById('name').textContent = card.name;
+      document.getElementById('role').textContent = card.role;
+      const still = document.getElementById('still');
+      still.src = card.still;
+      await Promise.all([document.fonts.ready, still.decode()]);
+      // The largest size at which the title fits its lines: three beside a frame, two over a film.
+      const arabic = card.titleLang === 'ar';
+      const [most, least] = wide ? (arabic ? [76, 40] : [96, 48]) : arabic ? [72, 38] : [104, 52];
+      const lines = wide ? 2 : 3;
+      let size = most;
+      const fits = () => {
+        const line = parseFloat(getComputedStyle(title).lineHeight);
+        const box = title.getBoundingClientRect().height - parseFloat(getComputedStyle(title).paddingTop) - parseFloat(getComputedStyle(title).paddingBottom);
+        return box <= line * lines + 1 && title.scrollWidth <= title.clientWidth;
+      };
+      title.style.setProperty('--size', `${size}px`);
+      while (!fits() && size > least) {
+        size -= 2;
+        title.style.setProperty('--size', `${size}px`);
+      }
+      if (!fits()) {
+        title.style.display = '-webkit-box';
+        title.style.webkitBoxOrient = 'vertical';
+        title.style.webkitLineClamp = String(lines);
+        title.style.overflow = 'hidden';
+      }
+      root.dataset.ready = 'yes';
+    </script>
+  </body>
+</html>

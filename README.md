@@ -1,8 +1,8 @@
 # Mahmoud Khaled — portfolio
 
-The video portfolio of Mahmoud Khaled, video editor and videographer in Giza / Cairo. Arabic first
-(`/`), English at `/en/`. Every piece has its own page and link preview, plays with sound on one tap,
-and ends on a pre-written WhatsApp message.
+The video portfolio of Mahmoud Khaled, video editor and videographer in Giza / Cairo. English at the
+root (`/`), Arabic at `/ar/`. Every piece has its own page and a link preview in each language, plays
+with sound on one tap, and ends on a pre-written WhatsApp message.
 
 This branch (`orange`) is the "paper" look: ink on warm paper with one burnt orange, his portrait in
 black and white on an orange block, a dark band where a video plays, and the sections Work, About,
@@ -53,8 +53,11 @@ site/portrait.png ────────────────────�
   (as GitHub annotations and a job summary in CI); encodes two H.264/AAC MP4s per video with the index
   at the front — `hd` (1080 class) and `sd` (720 class) — at the video's true shape with square pixels
   (a 9:16 video stored squeezed into a square comes out 9:16), never spending much more than the source's
-  own bitrate; picks the cover frame; renders AVIF/WebP covers, a blurred placeholder and a
-  1200×630 link-preview image under 300 KB; processes the portrait. Results are cached by content hash
+  own bitrate; picks the cover frame; renders AVIF/WebP covers and a blurred placeholder; draws a
+  1200×630 link-preview card per language (`scripts/media/og.ts`: the template
+  `site/brand/templates/og-work.html` in headless Chromium, the frame large beside its title, written
+  as a JPEG without colour subsampling and under 300 KB so WhatsApp shows it large); processes the
+  portrait. Results are cached by content hash
   in `.media-cache/` (restored between CI runs), so only new or changed files are processed.
 - **Site** (`src/`): static Astro pages, fonts self-hosted, no third-party requests. The only
   JavaScript is the player (`src/scripts/player.ts`, ~2.5 KB gzipped), the share button and the
@@ -84,8 +87,10 @@ site/portrait.png ────────────────────�
   and on hover with a mouse — never under reduced motion or Save-Data; "play with sound" then picks the
   file for the screen.
 - **Link previews**: every page has absolute Open Graph and Twitter tags, `hreflang` alternates and
-  JSON-LD (`Person` on home, `VideoObject` per piece). The home card (`public/og-home.jpg`) and the
-  wordmark used on per-video cards are rendered from `site/brand/templates/` with `npm run brand`.
+  JSON-LD (`Person` on home, `VideoObject` per piece), all in the page's language: an English link
+  gets the English card, an `/ar/` link the Arabic one. The home cards (`public/og-home-en.jpg`,
+  `public/og-home-ar.jpg`) and the icons are rendered from `site/brand/templates/` with
+  `npm run brand`; the per-video cards come from the media pipeline.
 
 ## Changing things
 
@@ -96,7 +101,7 @@ site/portrait.png ────────────────────�
 | Contact details | `src/lib/contact.ts` |
 | Interface text, bio, services | `src/lib/i18n.ts` |
 | Colours, type scale | `src/styles/tokens.css` (contrast is checked by `tests/unit/contrast.test.ts`) |
-| Brand artwork (icons, wordmark, home card) | `site/brand/templates/`, then `npm run brand` |
+| Brand artwork (icons, home cards) | `site/brand/templates/`, then `npm run brand` |
 
 ## Tests
 

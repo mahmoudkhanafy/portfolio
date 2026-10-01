@@ -4,7 +4,7 @@ import { watchForProblems, works } from './helpers.ts';
 test.describe('home page', () => {
   test('introduces Mahmoud in Arabic, right to left, with every piece of work', async ({ page }) => {
     const problems = watchForProblems(page);
-    await page.goto('');
+    await page.goto('ar/');
     await expect(page.locator('html')).toHaveAttribute('lang', 'ar');
     await expect(page.locator('html')).toHaveAttribute('dir', 'rtl');
     await expect(page.getByRole('heading', { level: 1 })).toHaveAccessibleName('محمود خالد');
@@ -14,7 +14,7 @@ test.describe('home page', () => {
   });
 
   test('offers WhatsApp first, with a message already written', async ({ page }) => {
-    await page.goto('');
+    await page.goto('ar/');
     const cta = page.locator('.hero').getByRole('link', { name: 'كلّمني على واتساب' });
     const href = await cta.getAttribute('href');
     expect(href).toMatch(/^https:\/\/wa\.me\/201156379179\?text=/);
@@ -23,7 +23,7 @@ test.describe('home page', () => {
 
   test('has an English version, left to right', async ({ page }) => {
     const problems = watchForProblems(page);
-    await page.goto('en/');
+    await page.goto('');
     await expect(page.locator('html')).toHaveAttribute('lang', 'en');
     await expect(page.locator('html')).toHaveAttribute('dir', 'ltr');
     await expect(page.getByRole('heading', { level: 1 })).toHaveAccessibleName('Mahmoud Khaled');
@@ -35,7 +35,7 @@ test.describe('home page', () => {
     // Every page, including the e2e build's test piece whose titles hold long unbroken hashtags and links.
     test(`fits a ${width} px phone without sideways scrolling, whatever the titles say`, async ({ page }) => {
       await page.setViewportSize({ width, height: 740 });
-      for (const path of ['', 'en/', ...works.flatMap((w) => [`work/${w.slug}/`, `en/work/${w.slug}/`])]) {
+      for (const path of ['ar/', '', ...works.flatMap((w) => [`ar/work/${w.slug}/`, `work/${w.slug}/`])]) {
         await page.goto(path);
         const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
         expect(overflow, path).toBeLessThanOrEqual(0);
@@ -43,9 +43,9 @@ test.describe('home page', () => {
     });
   }
 
-  for (const path of ['', 'en/']) {
+  for (const path of ['ar/', '']) {
     // His first and last name each keep to one line, and the portrait on its orange block stays on screen.
-    test(`sets the name on two whole lines beside his portrait (${path || 'ar'})`, async ({ page }) => {
+    test(`sets the name on two whole lines beside his portrait (${path || 'en'})`, async ({ page }) => {
       for (const [width, height] of [[320, 640], [390, 844], [768, 1024], [1024, 768], [1280, 720], [1440, 900], [1920, 1080]] as const) {
         await page.setViewportSize({ width, height });
         await page.goto(path);
@@ -77,7 +77,7 @@ test.describe('home page', () => {
       const { responseBodySize } = await request.sizes();
       sizes.push({ url: request.url(), bytes: responseBodySize, type: response?.headers()['content-type'] ?? '' });
     });
-    await page.goto('', { waitUntil: 'networkidle' });
+    await page.goto('ar/', { waitUntil: 'networkidle' });
     await page.waitForTimeout(500);
     expect(sizes.filter((s) => s.type.startsWith('video/'))).toEqual([]);
     const total = sizes.reduce((sum, s) => sum + s.bytes, 0);
@@ -95,7 +95,7 @@ test.describe('"See the work"', () => {
     });
 
   test('cues the way down once the hero has built, a few times, then rests', async ({ page }) => {
-    await page.goto('');
+    await page.goto('ar/');
     const cue = await cueAnimation(page);
     expect(cue.name).not.toBe('none');
     expect(cue.count).not.toBe('infinite');
@@ -103,7 +103,7 @@ test.describe('"See the work"', () => {
   });
 
   test('eases down to the work', async ({ page }) => {
-    await page.goto('');
+    await page.goto('ar/');
     expect(await page.evaluate(() => getComputedStyle(document.documentElement).scrollBehavior)).toBe('smooth');
     await page.locator('.hero__next').click();
     await expect(page).toHaveURL(/#work$/);
@@ -112,7 +112,7 @@ test.describe('"See the work"', () => {
 
   test('drops its arrow again on hover', async ({ page, isMobile }) => {
     test.skip(isMobile, 'Hover is for mouse users.');
-    await page.goto('');
+    await page.goto('ar/');
     await page.locator('.hero__next').hover();
     await expect.poll(() => page.locator('.hero__cue svg').evaluate((el) => getComputedStyle(el).animationDuration)).toBe('1.1s');
   });
@@ -121,7 +121,7 @@ test.describe('"See the work"', () => {
     test.use({ reducedMotion: 'reduce' });
 
     test('stays still and jumps straight to the work', async ({ page }) => {
-      await page.goto('');
+      await page.goto('ar/');
       expect((await cueAnimation(page)).name).toBe('none');
       expect(await page.evaluate(() => getComputedStyle(document.documentElement).scrollBehavior)).toBe('auto');
     });

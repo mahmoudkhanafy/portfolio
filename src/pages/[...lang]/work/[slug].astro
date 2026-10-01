@@ -18,7 +18,7 @@ import { RHYTHM } from '../../../lib/words.ts';
 
 export function getStaticPaths() {
   return (['ar', 'en'] as const).flatMap((lang) =>
-    works.map((work) => ({ params: { lang: lang === 'en' ? 'en' : undefined, slug: work.slug }, props: { work } })),
+    works.map((work) => ({ params: { lang: lang === 'ar' ? 'ar' : undefined, slug: work.slug }, props: { work } })),
   );
 }
 
@@ -27,7 +27,7 @@ interface Props {
 }
 
 const { work } = Astro.props;
-const lang: Lang = Astro.params.lang === 'en' ? 'en' : 'ar';
+const lang: Lang = Astro.params.lang === 'ar' ? 'ar' : 'en';
 const t = ui[lang];
 const title = pick(work.title, lang)!;
 const description = pick(work.description, lang);
@@ -53,9 +53,9 @@ const others = works.filter((w) => w.slug !== work.slug);
   path={pagePath(lang, work.slug)}
   altPath={pagePath(otherLang(lang), work.slug)}
   og={{
-    image: abs(work.og.src),
-    width: work.og.width,
-    height: work.og.height,
+    image: abs(work.og[lang].src),
+    width: work.og[lang].width,
+    height: work.og[lang].height,
     alt: t.ogWorkAlt(title.text),
     type: 'video.other',
     video: { url: abs(lightest.src), width: lightest.width, height: lightest.height },
@@ -66,7 +66,7 @@ const others = works.filter((w) => w.slug !== work.slug);
       description: metaDescription,
       pageUrl,
       contentUrl: abs(hd.src),
-      thumbnails: [abs(work.og.src), abs(work.cover.jpg.src)],
+      thumbnails: [abs(work.og[lang].src), abs(work.cover.jpg.src)],
       uploadDate: work.addedAt,
       duration: work.duration,
       width: work.width,

@@ -12,11 +12,11 @@ const delaysOf = (page: Page, selector: string) => page.locator(selector).evalua
 
 test.describe('the hero line', () => {
   const lines = [
-    { path: '', count: 7, keys: ['حكايتك.'], text: 'كل لقطة ليها حكاية. خلّينا نحكي حكايتك.' },
-    { path: 'en/', count: 8, keys: ['yours.'], text: "Every frame has a story. Let's tell yours." },
+    { path: 'ar/', count: 7, keys: ['حكايتك.'], text: 'كل لقطة ليها حكاية. خلّينا نحكي حكايتك.' },
+    { path: '', count: 8, keys: ['yours.'], text: "Every frame has a story. Let's tell yours." },
   ];
   for (const { path, count, keys, text } of lines) {
-    test(`builds word by word as the name wipes in, its key word orange, and ends whole (${path || 'ar'})`, async ({ page }) => {
+    test(`builds word by word as the name wipes in, its key word orange, and ends whole (${path || 'en'})`, async ({ page }) => {
       await page.goto(path);
       await expect(page.locator('html')).toHaveClass(/\bmotion\b/);
       const words = page.locator('.hero__lead .w');
@@ -36,7 +36,7 @@ test.describe('the hero line', () => {
 
   test('moves nothing on the page while it builds', async ({ page, browserName }) => {
     test.skip(browserName !== 'chromium', 'Layout shifts are measured by Chromium.');
-    await page.goto('');
+    await page.goto('ar/');
     const shift = await page.evaluate(
       () =>
         new Promise<number>((resolve) => {
@@ -51,13 +51,13 @@ test.describe('the hero line', () => {
   });
 
   test('lets "See the work" cue only once the line has built', async ({ page }) => {
-    await page.goto('');
+    await page.goto('ar/');
     expect(await page.locator('.hero__cue svg').evaluate((el) => parseFloat(getComputedStyle(el).animationDelay))).toBeGreaterThanOrEqual(3.5);
   });
 
   test('stretches «حكايتك» with kashida and relaxes it, moving nothing', async ({ page, browserName }) => {
     test.skip(browserName !== 'chromium', 'Layout shifts are measured by Chromium.');
-    await page.goto('');
+    await page.goto('ar/');
     const shift = page.evaluate(
       () =>
         new Promise<number>((resolve) => {
@@ -76,7 +76,7 @@ test.describe('the hero line', () => {
   });
 
   test('stretches nothing in English', async ({ page }) => {
-    await page.goto('en/');
+    await page.goto('');
     await expect(page.locator('.hero__lead [data-kashida]')).toHaveCount(0);
   });
 });
@@ -85,7 +85,7 @@ test.describe('with reduced motion', () => {
   test.use({ reducedMotion: 'reduce' });
 
   test('shows every word at once, unanimated', async ({ page }) => {
-    for (const path of ['', `work/${works[0]!.slug}/`]) {
+    for (const path of ['', `ar/work/${works[0]!.slug}/`]) {
       await page.goto(path);
       await expect(page.locator('html')).not.toHaveClass(/\bmotion\b/);
       const states = await page.locator('.w, .pop').evaluateAll((els) => els.map((el) => `${getComputedStyle(el).opacity}/${el.getAnimations().length}`));
@@ -98,7 +98,7 @@ test.describe('without JavaScript', () => {
   test.use({ javaScriptEnabled: false });
 
   test('shows every word at once', async ({ page }) => {
-    await page.goto('');
+    await page.goto('ar/');
     await expect(page.locator('html')).not.toHaveClass(/\bmotion\b/);
     await expect(page.locator('.hero__lead .w').first()).toHaveCSS('opacity', '1');
     await expect(page.locator('.hero__lead .w').last()).toHaveCSS('opacity', '1');
@@ -107,7 +107,7 @@ test.describe('without JavaScript', () => {
 
 test.describe('headings, titles and services', () => {
   test('build as they come into view', async ({ page }) => {
-    await page.goto('');
+    await page.goto('ar/');
     const heading = page.locator('#about-heading');
     await expect(heading).not.toHaveClass(/is-(built|building)/);
     await expect(heading.locator('.w').first()).toHaveCSS('opacity', '0');
@@ -131,14 +131,14 @@ test.describe('headings, titles and services', () => {
   });
 
   test('show at once what is already on screen as the page starts', async ({ page }) => {
-    await page.goto('#about');
+    await page.goto('ar/#about');
     await expect(page.locator('#about-heading')).toHaveClass(/is-built/);
     expect(await page.locator('#about-heading .w').first().evaluate((el) => el.getAnimations().length)).toBe(0);
   });
 
   test('build a feed title word by word, its arrow last', async ({ page }) => {
     const work = works[0]!;
-    await page.goto('');
+    await page.goto('ar/');
     const title = page.locator(`#title-${work.slug}`);
     await title.evaluate((el) => el.scrollIntoView({ block: 'center' }));
     await expect(title).toHaveClass(/is-building/);
@@ -151,7 +151,7 @@ test.describe('headings, titles and services', () => {
   });
 
   test('show a title that comes to rest whole at the bottom of the screen', async ({ page }) => {
-    await page.goto('');
+    await page.goto('ar/');
     await page.waitForFunction(() => document.documentElement.classList.contains('motion-ready'));
     await page.waitForTimeout(300);
     const title = page.locator(`#title-${works[1]!.slug}`);
@@ -165,7 +165,7 @@ test.describe('headings, titles and services', () => {
   test('keep each title’s arrow beside its last word, never on a line of its own', async ({ page }) => {
     for (const width of [342, 372, 390, 408, 816, 834, 1024, 1280, 1440]) {
       await page.setViewportSize({ width, height: 900 });
-      await page.goto('');
+      await page.goto('ar/');
       // Plain line breaking, as where headings are not balanced (Safari on some iPads).
       await page.addStyleTag({ content: '.reel__title { text-wrap: wrap !important; }' });
       const alone = await page.locator('.reel__title').evaluateAll((titles) =>
@@ -185,7 +185,7 @@ test.describe('headings, titles and services', () => {
   });
 
   test('show a title as soon as keyboard focus reaches it, wherever it is', async ({ page }) => {
-    await page.goto('');
+    await page.goto('ar/');
     const title = page.locator(`#title-${works.at(-1)!.slug}`);
     // Focus without scrolling, so only the focus can start the build (not coming into view).
     const before = await page.evaluate(() => scrollY);
@@ -204,7 +204,7 @@ test.describe('headings, titles and services', () => {
         if (root?.classList.contains('motion-ready')) root.classList.remove('motion-ready');
       }).observe(document, { subtree: true, attributes: true, attributeFilter: ['class'] });
     });
-    await page.goto('');
+    await page.goto('ar/');
     await expect(page.locator('#about-heading .w').first()).toHaveCSS('opacity', '0');
     // The <head> script gives it 4 s, then shows the text plain.
     await expect(page.locator('html')).not.toHaveClass(/\bmotion\b/, { timeout: 6_000 });
@@ -214,7 +214,7 @@ test.describe('headings, titles and services', () => {
   test('build a title pasted with markup, emoji, hashtags and links, and read it whole', async ({ page }) => {
     const edge = works.find((w) => w.slug === 'edge-case-text');
     expect(edge, 'the e2e build adds tests/fixtures/work/ (npm run build:e2e)').toBeDefined();
-    for (const [path, text] of [['', edge!.title.ar], ['en/', edge!.title.en!]] as const) {
+    for (const [path, text] of [['ar/', edge!.title.ar], ['', edge!.title.en!]] as const) {
       await page.goto(path);
       const title = page.locator(`#title-${edge!.slug}`);
       await title.evaluate((el) => el.scrollIntoView({ block: 'center' }));
@@ -230,7 +230,7 @@ test.describe('headings, titles and services', () => {
 test.describe('a video page', () => {
   test('builds its title once the frame has landed, and is read whole', async ({ page }) => {
     const work = works[0]!;
-    await page.goto(`work/${work.slug}/`);
+    await page.goto(`ar/work/${work.slug}/`);
     expect((await delaysOf(page, '#work-title .w'))[0]).toBeCloseTo(0.65, 2);
     await settled(page, '#work-title');
     await expect(page.locator('#work-title')).toHaveAccessibleName(work.title.ar);
@@ -249,14 +249,14 @@ test.describe('a page the browser translates', () => {
     });
 
   test('shows each line whole once Chrome marks the page translated, a title’s arrow still after it', async ({ page }) => {
-    await page.goto('');
+    await page.goto('ar/');
     await page.evaluate(() => document.documentElement.classList.add('translated-ltr'));
     for (const line of lines) expect(await whole(page, line), line).toEqual({ copy: true, words: 0 });
     await expect(page.locator(`#title-${works[0]!.slug} .reel__go`)).toBeVisible();
   });
 
   test('shows each line whole when any other translator rewrites the words, but not for the kashida', async ({ page, browserName }) => {
-    await page.goto('');
+    await page.goto('ar/');
     if (browserName === 'chromium') {
       await page.waitForFunction(() => document.querySelector('.hero__lead .w__stretch'), null, { timeout: 5_000 });
       await expect(page.locator('.hero__lead .w__stretch')).toHaveCount(0, { timeout: 3_000 });

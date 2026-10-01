@@ -5,30 +5,42 @@ import { works } from './helpers.ts';
 
 const slug = works[0]!.slug;
 
+test('opens in English at the root and in Arabic under ar/, site and link preview alike', async ({ page }) => {
+  for (const [path, lang, dir, locale, image] of [['', 'en', 'ltr', 'en_US', 'og-home-en.jpg'], ['ar/', 'ar', 'rtl', 'ar_EG', 'og-home-ar.jpg']] as const) {
+    await page.goto(path);
+    await expect(page.locator('html')).toHaveAttribute('lang', lang);
+    await expect(page.locator('html')).toHaveAttribute('dir', dir);
+    await expect(page.locator('meta[property="og:locale"]')).toHaveAttribute('content', locale);
+    await expect(page.locator('meta[property="og:image"]')).toHaveAttribute('content', new RegExp(`/mahmoud-khaled/${image.replace('.', '\\.')}$`));
+  }
+});
+
 test('the language switch keeps the same video', async ({ page }) => {
   await page.goto(`work/${slug}/`);
-  await page.getByRole('link', { name: 'Read this site in English' }).first().click();
-  await expect(page).toHaveURL(new RegExp(`/en/work/${slug}/$`));
-  await expect(page.locator('html')).toHaveAttribute('lang', 'en');
   await page.getByRole('link', { name: 'اقرأ الموقع باللغة العربية' }).first().click();
+  await expect(page).toHaveURL(new RegExp(`/mahmoud-khaled/ar/work/${slug}/$`));
+  await expect(page.locator('html')).toHaveAttribute('lang', 'ar');
+  await page.getByRole('link', { name: 'Read this site in English' }).first().click();
   await expect(page).toHaveURL(new RegExp(`/mahmoud-khaled/work/${slug}/$`));
+  await expect(page.locator('html')).toHaveAttribute('lang', 'en');
 });
 
 test('links shared without the trailing slash or with app tracking still open', async ({ page, baseURL }) => {
-  const plain = await page.goto(`work/${slug}`);
+  const plain = await page.goto(`ar/work/${slug}`);
   expect(plain?.status()).toBe(200);
   await expect(page).toHaveURL(new RegExp(`/work/${slug}/$`));
-  await page.goto(`work/${slug}/?utm_source=ig_web_copy_link&fbclid=abc`);
+  await page.goto(`ar/work/${slug}/?utm_source=ig_web_copy_link&fbclid=abc`);
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
-  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', new URL(`work/${slug}/`, baseURL).href);
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', new URL(`ar/work/${slug}/`, baseURL).href);
 });
 
 test('unknown addresses get a helpful bilingual 404', async ({ page }) => {
   const response = await page.goto('work/does-not-exist/');
   expect(response?.status()).toBe(404);
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText('الصفحة دي مش موجودة');
-  await expect(page.getByRole('heading', { name: "This page doesn't exist" })).toBeVisible();
-  await expect(page.getByRole('link', { name: 'ارجع لشغل محمود' })).toHaveAttribute('href', '/mahmoud-khaled/');
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText("This page doesn't exist");
+  await expect(page.getByRole('heading', { name: 'الصفحة دي مش موجودة' })).toBeVisible();
+  await expect(page.getByRole('link', { name: "Back to Mahmoud's work" })).toHaveAttribute('href', '/mahmoud-khaled/');
+  await expect(page.getByRole('link', { name: 'ارجع لشغل محمود' })).toHaveAttribute('href', '/mahmoud-khaled/ar/');
   await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', 'noindex');
 });
 
@@ -36,8 +48,11 @@ test('search engines and phones get robots, sitemap, contact card and manifest',
   const robots = await (await request.get('robots.txt')).text();
   expect(robots).toContain(`Sitemap: ${new URL('sitemap-index.xml', baseURL).href}`);
   const sitemap = await (await request.get('sitemap-0.xml')).text();
-  for (const work of works) expect(sitemap).toContain(new URL(`work/${work.slug}/`, baseURL).href);
-  expect(sitemap).toContain('hreflang="en"');
+  for (const work of works) {
+    expect(sitemap).toContain(new URL(`work/${work.slug}/`, baseURL).href);
+    expect(sitemap).toContain(new URL(`ar/work/${work.slug}/`, baseURL).href);
+  }
+  expect(sitemap).toContain('hreflang="ar-EG"');
 
   const card = await request.get('mahmoud-khaled.vcf');
   expect(card.headers()['content-type']).toContain('text/vcard');
@@ -46,10 +61,10 @@ test('search engines and phones get robots, sitemap, contact card and manifest',
   expect(vcf).toContain('EMAIL;TYPE=INTERNET:mahmoud.kh.hanafy@gmail.com');
 
   const manifest = await (await request.get('manifest.webmanifest')).json();
-  expect(manifest).toMatchObject({ start_url: '/mahmoud-khaled/', lang: 'ar', dir: 'rtl' });
+  expect(manifest).toMatchObject({ start_url: '/mahmoud-khaled/', lang: 'en', dir: 'ltr' });
 });
 
-for (const path of ['', 'en/', `work/${slug}/`]) {
+for (const path of ['ar/', '', `ar/work/${slug}/`]) {
   test(`points each arrow the way its line reads, also where :dir() is unknown (${path || 'home'})`, async ({ page }) => {
     await page.goto(path);
     /** For each arrow on screen: whether it is mirrored, and whether its line reads right to left. A
@@ -87,7 +102,7 @@ test('carries its <head> script on every page without comments, in little more t
 });
 
 test('keeps its own paper design under Dark Reader', async ({ page }) => {
-  await page.goto('');
+  await page.goto('ar/');
   await expect(page.locator('meta[name="darkreader-lock"]')).toHaveCount(1);
   await expect(page.locator('meta[name="color-scheme"]')).toHaveAttribute('content', 'light');
 });
@@ -95,7 +110,7 @@ test('keeps its own paper design under Dark Reader', async ({ page }) => {
 test('share buttons appear where the browser can share or copy', async ({ page, browserName, context }) => {
   test.skip(browserName !== 'chromium', 'Clipboard permission is granted per browser.');
   await context.grantPermissions(['clipboard-read', 'clipboard-write']);
-  await page.goto(`work/${slug}/`);
+  await page.goto(`ar/work/${slug}/`);
   const share = page.locator('.work__cta button[data-share]');
   await expect(share).toBeVisible();
   await page.evaluate(() => Object.defineProperty(navigator, 'share', { value: undefined }));
@@ -103,7 +118,7 @@ test('share buttons appear where the browser can share or copy', async ({ page, 
   await expect(page.locator('#announcer')).toHaveText('اتنسخ اللينك');
 });
 
-for (const path of ['', 'en/', `work/${slug}/`, `en/work/${slug}/`, 'work/missing/']) {
+for (const path of ['ar/', '', `ar/work/${slug}/`, `work/${slug}/`, 'work/missing/']) {
   test(`${path || 'home'} has no serious accessibility problems`, async ({ page }) => {
     await page.goto(path);
     // Check the page as it rests, not halfway through a build.

@@ -28,7 +28,7 @@ export default defineConfig({
   outDir: process.env.OUT_DIR || 'dist',
   build: { format: 'directory', inlineStylesheets: 'always' },
   server: { port: DEFAULT_PORT, host: true },
-  integrations: [sitemap({ i18n: { defaultLocale: 'ar', locales: { ar: 'ar-EG', en: 'en' } } })],
+  integrations: [sitemap({ i18n: { defaultLocale: 'en', locales: { en: 'en', ar: 'ar-EG' } } })],
   fonts: [
     {
       provider: fontProviders.local(),

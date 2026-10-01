@@ -1,8 +1,9 @@
 <!doctype html>
-<html lang="ar">
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <link rel="stylesheet" href="fonts.css" />
+    <!-- The home page's link preview: "?en" or "?ar" (npm run brand renders both). -->
     <style>
       html,
       body {
@@ -12,11 +13,11 @@
         background: var(--paper);
         color: var(--ink);
       }
-      /* The home page's hero: his name in the display face, his portrait in black and white on orange. */
+      /* The home page's hero: his name large, his portrait in black and white on orange. */
       .words {
         position: absolute;
         top: 64px;
-        left: 64px;
+        inset-inline-start: 64px;
         width: 620px;
       }
       .role {
@@ -24,7 +25,7 @@
         align-items: center;
         gap: 14px;
         font-family: var(--display);
-        font-size: 24px;
+        font-size: 25px;
         letter-spacing: 0.14em;
         text-transform: uppercase;
       }
@@ -43,42 +44,63 @@
       }
       .name span {
         display: block;
-        padding-left: 70px;
+        padding-inline-start: 70px;
       }
       .name b {
         color: var(--accent);
       }
-      .ar {
-        margin-top: 34px;
-        direction: rtl;
-        text-align: left;
-        font-size: 40px;
-        font-weight: 700;
+      .lead {
+        margin-top: 40px;
+        font-size: 34px;
+        font-weight: 600;
+        line-height: 1.35;
       }
-      .ar small {
+      .lead small {
+        display: block;
+        margin-top: 8px;
         color: var(--muted);
-        font-size: 28px;
+        font-size: 26px;
         font-weight: 500;
+      }
+      [lang='ar'] .role {
+        font-family: 'Noto Sans Arabic', sans-serif;
+        font-size: 28px;
+        font-weight: 600;
+        letter-spacing: 0;
+      }
+      [lang='ar'] .name {
+        margin-top: 18px;
+        font-family: 'Noto Sans Arabic', sans-serif;
+        font-size: 118px;
+        font-weight: 800;
+        line-height: 1.22;
+        letter-spacing: -0.02em;
+      }
+      [lang='ar'] .name span {
+        padding-inline-start: 0;
+      }
+      [lang='ar'] .lead {
+        margin-top: 22px;
+        line-height: 1.6;
       }
       .block {
         position: absolute;
         top: 70px;
-        right: 64px;
+        inset-inline-end: 64px;
         bottom: 46px;
         width: 400px;
         background: var(--accent);
       }
       .portrait {
         position: absolute;
-        right: 40px;
+        inset-inline-end: 40px;
         bottom: 0;
         height: 590px;
         filter: grayscale(1);
       }
       .rule {
         position: absolute;
-        left: 64px;
-        right: 520px;
+        inset-inline: 64px 520px;
         bottom: 46px;
         border-top: 2px solid var(--line);
       }
@@ -89,9 +111,23 @@
     <img class="portrait" src="../../portrait.png" alt="" />
     <div class="rule"></div>
     <div class="words">
-      <p class="role"><i></i>Video editor &amp; videographer · Giza</p>
-      <p class="name" lang="en">Mahmoud<span>Khaled<b>.</b></span></p>
-      <p class="ar">محمود خالد <small>· مونتير ومصوّر فيديو</small></p>
+      <p class="role"><i></i><span id="role"></span></p>
+      <p class="name" id="name"></p>
+      <p class="lead"><span id="lead"></span><small id="place"></small></p>
     </div>
+    <script>
+      const text = {
+        en: { role: 'Video editor & videographer', first: 'Mahmoud', last: 'Khaled', lead: 'Every frame has a story.', place: 'Reels, kinetic captions, events and brands' },
+        ar: { role: 'مونتير ومصوّر فيديو', first: 'محمود', last: 'خالد', lead: 'كل لقطة ليها حكاية.', place: 'مونتاج ريلز، كتابة متحركة، فعاليات وبراندات' },
+      };
+      const lang = location.search.slice(1) === 'ar' ? 'ar' : 'en';
+      const t = text[lang];
+      document.documentElement.lang = lang;
+      document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+      document.getElementById('role').textContent = t.role;
+      document.getElementById('name').innerHTML = `${t.first}<span>${t.last}<b>.</b></span>`;
+      document.getElementById('lead').textContent = t.lead;
+      document.getElementById('place').textContent = t.place;
+    </script>
   </body>
 </html>

@@ -5,7 +5,7 @@ const pieceIn = (page: Page, slug: string) => page.locator('[data-reel]').filter
 
 test.describe('play here, open there', () => {
   test('a picture plays where it is, and the page stays', async ({ page }) => {
-    await page.goto('');
+    await page.goto('ar/');
     const url = page.url();
     await pieceIn(page, works[0]!.slug).locator('.player__play').click();
     await expect.poll(async () => (await videoState(page, '[data-reel] [data-player] >> nth=0')).time, { timeout: 15_000 }).toBeGreaterThan(0.3);
@@ -14,7 +14,7 @@ test.describe('play here, open there', () => {
 
   test('a title opens its page, and says so with an arrow that is not read out', async ({ page }) => {
     const work = works[1]!;
-    await page.goto('');
+    await page.goto('ar/');
     const link = page.locator(`#title-${work.slug} a`);
     await expect(link).toHaveAccessibleName(work.title.ar);
     await expect(link.locator('[aria-hidden="true"] .reel__go')).toHaveCount(1);
@@ -23,7 +23,7 @@ test.describe('play here, open there', () => {
   });
 
   test('nudges a title’s arrow on hover only where there is a mouse, so a tap on a phone opens the page at once', async ({ page }) => {
-    await page.goto('');
+    await page.goto('ar/');
     const link = page.locator(`#title-${works[1]!.slug} a`);
     await link.evaluate((el) => el.scrollIntoView({ block: 'center', behavior: 'instant' }));
     await link.hover();
@@ -36,7 +36,7 @@ test.describe('play here, open there', () => {
 
   test('"All work" returns to the same piece, even the last one', async ({ page }) => {
     const work = works.at(-1)!;
-    await page.goto(`work/${work.slug}/`);
+    await page.goto(`ar/work/${work.slug}/`);
     await expect(page.locator('.work__back')).toHaveAttribute('href', new RegExp(`/#reel-${work.slug}$`));
     await page.locator('.work__back').click();
     await expect(page).toHaveURL(new RegExp(`#reel-${work.slug}$`));
@@ -111,7 +111,7 @@ test.describe('the glide', () => {
 
   test('pairs the frame of the last piece too, when coming back to it', async ({ page }) => {
     const work = works.at(-1)!;
-    await open(page, `work/${work.slug}/`);
+    await open(page, `ar/work/${work.slug}/`);
     await page.locator('.work__back').click();
     await page.waitForURL(`**/#reel-${work.slug}`);
     await expect.poll(() => glide(page)).toBe(expected(work.slug));
@@ -119,7 +119,7 @@ test.describe('the glide', () => {
 
   test('moves a "More work" thumbnail into its page', async ({ page }) => {
     const [from, to] = [works[0]!, works[1]!];
-    await open(page, `work/${from.slug}/`);
+    await open(page, `ar/work/${from.slug}/`);
     await page.locator(`.more a[href$="/work/${to.slug}/"]`).click();
     await page.waitForURL(`**/work/${to.slug}/`);
     await expect.poll(() => glide(page)).toBe(expected(to.slug));
@@ -127,7 +127,7 @@ test.describe('the glide', () => {
 
   test('sends no frame off screen when going home by the name in the header', async ({ page }) => {
     const work = works.at(-1)!;
-    await open(page, `work/${work.slug}/`);
+    await open(page, `ar/work/${work.slug}/`);
     await page.locator('.site-header .brand').click();
     await page.waitForURL((url) => !url.pathname.includes('/work/'));
     await expect.poll(() => glide(page)).not.toBeNull();
@@ -138,7 +138,7 @@ test.describe('the glide', () => {
 
   test('names no frame outside a page change, even after going back', async ({ page }) => {
     const work = works[0]!;
-    await page.goto('');
+    await page.goto('ar/');
     await expect(page.locator('.is-gliding')).toHaveCount(0);
     await page.locator(`#title-${work.slug} a`).click();
     await page.waitForURL(`**/work/${work.slug}/`);
@@ -171,7 +171,7 @@ test.describe('the glide', () => {
     const glided = (page: Page) => expect(page.locator('.is-gliding')).toHaveCount(0);
     /** Comes back to the feed at `first` by "All work", and finds another piece on screen beside it. */
     const besideIn = async (page: Page, first: string) => {
-      await open(page, `work/${first}/`);
+      await open(page, `ar/work/${first}/`);
       await page.locator('.work__back').click();
       await page.waitForURL(`**/#reel-${first}`);
       await glided(page);

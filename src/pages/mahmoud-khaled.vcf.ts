@@ -12,7 +12,7 @@ export const GET: APIRoute = () => {
     'TITLE:Video editor & videographer',
     `TEL;TYPE=CELL,VOICE:${CONTACT.phoneE164}`,
     `EMAIL;TYPE=INTERNET:${CONTACT.email}`,
-    `URL:${pageAbs('ar')}`,
+    `URL:${pageAbs('en')}`,
     `X-SOCIALPROFILE;TYPE=instagram:${CONTACT.instagramUrl}`,
     'ADR;TYPE=WORK:;;;Giza;;;Egypt',
     'NOTE:محمود خالد - مونتير ومصور فيديو',

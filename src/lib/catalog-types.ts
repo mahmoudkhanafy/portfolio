@@ -40,7 +40,15 @@ export interface Work {
     webp: ImageSource[];
     jpg: ImageSource;
   };
-  og: { src: string; width: number; height: number; bytes: number };
+  /** The link-preview card for each page language. */
+  og: Record<'ar' | 'en', OgImage>;
+}
+
+export interface OgImage {
+  src: string;
+  width: number;
+  height: number;
+  bytes: number;
 }
 
 export interface Portrait {

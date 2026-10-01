@@ -16,8 +16,8 @@ export function absoluteUrl(path: string, site: string, base: string): string {
   return site.replace(/\/+$/, '') + withBase(path, base);
 }
 
-/** Path of a page (without the base): Arabic lives at the root, English under en/. */
+/** Path of a page (without the base): English lives at the root, Arabic under ar/. */
 export function pagePath(lang: Lang, slug?: string): string {
-  const prefix = lang === 'en' ? 'en/' : '';
+  const prefix = lang === 'ar' ? 'ar/' : '';
   return slug ? `${prefix}work/${slug}/` : prefix;
 }

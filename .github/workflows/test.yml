@@ -52,6 +52,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Install the test browsers (Chromium also draws the link previews)
+        run: npx playwright install --with-deps chromium webkit
+
       - name: Prepare videos
         run: npm run media
 
@@ -60,9 +63,6 @@ jobs:
 
       - name: Unit tests
         run: npm run test:unit
-
-      - name: Install the WebKit test browser
-        run: npx playwright install --with-deps webkit
 
       - name: Build for end-to-end tests
         run: npm run build:e2e

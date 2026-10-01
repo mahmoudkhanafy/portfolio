@@ -1,5 +1,5 @@
 import { writeFile } from 'node:fs/promises';
-import sharp, { type OverlayOptions } from 'sharp';
+import sharp from 'sharp';
 import type { Size } from './ladder.ts';
 
 /** A rendered file inside a cache directory. */
@@ -26,7 +26,8 @@ export interface PortraitSet {
   png: FileRef;
 }
 
-const OG = { width: 1200, height: 630, pad: 40, maxBytes: 290_000 };
+/** WhatsApp drops a link-preview image over 300 KB; this leaves room. */
+export const OG_MAX_BYTES = 280_000;
 
 /** Cover widths for srcset: phone and grid sizes, plus wide sizes for landscape work. Never upscaled. */
 export function coverWidths(size: Size): number[] {
@@ -64,48 +65,27 @@ export async function renderCover(framePng: string, dir: string): Promise<CoverS
   };
 }
 
-/** The site's play button: a play mark on the orange, square like the page. */
-const BADGE = 76;
-const playBadge = (): Buffer =>
-  Buffer.from(
-    `<svg xmlns="http://www.w3.org/2000/svg" width="${BADGE}" height="${BADGE}" viewBox="0 0 120 120">
-      <rect width="120" height="120" fill="#bd4225"/>
-      <path d="M48 38 L84 60 L48 82 Z" fill="#fff9ed"/>
-    </svg>`,
-  );
+/** The frame as a high-quality still, from which the link-preview cards are drawn (scripts/media/og.ts). */
+export async function renderStill(framePng: string, out: string): Promise<void> {
+  await sharp(framePng).jpeg({ quality: 92, mozjpeg: true, chromaSubsampling: '4:4:4' }).toFile(out);
+}
 
 /**
- * The link-preview image WhatsApp and Instagram show: 1200×630, the frame on a blurred fill of itself
- * (or full-bleed for wide video), a play badge that says "video", and the bilingual wordmark.
+ * Writes a link-preview image as JPEG at the best quality that keeps it under the size WhatsApp still
+ * shows large: without colour subsampling first, so its text and the orange stay sharp, and only for
+ * a picture too busy for that, with it.
  */
-export async function renderOg(framePng: string, size: Size, wordmarkPng: string, out: string): Promise<number> {
-  const layers: OverlayOptions[] = [];
-  let base: Buffer;
-  // The play badge sits in the frame's lower corner, clear of the faces most covers are centred on.
-  let badge = { left: OG.width - BADGE - 28, top: OG.height - BADGE - 28 };
-  if (size.width / size.height >= 1.6) {
-    base = await sharp(framePng).resize(OG.width, OG.height, { fit: 'cover' }).toBuffer();
-  } else {
-    base = await sharp(framePng).resize(OG.width, OG.height, { fit: 'cover' }).blur(28).modulate({ brightness: 0.42 }).toBuffer();
-    const height = OG.height - OG.pad * 2;
-    const width = Math.round((height * size.width) / size.height);
-    const framed = await sharp(framePng).resize(width, height, { fit: 'cover' }).png().toBuffer();
-    const left = Math.round((OG.width - width) / 2);
-    layers.push({ input: framed, left, top: OG.pad });
-    badge = { left: left + width - BADGE - 20, top: OG.pad + height - BADGE - 20 };
+export async function writeOgJpeg(png: Buffer, out: string): Promise<number> {
+  const steps: Array<[number, '4:4:4' | '4:2:0']> = [
+    [90, '4:4:4'], [84, '4:4:4'], [78, '4:4:4'], [72, '4:4:4'],
+    [72, '4:2:0'], [62, '4:2:0'], [52, '4:2:0'], [42, '4:2:0'], [32, '4:2:0'],
+  ];
+  let jpeg = Buffer.alloc(0);
+  for (const [quality, chromaSubsampling] of steps) {
+    jpeg = await sharp(png).jpeg({ quality, mozjpeg: true, chromaSubsampling }).toBuffer();
+    if (jpeg.length <= OG_MAX_BYTES) break;
   }
-  layers.push({ input: playBadge(), ...badge });
-  const mark = await sharp(wordmarkPng).metadata();
-  layers.push({ input: wordmarkPng, left: 24, top: OG.height - (mark.height ?? 0) - 24 });
-
-  const composed = await sharp(base).composite(layers).toBuffer();
-  let quality = 82;
-  let jpeg = await sharp(composed).jpeg({ quality, mozjpeg: true }).toBuffer();
-  while (jpeg.length > OG.maxBytes && quality > 50) {
-    quality -= 8;
-    jpeg = await sharp(composed).jpeg({ quality, mozjpeg: true }).toBuffer();
-  }
-  // Written as measured: letting sharp write it would re-encode it without mozjpeg, at another size.
+  // Written as measured: letting sharp write it would re-encode it, at another size.
   await writeFile(out, jpeg);
   return jpeg.length;
 }
