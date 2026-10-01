@@ -635,15 +635,15 @@ const { lang } = Astro.props;
     transform: scale(1.05);
   }
 
-  /* Modal Content Wrapper: Authentic iPhone Pro Body */
+  /* Modal Content Wrapper: Authentic iPhone 16 Pro Body */
   .modal-content-container {
     position: relative;
-    background-color: #000000;
-    border: clamp(2.5px, 0.35vw, 3px) solid rgba(189, 66, 37, 0.4);
+    background-color: #1b1a19;
+    border: 1px solid rgba(189, 66, 37, 0.45);
     box-shadow:
-      0 30px 80px -15px rgba(0, 0, 0, 0.95),
       0 0 0 1px rgba(189, 66, 37, 0.25),
-      0 0 35px -5px rgba(189, 66, 37, 0.2),
+      0 0 20px -2px rgba(189, 66, 37, 0.22),
+      0 30px 80px -15px rgba(0, 0, 0, 0.95),
       inset 0 0 0 1px rgba(255, 255, 255, 0.08);
     display: flex;
     align-items: center;
@@ -652,94 +652,127 @@ const { lang } = Astro.props;
     max-width: 95vw;
     width: auto;
     height: auto;
+    padding: 3.5px;
     transition: max-width 300ms ease, aspect-ratio 300ms ease, border-radius 300ms ease;
   }
 
-  /* Vertical container: authentic 9:19.5 with rounded-[50px] */
+  /* Vertical container: authentic 9:19.5 with rounded-[46px] */
   .modal-container--vertical {
     aspect-ratio: 9 / 19.5;
     max-height: 85vh;
     max-width: calc(85vh * 9 / 19.5);
     width: 100%;
-    border-radius: 50px;
+    border-radius: 46px;
   }
 
-  /* Landscape container: authentic 19.5:9 */
+  /* Landscape container: authentic 19.5:9 with rounded-[38px] */
   .modal-container--landscape {
     aspect-ratio: 19.5 / 9;
     max-height: 85vh;
     max-width: min(92vw, calc(85vh * 19.5 / 9));
     width: 100%;
-    border-radius: 40px;
+    border-radius: 38px;
   }
 
-  /* Hardware Side Buttons */
+  /* Hardware Side Buttons (Ultra-Thin 2px Titanium Slivers) */
   .modal-content-container .phone-btn {
     position: absolute;
-    background: linear-gradient(180deg, #3d3a33 0%, #1c1b18 50%, #2e2b26 100%);
-    border: 0.5px solid rgba(189, 66, 37, 0.35);
+    background: #2b2a28;
     z-index: 10;
     pointer-events: none;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
   }
 
   .modal-content-container .phone-btn--action {
-    top: clamp(65px, 12%, 80px);
-    left: -4px;
-    width: 4px;
-    height: 26px;
-    border-radius: 3px 0 0 3px;
+    top: clamp(65px, 12%, 76px);
+    left: -2px;
+    width: 2px;
+    height: 24px;
+    border-radius: 2px 0 0 2px;
   }
 
   .modal-content-container .phone-btn--vol-up {
-    top: clamp(102px, 18%, 120px);
-    left: -4px;
-    width: 4px;
-    height: 50px;
-    border-radius: 3px 0 0 3px;
+    top: clamp(100px, 18%, 112px);
+    left: -2px;
+    width: 2px;
+    height: 46px;
+    border-radius: 2px 0 0 2px;
   }
 
   .modal-content-container .phone-btn--vol-down {
-    top: clamp(162px, 28%, 180px);
-    left: -4px;
-    width: 4px;
-    height: 50px;
-    border-radius: 3px 0 0 3px;
+    top: clamp(156px, 28%, 168px);
+    left: -2px;
+    width: 2px;
+    height: 46px;
+    border-radius: 2px 0 0 2px;
   }
 
   .modal-content-container .phone-btn--power {
-    top: clamp(100px, 17%, 120px);
-    right: -4px;
-    width: 4px;
-    height: 75px;
-    border-radius: 0 3px 3px 0;
+    top: clamp(100px, 17%, 116px);
+    right: -2px;
+    width: 2px;
+    height: 72px;
+    border-radius: 0 2px 2px 0;
   }
 
-  /* Top Micro Speaker Slit */
+  /* Landscape Modal Hardware Buttons */
+  .modal-container--landscape .phone-btn--action {
+    top: -2px;
+    left: clamp(70px, 12%, 88px);
+    height: 2px;
+    width: 24px;
+    border-radius: 2px 2px 0 0;
+  }
+
+  .modal-container--landscape .phone-btn--vol-up {
+    top: -2px;
+    left: clamp(106px, 18%, 124px);
+    height: 2px;
+    width: 46px;
+    border-radius: 2px 2px 0 0;
+  }
+
+  .modal-container--landscape .phone-btn--vol-down {
+    top: -2px;
+    left: clamp(162px, 28%, 180px);
+    height: 2px;
+    width: 46px;
+    border-radius: 2px 2px 0 0;
+  }
+
+  .modal-container--landscape .phone-btn--power {
+    bottom: -2px;
+    top: auto;
+    right: auto;
+    left: clamp(106px, 18%, 124px);
+    height: 2px;
+    width: 72px;
+    border-radius: 0 0 2px 2px;
+  }
+
+  /* Micro Speaker Slit */
   .modal-content-container .phone-speaker--vertical {
     position: absolute;
-    top: 4px;
+    top: 3px;
     left: 50%;
     transform: translateX(-50%);
-    width: clamp(38px, 6vw, 48px);
-    height: 2.5px;
-    background: #141312;
+    width: 48px;
+    height: 2px;
+    background: #262626;
     border-radius: 9999px;
-    border: 0.5px solid rgba(255, 255, 255, 0.1);
     z-index: 35;
     pointer-events: none;
   }
 
   .modal-content-container .phone-speaker--landscape {
     position: absolute;
-    left: 4px;
+    left: 3px;
     top: 50%;
     transform: translateY(-50%);
-    height: clamp(38px, 6vw, 48px);
-    width: 2.5px;
-    background: #141312;
+    height: 48px;
+    width: 2px;
+    background: #262626;
     border-radius: 9999px;
-    border: 0.5px solid rgba(255, 255, 255, 0.1);
     z-index: 35;
     pointer-events: none;
   }
@@ -790,6 +823,7 @@ const { lang } = Astro.props;
     background-color: rgba(0, 0, 0, 0.85);
   }
 
+  /* Inner Screen Canvas */
   .modal-video-canvas {
     position: relative;
     width: 100%;
@@ -800,25 +834,28 @@ const { lang } = Astro.props;
     background-color: #000000;
     cursor: pointer;
     overflow: hidden;
-    border-radius: 46px;
+    border-radius: 38px;
   }
 
   .modal-container--landscape .modal-video-canvas {
-    border-radius: 36px;
+    border-radius: 30px;
   }
 
-  /* Centered video element */
+  /* Centered video element: edge-to-edge object-cover with rounded-[38px] (no letterboxing) */
   .modal-video-element {
-    max-height: 85vh;
-    max-width: 100%;
     width: 100%;
     height: 100%;
-    object-fit: contain;
+    object-fit: cover;
     background-color: #000000;
     display: block;
     margin: 0 auto;
     border: none;
     outline: none;
+    border-radius: 38px;
+  }
+
+  .modal-container--landscape .modal-video-element {
+    border-radius: 30px;
   }
 
   /* Authentic Apple Dynamic Island in Modal */
@@ -833,7 +870,7 @@ const { lang } = Astro.props;
     pointer-events: none;
     box-shadow:
       0 0 0 0.5px rgba(255, 255, 255, 0.08),
-      0 2px 8px rgba(0, 0, 0, 0.8);
+      0 2px 6px rgba(0, 0, 0, 0.8);
     transition: all 300ms ease;
   }
 
@@ -841,9 +878,9 @@ const { lang } = Astro.props;
     top: 10px;
     left: 50%;
     transform: translateX(-50%);
-    width: clamp(88px, 11vw, 112px);
-    height: 24px;
-    padding-right: 10px;
+    width: clamp(96px, 28%, 108px);
+    height: 22px;
+    padding-right: 9px;
     gap: 6px;
   }
 
@@ -851,9 +888,9 @@ const { lang } = Astro.props;
     left: 10px;
     top: 50%;
     transform: translateY(-50%);
-    width: 24px;
-    height: clamp(88px, 11vw, 112px);
-    padding-bottom: 10px;
+    width: 22px;
+    height: clamp(96px, 28%, 108px);
+    padding-bottom: 9px;
     flex-direction: column;
     gap: 6px;
   }
@@ -862,15 +899,15 @@ const { lang } = Astro.props;
     width: 5px;
     height: 5px;
     border-radius: 9999px;
-    background: #111215;
+    background: #0c0d10;
   }
 
   .modal-island__dot-lens {
-    width: 8.5px;
-    height: 8.5px;
+    width: 8px;
+    height: 8px;
     border-radius: 9999px;
-    background: #08090d;
-    border: 1px solid rgba(189, 66, 37, 0.35);
+    background: #050608;
+    border: 0.5px solid #1a1a22;
     box-shadow: inset 0 0 1px 1px rgba(255, 255, 255, 0.12);
   }
 
@@ -879,21 +916,24 @@ const { lang } = Astro.props;
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
-    width: clamp(88px, 11vw, 112px);
     height: 4px;
     background: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     border-radius: 9999px;
     pointer-events: none;
     z-index: 25;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
   }
 
   .modal-content-container .phone-home-indicator--vertical {
     bottom: 8px;
+    width: clamp(96px, 28%, 112px);
   }
 
   .modal-content-container .phone-home-indicator--landscape {
     bottom: 8px;
+    width: clamp(96px, 20%, 120px);
   }
 
   .modal-spinner {
