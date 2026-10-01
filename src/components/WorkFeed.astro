@@ -71,16 +71,26 @@ const withBust = (url: string) => (url ? (url.includes('?') ? `${url}&${cacheBus
               data-duration={work.duration}
             >
               <div class="phone-frame-wrapper w-full flex-1 flex items-center justify-center">
-                {/* Titanium Orange iPhone 17 Frame */}
+                {/* Authentic iPhone Pro Chassis */}
                 <div class="phone-frame phone-frame--vertical">
-                  {/* Dynamic Island Pill Notch */}
-                  <div class="phone-island phone-island--vertical" aria-hidden="true">
-                    <div class="phone-island__dot-sensor" />
-                    <div class="phone-island__dot-lens" />
-                  </div>
+                  {/* Left Hardware Buttons: Action Button + Volume Up + Volume Down */}
+                  <span class="phone-btn phone-btn--action" aria-hidden="true"></span>
+                  <span class="phone-btn phone-btn--vol-up" aria-hidden="true"></span>
+                  <span class="phone-btn phone-btn--vol-down" aria-hidden="true"></span>
 
-                  {/* Inner Screen */}
+                  {/* Right Hardware Button: Power / Side Button */}
+                  <span class="phone-btn phone-btn--power" aria-hidden="true"></span>
+
+                  {/* Top Speaker Slit */}
+                  <div class="phone-speaker phone-speaker--vertical" aria-hidden="true"></div>
+
+                  {/* Inner Screen: Aspect Ratio 9:19.5 */}
                   <div class="phone-screen phone-screen--vertical">
+                    {/* Dynamic Island: h-6 w-28 */}
+                    <div class="phone-island phone-island--vertical" aria-hidden="true">
+                      <div class="phone-island__dot-sensor" />
+                      <div class="phone-island__dot-lens" />
+                    </div>
                     <picture class="phone-poster">
                       <source type="image/avif" srcset={srcset(work.cover.avif)} sizes="(min-width: 1024px) 340px, (min-width: 768px) 50vw, 100vw" />
                       <source type="image/webp" srcset={srcset(work.cover.webp)} sizes="(min-width: 1024px) 340px, (min-width: 768px) 50vw, 100vw" />
@@ -136,6 +146,8 @@ const withBust = (url: string) => (url ? (url.includes('?') ? `${url}&${cacheBus
                         </p>
                       )}
                     </div>
+                    {/* Sleek Apple Home Indicator Bar */}
+                    <div class="phone-home-indicator phone-home-indicator--vertical" aria-hidden="true" />
                   </div>
                 </div>
               </div>
@@ -191,14 +203,22 @@ const withBust = (url: string) => (url ? (url.includes('?') ? `${url}&${cacheBus
             >
               {/* Landscape Phone Mockup Frame - full width of section */}
               <div class="phone-frame phone-frame--landscape w-full">
-                {/* Landscape Camera Pill on Left Edge */}
-                <div class="phone-island phone-island--landscape" aria-hidden="true">
-                  <div class="phone-island__dot-sensor" />
-                  <div class="phone-island__dot-lens" />
-                </div>
+                {/* Landscape Hardware Buttons */}
+                <span class="phone-btn phone-btn--landscape-action" aria-hidden="true"></span>
+                <span class="phone-btn phone-btn--landscape-vol-up" aria-hidden="true"></span>
+                <span class="phone-btn phone-btn--landscape-vol-down" aria-hidden="true"></span>
+                <span class="phone-btn phone-btn--landscape-power" aria-hidden="true"></span>
 
-                {/* Inner Screen: Aspect Ratio 16:9 */}
+                {/* Left Speaker Slit in Landscape */}
+                <div class="phone-speaker phone-speaker--landscape" aria-hidden="true"></div>
+
+                {/* Inner Screen: Aspect Ratio 19.5:9 */}
                 <div class="phone-screen phone-screen--landscape">
+                  {/* Dynamic Island on Left Edge */}
+                  <div class="phone-island phone-island--landscape" aria-hidden="true">
+                    <div class="phone-island__dot-sensor" />
+                    <div class="phone-island__dot-lens" />
+                  </div>
                   <picture class="phone-poster">
                     <source type="image/avif" srcset={srcset(work.cover.avif)} sizes="(min-width: 1200px) 1100px, 100vw" />
                     <source type="image/webp" srcset={srcset(work.cover.webp)} sizes="(min-width: 1200px) 1100px, 100vw" />
@@ -253,6 +273,8 @@ const withBust = (url: string) => (url ? (url.includes('?') ? `${url}&${cacheBus
                         {description.text}
                       </p>
                     )}
+                    {/* Sleek Apple Home Indicator Bar */}
+                    <div class="phone-home-indicator phone-home-indicator--landscape" aria-hidden="true" />
                   </div>
                 </div>
               </div>
@@ -411,32 +433,32 @@ const withBust = (url: string) => (url ? (url.includes('?') ? `${url}&${cacheBus
     justify-content: center;
   }
 
-  /* Exact Avatar-Matched Orange iPhone Mockup Frame */
+  /* Exact Avatar-Matched Orange iPhone Pro Mockup Frame */
   .phone-frame {
     width: 100%;
-    background: linear-gradient(145deg, #1c1b18 0%, #11100e 50%, #171513 100%);
-    border: clamp(2.5px, 0.35vw, 3.5px) solid rgba(189, 66, 37, 0.38);
+    background: linear-gradient(145deg, #22201d 0%, #131210 50%, #1a1916 100%);
+    border: clamp(2.5px, 0.35vw, 3px) solid rgba(189, 66, 37, 0.4);
     position: relative;
     box-shadow:
-      0 18px 45px -12px rgba(0, 0, 0, 0.8),
-      0 0 0 1px rgba(189, 66, 37, 0.22),
-      0 0 22px -4px rgba(189, 66, 37, 0.16),
+      0 20px 48px -10px rgba(0, 0, 0, 0.85),
+      0 0 0 1px rgba(189, 66, 37, 0.25),
+      0 0 24px -2px rgba(189, 66, 37, 0.18),
       inset 0 0 0 1px rgba(255, 255, 255, 0.08),
-      inset 0 1px 2px rgba(189, 66, 37, 0.18);
+      inset 0 1px 2px rgba(189, 66, 37, 0.2);
     transition: transform 300ms cubic-bezier(0.2, 0.8, 0.2, 1), border-color 300ms ease, box-shadow 300ms ease;
     pointer-events: auto;
   }
 
   .phone-frame--vertical {
-    max-width: 340px;
-    border-radius: clamp(46px, 5.5vw, 52px);
-    padding: clamp(3.5px, 0.55vw, 5.5px);
+    max-width: 320px;
+    border-radius: 50px;
+    padding: clamp(3px, 0.45vw, 4.5px);
   }
 
   .phone-frame--landscape {
     max-width: 100%;
-    border-radius: clamp(34px, 4vw, 46px);
-    padding: clamp(3.5px, 0.55vw, 6px);
+    border-radius: 40px;
+    padding: clamp(3px, 0.45vw, 5px);
   }
 
   @media (hover: hover) and (pointer: fine) {
@@ -446,72 +468,198 @@ const withBust = (url: string) => (url ? (url.includes('?') ? `${url}&${cacheBus
       box-shadow:
         0 28px 55px -12px rgba(0, 0, 0, 0.85),
         0 0 0 1.5px rgba(189, 66, 37, 0.65),
-        0 0 35px -2px rgba(189, 66, 37, 0.4),
+        0 0 35px -2px rgba(189, 66, 37, 0.45),
         inset 0 0 0 1px rgba(255, 255, 255, 0.18);
     }
   }
 
-  /* Authentic Apple Dynamic Island Cutout */
-  .phone-island--vertical {
+  /* Hardware Side Buttons */
+  .phone-btn {
     position: absolute;
-    top: clamp(8px, 1.2vw, 12px);
+    background: linear-gradient(180deg, #3d3a33 0%, #1c1b18 50%, #2e2b26 100%);
+    border: 0.5px solid rgba(189, 66, 37, 0.35);
+    z-index: 10;
+    pointer-events: none;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+  }
+
+  .phone-btn--action {
+    top: clamp(65px, 12%, 80px);
+    left: -4px;
+    width: 4px;
+    height: 26px;
+    border-radius: 3px 0 0 3px;
+  }
+
+  .phone-btn--vol-up {
+    top: clamp(102px, 18%, 120px);
+    left: -4px;
+    width: 4px;
+    height: 50px;
+    border-radius: 3px 0 0 3px;
+  }
+
+  .phone-btn--vol-down {
+    top: clamp(162px, 28%, 180px);
+    left: -4px;
+    width: 4px;
+    height: 50px;
+    border-radius: 3px 0 0 3px;
+  }
+
+  .phone-btn--power {
+    top: clamp(100px, 17%, 120px);
+    right: -4px;
+    width: 4px;
+    height: 75px;
+    border-radius: 0 3px 3px 0;
+  }
+
+  /* Landscape Hardware Buttons */
+  .phone-btn--landscape-action {
+    top: -4px;
+    left: clamp(75px, 12%, 95px);
+    height: 4px;
+    width: 26px;
+    border-radius: 3px 3px 0 0;
+  }
+
+  .phone-btn--landscape-vol-up {
+    top: -4px;
+    left: clamp(115px, 18%, 135px);
+    height: 4px;
+    width: 50px;
+    border-radius: 3px 3px 0 0;
+  }
+
+  .phone-btn--landscape-vol-down {
+    top: -4px;
+    left: clamp(175px, 28%, 195px);
+    height: 4px;
+    width: 50px;
+    border-radius: 3px 3px 0 0;
+  }
+
+  .phone-btn--landscape-power {
+    bottom: -4px;
+    left: clamp(115px, 18%, 135px);
+    height: 4px;
+    width: 75px;
+    border-radius: 0 0 3px 3px;
+  }
+
+  /* Top Micro Speaker Slit */
+  .phone-speaker--vertical {
+    position: absolute;
+    top: 4px;
     left: 50%;
     transform: translateX(-50%);
-    width: clamp(74px, 10vw, 96px);
-    height: clamp(16px, 2.2vw, 20px);
+    width: clamp(38px, 6vw, 48px);
+    height: 2.5px;
+    background: #141312;
+    border-radius: 9999px;
+    border: 0.5px solid rgba(255, 255, 255, 0.1);
+    z-index: 35;
+    pointer-events: none;
+  }
+
+  .phone-speaker--landscape {
+    position: absolute;
+    left: 4px;
+    top: 50%;
+    transform: translateY(-50%);
+    height: clamp(38px, 6vw, 48px);
+    width: 2.5px;
+    background: #141312;
+    border-radius: 9999px;
+    border: 0.5px solid rgba(255, 255, 255, 0.1);
+    z-index: 35;
+    pointer-events: none;
+  }
+
+  /* Authentic Apple Dynamic Island: h-6 w-28 */
+  .phone-island--vertical {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: clamp(88px, 11vw, 112px);
+    height: 24px;
     background: #000000;
     border-radius: 9999px;
     z-index: 30;
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 7px;
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    justify-content: flex-end;
+    padding-right: 10px;
+    gap: 6px;
     pointer-events: none;
     box-shadow:
       0 0 0 0.5px rgba(255, 255, 255, 0.08),
-      0 2px 7px rgba(0, 0, 0, 0.75);
+      0 2px 7px rgba(0, 0, 0, 0.85);
   }
 
   .phone-island--landscape {
     position: absolute;
-    left: clamp(9px, 1.3vw, 14px);
+    left: 10px;
     top: 50%;
     transform: translateY(-50%);
-    width: clamp(16px, 2.2vw, 20px);
-    height: clamp(74px, 10vw, 96px);
+    width: 24px;
+    height: clamp(88px, 11vw, 112px);
     background: #000000;
     border-radius: 9999px;
     z-index: 30;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    gap: 7px;
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    justify-content: flex-end;
+    padding-bottom: 10px;
+    gap: 6px;
     pointer-events: none;
     box-shadow:
       0 0 0 0.5px rgba(255, 255, 255, 0.08),
-      0 2px 7px rgba(0, 0, 0, 0.75);
+      0 2px 7px rgba(0, 0, 0, 0.85);
   }
 
   .phone-island__dot-sensor {
-    width: clamp(4px, 0.6vw, 6px);
-    height: clamp(4px, 0.6vw, 6px);
+    width: 5px;
+    height: 5px;
     border-radius: 9999px;
-    background: #141416;
+    background: #111215;
   }
 
   .phone-island__dot-lens {
-    width: clamp(6.5px, 0.9vw, 8.5px);
-    height: clamp(6.5px, 0.9vw, 8.5px);
+    width: 8.5px;
+    height: 8.5px;
     border-radius: 9999px;
-    background: #0b0c10;
+    background: #08090d;
     border: 1px solid rgba(189, 66, 37, 0.35);
     box-shadow: inset 0 0 1px 1px rgba(255, 255, 255, 0.12);
   }
 
-  /* Inner Mobile Screen: Ultra-Thin Uniform Bezel */
+  /* Sleek Apple Home Indicator Bar: h-1 w-28 */
+  .phone-home-indicator {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: clamp(88px, 11vw, 112px);
+    height: 4px;
+    background: rgba(255, 255, 255, 0.4);
+    border-radius: 9999px;
+    pointer-events: none;
+    z-index: 25;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+  }
+
+  .phone-home-indicator--vertical {
+    bottom: 8px;
+  }
+
+  .phone-home-indicator--landscape {
+    bottom: 8px;
+  }
+
+  /* Inner Mobile Screen: Authentic 9:19.5 Proportions & Ultra-Thin Bezel */
   .phone-screen {
     position: relative;
     overflow: hidden;
@@ -520,13 +668,13 @@ const withBust = (url: string) => (url ? (url.includes('?') ? `${url}&${cacheBus
   }
 
   .phone-screen--vertical {
-    aspect-ratio: 9 / 16;
-    border-radius: clamp(40px, 4.8vw, 46px);
+    aspect-ratio: 9 / 19.5;
+    border-radius: 46px;
   }
 
   .phone-screen--landscape {
-    aspect-ratio: 16 / 9;
-    border-radius: clamp(28px, 3.4vw, 40px);
+    aspect-ratio: 19.5 / 9;
+    border-radius: 36px;
   }
 
   /* Media */

@@ -34,6 +34,15 @@ const { lang } = Astro.props;
     id="modal-content-container"
     class="modal-content-container modal-container--vertical"
   >
+    {/* Hardware Side Buttons */}
+    <span class="phone-btn phone-btn--action" aria-hidden="true"></span>
+    <span class="phone-btn phone-btn--vol-up" aria-hidden="true"></span>
+    <span class="phone-btn phone-btn--vol-down" aria-hidden="true"></span>
+    <span class="phone-btn phone-btn--power" aria-hidden="true"></span>
+
+    {/* Top Speaker Slit */}
+    <div id="modal-speaker" class="phone-speaker phone-speaker--vertical" aria-hidden="true"></div>
+
     {/* Top Badges (Category & WhatsApp) */}
     <div
       id="modal-badges"
@@ -82,6 +91,13 @@ const { lang } = Astro.props;
         <div class="modal-island__dot-sensor"></div>
         <div class="modal-island__dot-lens"></div>
       </div>
+
+      {/* Sleek Apple Home Indicator Bar */}
+      <div
+        id="modal-home-bar"
+        class="phone-home-indicator phone-home-indicator--vertical"
+        aria-hidden="true"
+      ></div>
 
       {/* Buffering Loading Spinner Overlay */}
       <div
@@ -297,19 +313,29 @@ const { lang } = Astro.props;
     }) {
       if (!modal || !video) return;
 
-      // Update Aspect Ratio Container & Dynamic Island
+      // Update Aspect Ratio Container, Dynamic Island, Speaker, and Home Bar
       const islandEl = document.getElementById('modal-island');
+      const speakerEl = document.getElementById('modal-speaker');
+      const homeBarEl = document.getElementById('modal-home-bar');
       if (container) {
-        if (data.aspectRatio === '16/9') {
+        if (data.aspectRatio === '16/9' || data.aspectRatio === '19.5/9') {
           container.classList.remove('modal-container--vertical');
           container.classList.add('modal-container--landscape');
           islandEl?.classList.remove('modal-island--vertical');
           islandEl?.classList.add('modal-island--landscape');
+          speakerEl?.classList.remove('phone-speaker--vertical');
+          speakerEl?.classList.add('phone-speaker--landscape');
+          homeBarEl?.classList.remove('phone-home-indicator--vertical');
+          homeBarEl?.classList.add('phone-home-indicator--landscape');
         } else {
           container.classList.remove('modal-container--landscape');
           container.classList.add('modal-container--vertical');
           islandEl?.classList.remove('modal-island--landscape');
           islandEl?.classList.add('modal-island--vertical');
+          speakerEl?.classList.remove('phone-speaker--landscape');
+          speakerEl?.classList.add('phone-speaker--vertical');
+          homeBarEl?.classList.remove('phone-home-indicator--landscape');
+          homeBarEl?.classList.add('phone-home-indicator--vertical');
         }
       }
 
@@ -609,17 +635,16 @@ const { lang } = Astro.props;
     transform: scale(1.05);
   }
 
-  /* Modal Content Wrapper: Authentic iPhone Body */
+  /* Modal Content Wrapper: Authentic iPhone Pro Body */
   .modal-content-container {
     position: relative;
     background-color: #000000;
-    border: clamp(2.5px, 0.35vw, 3.5px) solid rgba(189, 66, 37, 0.4);
-    overflow: hidden;
+    border: clamp(2.5px, 0.35vw, 3px) solid rgba(189, 66, 37, 0.4);
     box-shadow:
       0 30px 80px -15px rgba(0, 0, 0, 0.95),
       0 0 0 1px rgba(189, 66, 37, 0.25),
       0 0 35px -5px rgba(189, 66, 37, 0.2),
-      inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+      inset 0 0 0 1px rgba(255, 255, 255, 0.08);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -630,22 +655,93 @@ const { lang } = Astro.props;
     transition: max-width 300ms ease, aspect-ratio 300ms ease, border-radius 300ms ease;
   }
 
-  /* Vertical container: capped by height 85vh and 9/16 aspect ratio with iPhone rounded corners */
+  /* Vertical container: authentic 9:19.5 with rounded-[50px] */
   .modal-container--vertical {
-    aspect-ratio: 9 / 16;
+    aspect-ratio: 9 / 19.5;
     max-height: 85vh;
-    max-width: calc(85vh * 9 / 16);
+    max-width: calc(85vh * 9 / 19.5);
     width: 100%;
-    border-radius: clamp(44px, 5.5vw, 52px);
+    border-radius: 50px;
   }
 
-  /* Landscape container: capped by height 85vh and 16/9 aspect ratio */
+  /* Landscape container: authentic 19.5:9 */
   .modal-container--landscape {
-    aspect-ratio: 16 / 9;
+    aspect-ratio: 19.5 / 9;
     max-height: 85vh;
-    max-width: min(92vw, calc(85vh * 16 / 9));
+    max-width: min(92vw, calc(85vh * 19.5 / 9));
     width: 100%;
-    border-radius: clamp(32px, 4vw, 42px);
+    border-radius: 40px;
+  }
+
+  /* Hardware Side Buttons */
+  .modal-content-container .phone-btn {
+    position: absolute;
+    background: linear-gradient(180deg, #3d3a33 0%, #1c1b18 50%, #2e2b26 100%);
+    border: 0.5px solid rgba(189, 66, 37, 0.35);
+    z-index: 10;
+    pointer-events: none;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+  }
+
+  .modal-content-container .phone-btn--action {
+    top: clamp(65px, 12%, 80px);
+    left: -4px;
+    width: 4px;
+    height: 26px;
+    border-radius: 3px 0 0 3px;
+  }
+
+  .modal-content-container .phone-btn--vol-up {
+    top: clamp(102px, 18%, 120px);
+    left: -4px;
+    width: 4px;
+    height: 50px;
+    border-radius: 3px 0 0 3px;
+  }
+
+  .modal-content-container .phone-btn--vol-down {
+    top: clamp(162px, 28%, 180px);
+    left: -4px;
+    width: 4px;
+    height: 50px;
+    border-radius: 3px 0 0 3px;
+  }
+
+  .modal-content-container .phone-btn--power {
+    top: clamp(100px, 17%, 120px);
+    right: -4px;
+    width: 4px;
+    height: 75px;
+    border-radius: 0 3px 3px 0;
+  }
+
+  /* Top Micro Speaker Slit */
+  .modal-content-container .phone-speaker--vertical {
+    position: absolute;
+    top: 4px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: clamp(38px, 6vw, 48px);
+    height: 2.5px;
+    background: #141312;
+    border-radius: 9999px;
+    border: 0.5px solid rgba(255, 255, 255, 0.1);
+    z-index: 35;
+    pointer-events: none;
+  }
+
+  .modal-content-container .phone-speaker--landscape {
+    position: absolute;
+    left: 4px;
+    top: 50%;
+    transform: translateY(-50%);
+    height: clamp(38px, 6vw, 48px);
+    width: 2.5px;
+    background: #141312;
+    border-radius: 9999px;
+    border: 0.5px solid rgba(255, 255, 255, 0.1);
+    z-index: 35;
+    pointer-events: none;
   }
 
   .modal-badges {
@@ -703,6 +799,12 @@ const { lang } = Astro.props;
     justify-content: center;
     background-color: #000000;
     cursor: pointer;
+    overflow: hidden;
+    border-radius: 46px;
+  }
+
+  .modal-container--landscape .modal-video-canvas {
+    border-radius: 36px;
   }
 
   /* Centered video element */
@@ -727,9 +829,7 @@ const { lang } = Astro.props;
     z-index: 35;
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 7px;
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    justify-content: flex-end;
     pointer-events: none;
     box-shadow:
       0 0 0 0.5px rgba(255, 255, 255, 0.08),
@@ -738,36 +838,62 @@ const { lang } = Astro.props;
   }
 
   .modal-island--vertical {
-    top: clamp(8px, 1.2vw, 13px);
+    top: 10px;
     left: 50%;
     transform: translateX(-50%);
-    width: clamp(74px, 10vw, 96px);
-    height: clamp(16px, 2.2vw, 20px);
+    width: clamp(88px, 11vw, 112px);
+    height: 24px;
+    padding-right: 10px;
+    gap: 6px;
   }
 
   .modal-island--landscape {
-    left: clamp(9px, 1.3vw, 14px);
+    left: 10px;
     top: 50%;
     transform: translateY(-50%);
-    width: clamp(16px, 2.2vw, 20px);
-    height: clamp(74px, 10vw, 96px);
+    width: 24px;
+    height: clamp(88px, 11vw, 112px);
+    padding-bottom: 10px;
     flex-direction: column;
+    gap: 6px;
   }
 
   .modal-island__dot-sensor {
-    width: clamp(4px, 0.6vw, 6px);
-    height: clamp(4px, 0.6vw, 6px);
+    width: 5px;
+    height: 5px;
     border-radius: 9999px;
-    background: #141416;
+    background: #111215;
   }
 
   .modal-island__dot-lens {
-    width: clamp(6.5px, 0.9vw, 8.5px);
-    height: clamp(6.5px, 0.9vw, 8.5px);
+    width: 8.5px;
+    height: 8.5px;
     border-radius: 9999px;
-    background: #0b0c10;
+    background: #08090d;
     border: 1px solid rgba(189, 66, 37, 0.35);
     box-shadow: inset 0 0 1px 1px rgba(255, 255, 255, 0.12);
+  }
+
+  /* Sleek Apple Home Indicator Bar */
+  .modal-content-container .phone-home-indicator {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: clamp(88px, 11vw, 112px);
+    height: 4px;
+    background: rgba(255, 255, 255, 0.4);
+    border-radius: 9999px;
+    pointer-events: none;
+    z-index: 25;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+  }
+
+  .modal-content-container .phone-home-indicator--vertical {
+    bottom: 8px;
+  }
+
+  .modal-content-container .phone-home-indicator--landscape {
+    bottom: 8px;
   }
 
   .modal-spinner {
