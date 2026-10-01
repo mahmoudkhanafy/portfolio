@@ -1,14 +1,13 @@
 ---
 import type { Work } from '../lib/catalog.ts';
-import { ui, videoCount } from '../lib/i18n.ts';
-import { ratioOf } from '../lib/localize.ts';
-import { pieceOf } from '../lib/phone.ts';
-import { FEED_ROWS, layRows, type FeedLayout, type RowPlace } from '../lib/rows.ts';
-import { dirOf } from '../lib/site.ts';
+import { typeLabel, ui, videoCount } from '../lib/i18n.ts';
+import { pick } from '../lib/localize.ts';
+import { dirOf, href, pageAbs, pageHref } from '../lib/site.ts';
+import { whatsappMessage, whatsappUrl } from '../lib/contact.ts';
 import type { Lang } from '../lib/urls.ts';
 import { RHYTHM } from '../lib/words.ts';
-import Reel from './Reel.astro';
 import Words from './Words.astro';
+import VideoModal from './VideoModal.astro';
 
 interface Props {
   lang: Lang;
@@ -17,9 +16,7 @@ interface Props {
 
 const { lang, works } = Astro.props;
 const t = ui[lang];
-const pieces = works.map((work) => pieceOf(ratioOf(work.width, work.height)));
-const layouts = Object.entries(FEED_ROWS).map(([name, layout]) => [name, layRows(pieces, layout)] as const);
-const rowsOf = (i: number) => Object.fromEntries(layouts.map(([name, places]) => [name, places[i]!])) as Record<FeedLayout, RowPlace>;
+const srcset = (list: Array<{ src: string; width: number }>) => list.map((s) => `${href(s.src)} ${s.width}w`).join(', ');
 ---
 
 <section id="work" class="feed" aria-labelledby="work-heading">
@@ -31,17 +28,163 @@ const rowsOf = (i: number) => Object.fromEntries(layouts.map(([name, places]) =>
     <p class="feed__intro">{t.workIntro[0]}<br />{t.workIntro[1]}</p>
   </div>
   <p class="feed__count eyebrow">{videoCount(works.length, lang)}</p>
-  <div class="feed__list">
-    {works.map((work, i) => <Reel work={work} lang={lang} rows={rowsOf(i)} />)}
+
+  {/* WORK GRID: 3-column grid across mobile, tablet, and desktop */}
+  <div class="feed__list grid grid-cols-3 gap-2 sm:gap-4 md:gap-6 max-w-7xl mx-auto">
+    {
+      works.map((work) => {
+        const title = pick(work.title, lang)!;
+        const description = pick(work.description, lang);
+        const hd = work.renditions.find((r) => r.id === 'hd') || work.renditions[0];
+        const sd = work.renditions.find((r) => r.id === 'sd') || work.renditions[work.renditions.length - 1];
+        const videoSrc = hd ? href(hd.src) : '';
+        const previewSrc = sd ? href(sd.src) : videoSrc;
+        const posterSrc = href(work.cover.jpg.src);
+
+        // Nimun is wrapped in standard 9:16 vertical phone mockup with object-fit: contain
+        const isNimun = work.slug === 'nimun-recap';
+        const isLandscape = !isNimun && work.width > work.height;
+        const isVertical = !isLandscape;
+        const category = typeLabel(work.type, lang);
+        const whatsappLink = whatsappUrl(whatsappMessage(lang, { title: title.text, url: pageAbs(lang, work.slug) }));
+        const pageLink = pageHref(lang, work.slug);
+
+        return (
+          <article
+            class={`phone-card group relative cursor-pointer flex flex-col items-center justify-between h-full w-full select-none touch-manipulation ${isLandscape ? 'phone-card--landscape' : 'phone-card--vertical'}`}
+            id={`reel-${work.slug}`}
+            data-reel
+            data-slug={work.slug}
+            data-title={title.text}
+            data-client={work.client || ''}
+            data-category={category}
+            data-year="2026"
+            data-video-src={videoSrc}
+            data-poster-src={posterSrc}
+            data-aspect-ratio={isVertical ? '9/16' : '16/9'}
+            data-whatsapp-url={whatsappLink}
+            data-duration={work.duration}
+          >
+            {/* Phone Frame Wrapper - centers frame within row height */}
+            <div class="phone-frame-wrapper w-full flex-1 flex items-center justify-center">
+              {/* Smartphone Bezel Mockup: visible across all viewports (mobile, tablet, desktop) */}
+              <div class={`phone-frame ${isLandscape ? 'phone-frame--landscape' : 'phone-frame--vertical'}`}>
+                {/* Dynamic Island / Camera Notch: top pill for vertical, left pill for landscape */}
+                {isLandscape ? (
+                  <div class="phone-island phone-island--landscape" aria-hidden="true">
+                    <div class="phone-island__dot-sensor" />
+                    <div class="phone-island__dot-lens" />
+                  </div>
+                ) : (
+                  <div class="phone-island phone-island--vertical" aria-hidden="true">
+                    <div class="phone-island__dot-sensor" />
+                    <div class="phone-island__dot-lens" />
+                  </div>
+                )}
+
+                {/* Inner Mobile Screen Frame */}
+                <div class={`phone-screen ${isLandscape ? 'phone-screen--landscape' : 'phone-screen--vertical'}`}>
+                  {/* Poster Image (static on touch/mobile to prevent GPU crash) */}
+                  <picture class="phone-poster">
+                    <source type="image/avif" srcset={srcset(work.cover.avif)} sizes="(min-width: 1024px) 340px, 33vw" />
+                    <source type="image/webp" srcset={srcset(work.cover.webp)} sizes="(min-width: 1024px) 340px, 33vw" />
+                    <img
+                      src={posterSrc}
+                      width={work.cover.width}
+                      height={work.cover.height}
+                      alt={title.text}
+                      loading="lazy"
+                      decoding="async"
+                      class={`phone-media ${isNimun ? 'phone-media--contain' : 'phone-media--cover'}`}
+                    />
+                  </picture>
+
+                  {/* Desktop Hover Video */}
+                  <video
+                    data-src={previewSrc}
+                    preload="none"
+                    playsinline
+                    webkit-playsinline="true"
+                    loop
+                    muted
+                    class={`phone-video ${isNimun ? 'phone-media--contain' : 'phone-media--cover'}`}
+                  >
+                    <source src={previewSrc} type="video/mp4" />
+                  </video>
+
+                  {/* Dark Vignette & Gradient */}
+                  <div class="phone-vignette" />
+
+                  {/* Category Badge */}
+                  <div class={`phone-badge-wrap ${isLandscape ? 'phone-badge-wrap--landscape' : ''}`}>
+                    <span class="phone-badge">{category}</span>
+                  </div>
+
+                  {/* Center Play Button Overlay */}
+                  <div class="phone-play-wrap">
+                    <div class="phone-play-btn">
+                      <svg class="phone-play-icon" viewBox="0 0 24 24">
+                        <polygon points="6 3 20 12 6 21 6 3" />
+                      </svg>
+                    </div>
+                  </div>
+
+                  {/* Bottom Details Overlay */}
+                  <div class={`phone-overlay-meta ${isLandscape ? 'phone-overlay-meta--landscape' : ''}`}>
+                    {work.client && (
+                      <div class="phone-meta-client">
+                        {work.client} • 2026
+                      </div>
+                    )}
+                    <h4 class="phone-meta-title" id={`title-${work.slug}`}>
+                      <a href={pageLink} class="phone-meta-title-link">
+                        {title.text}
+                      </a>
+                    </h4>
+                    {description && (
+                      <p class="phone-meta-desc">
+                        {description.text}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Card Footer below Mockup */}
+            <div class="phone-card-footer">
+              <a href={pageLink} class="phone-footer-title">
+                {title.text}
+              </a>
+              <span class="phone-footer-action">
+                <span>{lang === 'ar' ? 'شاهد الفيديو' : 'Watch Reel'}</span>
+                <svg class="phone-footer-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="7" y1="17" x2="17" y2="7" />
+                  <polyline points="7 7 17 7 17 17" />
+                </svg>
+              </span>
+            </div>
+          </article>
+        );
+      })
+    }
   </div>
+
+  {/* Video Modal with WebKit Cleanup */}
+  <VideoModal lang={lang} />
 </section>
 
 <style>
   .feed {
     padding-inline: var(--gutter);
     padding-top: clamp(3rem, 2rem + 4vw, 5.5rem);
-    /* The header links to #work: the heading lands just below the top of the screen. */
     scroll-margin-top: 0.5rem;
+  }
+
+  @media (max-width: 480px) {
+    .feed {
+      padding-inline: 0.75rem;
+    }
   }
 
   .feed__head {
@@ -72,25 +215,408 @@ const rowsOf = (i: number) => Object.fromEntries(layouts.map(([name, places]) =>
   .feed__count {
     padding-block: 1rem 0;
     border-top: 1px solid var(--line);
+    margin-bottom: 2rem;
+  }
+
+  /* Grid Layout: Exactly 3 columns across mobile, tablet, and desktop */
+  .grid {
+    display: grid;
+  }
+
+  .grid-cols-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .feed__list {
     display: grid;
-    gap: 3.5rem;
-    padding-top: 1.25rem;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.5rem;
+    max-width: 80rem;
+    margin-inline: auto;
+    width: 100%;
+    align-items: stretch;
   }
 
-  /* Wider screens: rows laid out by lib/rows.ts, each piece sized by Reel.astro. Pieces keep the
-     reading order of the page; only where a film waits for a row of its own do the pieces after it
-     move up on screen. */
-  @media (min-width: 760px) {
+  @media (min-width: 640px) {
     .feed__list {
-      --gap: clamp(1.25rem, 0.5rem + 2vw, 2.5rem);
-      display: flex;
-      flex-wrap: wrap;
-      align-items: flex-start;
-      gap: clamp(2.5rem, 1.5rem + 3vw, 4rem) var(--gap);
-      padding-top: 1.5rem;
+      gap: 1rem;
     }
+  }
+
+  @media (min-width: 1024px) {
+    .feed__list {
+      gap: 1.5rem;
+    }
+  }
+
+  .max-w-7xl {
+    max-width: 80rem;
+  }
+
+  .mx-auto {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .phone-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+    user-select: none;
+    touch-action: manipulation;
+    position: relative;
+  }
+
+  .phone-frame-wrapper {
+    width: 100%;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Phone Mockup Frame - visible across all viewport sizes */
+  .phone-frame {
+    width: 100%;
+    max-width: 340px;
+    background: #0F0F12;
+    border: clamp(1.5px, 0.4vw, 3.5px) solid #222226;
+    border-radius: clamp(14px, 3.2vw, 38px);
+    padding: clamp(2px, 0.6vw, 6px);
+    position: relative;
+    box-shadow:
+      0 10px 25px -8px rgba(0, 0, 0, 0.5),
+      0 0 0 1px rgba(255, 255, 255, 0.08),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+    transition: transform 300ms cubic-bezier(0.2, 0.8, 0.2, 1), border-color 300ms ease, box-shadow 300ms ease;
+    pointer-events: auto;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .phone-card:hover .phone-frame {
+      transform: translateY(-5px);
+      border-color: #DC2626;
+      box-shadow:
+        0 24px 44px -12px rgba(220, 38, 38, 0.3),
+        0 0 0 1px rgba(220, 38, 38, 0.4);
+    }
+  }
+
+  /* Dynamic Island / Notch for Vertical Phones */
+  .phone-island--vertical {
+    position: absolute;
+    top: clamp(3px, 1vw, 12px);
+    left: 50%;
+    transform: translateX(-50%);
+    width: clamp(24px, 6vw, 76px);
+    height: clamp(5px, 1.3vw, 15px);
+    background: #000000;
+    border-radius: 9999px;
+    z-index: 30;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(2px, 0.5vw, 6px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    pointer-events: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+  }
+
+  /* Dynamic Island / Camera Cutout for Landscape Phone (Sideways on left edge) */
+  .phone-island--landscape {
+    position: absolute;
+    left: clamp(3px, 0.9vw, 10px);
+    top: 50%;
+    transform: translateY(-50%);
+    width: clamp(5px, 1.3vw, 15px);
+    height: clamp(24px, 6vw, 76px);
+    background: #000000;
+    border-radius: 9999px;
+    z-index: 30;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(2px, 0.5vw, 6px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    pointer-events: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+  }
+
+  .phone-island__dot-sensor {
+    width: clamp(1.5px, 0.4vw, 5px);
+    height: clamp(1.5px, 0.4vw, 5px);
+    border-radius: 9999px;
+    background: #1A1A24;
+  }
+
+  .phone-island__dot-lens {
+    width: clamp(2px, 0.6vw, 7px);
+    height: clamp(2px, 0.6vw, 7px);
+    border-radius: 9999px;
+    background: #0D0D14;
+    border: 1px solid rgba(30, 58, 138, 0.4);
+  }
+
+  /* Inner Mobile Screen Frame */
+  .phone-screen {
+    position: relative;
+    overflow: hidden;
+    background-color: #000000;
+    width: 100%;
+    border-radius: clamp(11px, 2.7vw, 30px);
+  }
+
+  .phone-screen--vertical {
+    aspect-ratio: 9 / 16;
+  }
+
+  .phone-screen--landscape {
+    aspect-ratio: 16 / 9;
+  }
+
+  /* Media rendering */
+  .phone-poster {
+    display: block;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+
+  .phone-video {
+    display: none;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .phone-poster {
+      display: none;
+    }
+    .phone-video {
+      display: block;
+    }
+  }
+
+  .phone-media {
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    transition: transform 700ms ease;
+  }
+
+  .phone-media--cover {
+    object-fit: cover;
+  }
+
+  /* Nimun video vertical fit with clean black letterboxing */
+  .phone-media--contain {
+    object-fit: contain;
+    background-color: #000000;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .phone-card:hover .phone-media {
+      transform: scale(1.05);
+    }
+  }
+
+  /* Dark Vignette & Gradient Overlay */
+  .phone-vignette {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.2) 40%, transparent 80%);
+    pointer-events: none;
+    z-index: 10;
+  }
+
+  /* Category Badge */
+  .phone-badge-wrap {
+    position: absolute;
+    top: clamp(4px, 1.2vw, 14px);
+    left: clamp(4px, 1.2vw, 16px);
+    z-index: 20;
+    pointer-events: none;
+  }
+
+  .phone-badge-wrap--landscape {
+    left: clamp(12px, 3.2vw, 30px);
+  }
+
+  .phone-badge {
+    display: inline-block;
+    padding: clamp(1px, 0.35vw, 3px) clamp(3px, 0.8vw, 9px);
+    border-radius: clamp(2px, 0.4vw, 4px);
+    font-size: clamp(6.5px, 1.1vw, 11px);
+    font-family: var(--display, inherit);
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    background-color: #DC2626;
+    color: #ffffff;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+  }
+
+  /* Play Button Overlay */
+  .phone-play-wrap {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    z-index: 20;
+  }
+
+  .phone-play-btn {
+    width: clamp(22px, 5.5vw, 56px);
+    height: clamp(22px, 5.5vw, 56px);
+    border-radius: 9999px;
+    background-color: #DC2626;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+    opacity: 0.85;
+    transition: transform 300ms ease, opacity 300ms ease, background-color 300ms ease;
+  }
+
+  .phone-card:hover .phone-play-btn {
+    transform: scale(1.12);
+    opacity: 1;
+    background-color: #DC2626;
+  }
+
+  .phone-play-icon {
+    width: clamp(9px, 2.3vw, 24px);
+    height: clamp(9px, 2.3vw, 24px);
+    fill: #ffffff;
+    margin-inline-start: 1px;
+  }
+
+  /* Bottom Details Overlay */
+  .phone-overlay-meta {
+    position: absolute;
+    bottom: clamp(3px, 1vw, 16px);
+    left: clamp(4px, 1.2vw, 16px);
+    right: clamp(4px, 1.2vw, 16px);
+    z-index: 20;
+    pointer-events: none;
+  }
+
+  .phone-overlay-meta--landscape {
+    left: clamp(12px, 3.2vw, 30px);
+  }
+
+  .phone-meta-client {
+    font-size: clamp(6px, 0.95vw, 10px);
+    font-family: monospace;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #F87171;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .phone-meta-title {
+    margin-top: clamp(1px, 0.3vw, 3px);
+    font-size: clamp(7.5px, 1.35vw, 16px);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    line-height: 1.15;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    pointer-events: auto;
+  }
+
+  .phone-meta-title-link {
+    color: #ffffff;
+    text-decoration: none;
+  }
+
+  .phone-meta-title-link:hover {
+    text-decoration: underline;
+  }
+
+  .phone-meta-desc {
+    display: none;
+    margin-top: 2px;
+    font-size: clamp(9px, 1.1vw, 12px);
+    color: #D1D5DB;
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  @media (min-width: 640px) {
+    .phone-meta-desc {
+      display: -webkit-box;
+    }
+  }
+
+  /* Card Footer below Mockup */
+  .phone-card-footer {
+    margin-top: clamp(4px, 1vw, 12px);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 340px;
+    padding-inline: clamp(1px, 0.5vw, 4px);
+    gap: 4px;
+  }
+
+  .phone-footer-title {
+    font-size: clamp(7.5px, 1.3vw, 14px);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--ink);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1;
+    min-width: 0;
+    text-decoration: none;
+  }
+
+  .phone-footer-title:hover {
+    text-decoration: underline;
+  }
+
+  .phone-footer-action {
+    font-size: clamp(6.5px, 1.05vw, 12px);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #DC2626;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    flex-shrink: 0;
+  }
+
+  .phone-card:hover .phone-footer-action {
+    text-decoration: underline;
+  }
+
+  .phone-footer-arrow {
+    width: clamp(7px, 1.1vw, 14px);
+    height: clamp(7px, 1.1vw, 14px);
+  }
+
+  :dir(rtl) .phone-footer-arrow {
+    transform: rotate(180deg);
   }
 </style>

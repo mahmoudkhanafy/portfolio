@@ -1,0 +1,715 @@
+---
+import type { Lang } from '../lib/urls.ts';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+---
+
+<div
+  id="video-modal"
+  data-lang={lang}
+  class="video-modal-backdrop hidden fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-2 sm:p-6 select-none"
+  role="dialog"
+  aria-modal="true"
+  aria-hidden="true"
+>
+  {/* Close Button in Top Right */}
+  <button
+    id="modal-close-btn"
+    type="button"
+    class="modal-close-btn absolute top-3 right-3 sm:top-5 sm:right-5 z-50 w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-white/10 hover:bg-[#DC2626] backdrop-blur-md border border-white/15 flex items-center justify-center text-white transition-all cursor-pointer shadow-lg active:scale-95"
+    aria-label="Close modal"
+  >
+    <svg class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="18" y1="6" x2="6" y2="18"></line>
+      <line x1="6" y1="6" x2="18" y2="18"></line>
+    </svg>
+  </button>
+
+  {/* Modal Content Wrapper */}
+  <div
+    id="modal-content-container"
+    class="relative w-full max-w-[420px] aspect-[9/16] bg-black rounded-2xl overflow-hidden shadow-2xl flex items-center justify-center"
+  >
+    {/* Top Badges (Category & WhatsApp) */}
+    <div
+      id="modal-badges"
+      class="absolute top-3 left-3 z-40 flex items-center gap-2 pointer-events-auto transition-opacity duration-300"
+    >
+      <span
+        id="modal-category"
+        class="px-2.5 py-1 rounded-full text-[10px] font-display tracking-wider uppercase bg-[#DC2626] text-white shadow-md font-semibold"
+      >
+        Reels / TikTok
+      </span>
+      <a
+        id="modal-whatsapp-link"
+        href="#"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="inline-flex items-center space-x-1.5 py-1 px-3 rounded-full bg-black/60 hover:bg-black/80 backdrop-blur-md text-white text-[10px] font-display tracking-wider uppercase transition-colors border border-white/10 shadow-md"
+      >
+        <svg class="w-3.5 h-3.5 text-emerald-400 inline-block mr-1" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.007c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86.173.086.275.072.376-.043.101-.116.433-.506.549-.68.116-.173.231-.145.39-.086s1.011.477 1.184.564.289.13.332.202c.043.072.043.419-.101.824z" />
+        </svg>
+        <span class="text-white font-semibold">WhatsApp</span>
+      </a>
+    </div>
+
+    {/* Video Canvas Container */}
+    <div
+      id="modal-video-canvas"
+      class="relative w-full h-full flex items-center justify-center cursor-pointer touch-manipulation"
+    >
+      <video
+        id="modal-video"
+        playsinline
+        webkit-playsinline="true"
+        preload="auto"
+        loop
+        class="w-full h-full object-contain pointer-events-none"
+      ></video>
+
+      {/* Buffering Loading Spinner Overlay */}
+      <div
+        id="modal-spinner"
+        class="hidden absolute inset-0 z-20 flex items-center justify-center bg-black/30 pointer-events-none"
+      >
+        <div class="w-10 h-10 border-[3px] border-white/20 border-t-[#DC2626] rounded-full animate-spin"></div>
+      </div>
+
+      {/* Center Play Button Overlay when Paused */}
+      <div
+        id="modal-paused-overlay"
+        class="hidden absolute inset-0 z-20 flex items-center justify-center bg-black/40 backdrop-blur-[1px] transition-opacity duration-300"
+      >
+        <button
+          id="modal-center-play-btn"
+          type="button"
+          class="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-[#DC2626] text-white flex items-center justify-center shadow-2xl transform hover:scale-110 active:scale-95 transition-all cursor-pointer"
+          aria-label="Play video"
+        >
+          <svg class="w-8 h-8 sm:w-10 sm:h-10 text-white fill-white ml-1" viewBox="0 0 24 24">
+            <polygon points="6 3 20 12 6 21 6 3" />
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    {/* Controls & Scrubber Bar at Bottom */}
+    <div
+      id="modal-controls-bar"
+      class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/95 via-black/70 to-transparent p-3.5 sm:p-4 flex flex-col gap-2 z-40 transition-opacity duration-300"
+    >
+      <div class="flex items-center justify-between text-white pointer-events-auto">
+        <div class="min-w-0 pr-2">
+          <h3 id="modal-title" class="text-sm sm:text-base font-bold uppercase tracking-wide font-display text-white line-clamp-1 leading-tight"></h3>
+          <p id="modal-client" class="text-[10px] text-zinc-400 font-mono"></p>
+        </div>
+      </div>
+
+      {/* Interactive Range Scrubber Seek Bar */}
+      <div class="w-full flex items-center pointer-events-auto">
+        <input
+          id="modal-seek-slider"
+          type="range"
+          min="0"
+          max="100"
+          step="0.1"
+          value="0"
+          class="w-full h-1.5 bg-white/20 rounded-lg appearance-none cursor-pointer accent-[#DC2626]"
+          aria-label="Video seek scrubber"
+        />
+      </div>
+
+      {/* Playback Controls Row */}
+      <div class="flex items-center justify-between pointer-events-auto text-white">
+        <div class="flex items-center gap-2.5">
+          <button
+            id="modal-play-pause-btn"
+            type="button"
+            class="w-7 h-7 rounded-full bg-white/15 hover:bg-[#DC2626] flex items-center justify-center text-white transition-colors cursor-pointer active:scale-90"
+            aria-label="Play or pause"
+          >
+            <svg id="modal-icon-play" class="w-3.5 h-3.5 fill-white ml-0.5 hidden" viewBox="0 0 24 24"><polygon points="6 3 20 12 6 21 6 3" /></svg>
+            <svg id="modal-icon-pause" class="w-3.5 h-3.5 fill-white" viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16" fill="white" /><rect x="14" y="4" width="4" height="16" fill="white" /></svg>
+          </button>
+          <span id="modal-time-display" class="font-mono text-xs text-zinc-400 select-none">00:00 / 00:00</span>
+        </div>
+
+        <div class="flex items-center gap-1">
+          <button
+            id="modal-mute-btn"
+            type="button"
+            class="p-1.5 text-white hover:text-[#DC2626] transition-colors cursor-pointer active:scale-90 rounded-lg hover:bg-white/10 flex items-center justify-center"
+            aria-label="Mute or unmute"
+          >
+            <svg id="modal-icon-volume" class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+              <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+              <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+            </svg>
+            <svg id="modal-icon-muted" class="w-4 h-4 text-red-400 hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+              <line x1="23" y1="9" x2="17" y2="15"></line>
+              <line x1="17" y1="9" x2="23" y2="15"></line>
+            </svg>
+          </button>
+          <button
+            id="modal-fullscreen-btn"
+            type="button"
+            class="p-1.5 text-white hover:text-[#DC2626] transition-colors cursor-pointer active:scale-90 rounded-lg hover:bg-white/10 flex items-center justify-center"
+            aria-label="Fullscreen"
+          >
+            <svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  // Bulletproof WebKit cleanup function
+  function performWebKitCleanup(video: HTMLVideoElement | null) {
+    if (!video) return;
+    try {
+      video.pause();
+      video.removeAttribute('src');
+      while (video.firstChild) {
+        video.removeChild(video.firstChild);
+      }
+      video.load(); // CRITICAL for iOS: immediately frees WebKit AVPlayer hardware decoder and GPU buffer
+    } catch (err) {
+      console.warn('Video cleanup warning:', err);
+    }
+  }
+
+  function formatTime(seconds: number): string {
+    if (isNaN(seconds) || seconds === null || !isFinite(seconds)) return '00:00';
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+  }
+
+  function initVideoModal() {
+    const modal = document.getElementById('video-modal');
+    if (!modal) return;
+
+    const closeBtn = document.getElementById('modal-close-btn');
+    const container = document.getElementById('modal-content-container');
+    const video = document.getElementById('modal-video') as HTMLVideoElement | null;
+    const categoryEl = document.getElementById('modal-category');
+    const whatsappLinkEl = document.getElementById('modal-whatsapp-link') as HTMLAnchorElement | null;
+    const titleEl = document.getElementById('modal-title');
+    const clientEl = document.getElementById('modal-client');
+    const spinner = document.getElementById('modal-spinner');
+    const pausedOverlay = document.getElementById('modal-paused-overlay');
+    const centerPlayBtn = document.getElementById('modal-center-play-btn');
+    const playPauseBtn = document.getElementById('modal-play-pause-btn');
+    const iconPlay = document.getElementById('modal-icon-play');
+    const iconPause = document.getElementById('modal-icon-pause');
+    const timeDisplay = document.getElementById('modal-time-display');
+    const seekSlider = document.getElementById('modal-seek-slider') as HTMLInputElement | null;
+    const muteBtn = document.getElementById('modal-mute-btn');
+    const iconVolume = document.getElementById('modal-icon-volume');
+    const iconMuted = document.getElementById('modal-icon-muted');
+    const fullscreenBtn = document.getElementById('modal-fullscreen-btn');
+    const videoCanvas = document.getElementById('modal-video-canvas');
+    const controlsBar = document.getElementById('modal-controls-bar');
+    const badgesBar = document.getElementById('modal-badges');
+
+    let showControls = true;
+    let lastTimeUpdate = 0;
+
+    function updatePlayState(playing: boolean) {
+      if (playing) {
+        iconPlay?.classList.add('hidden');
+        iconPause?.classList.remove('hidden');
+        pausedOverlay?.classList.add('hidden');
+      } else {
+        iconPlay?.classList.remove('hidden');
+        iconPause?.classList.add('hidden');
+        if (showControls) {
+          pausedOverlay?.classList.remove('hidden');
+        }
+      }
+    }
+
+    function updateMuteState(muted: boolean) {
+      if (muted) {
+        iconVolume?.classList.add('hidden');
+        iconMuted?.classList.remove('hidden');
+      } else {
+        iconVolume?.classList.remove('hidden');
+        iconMuted?.classList.add('hidden');
+      }
+    }
+
+    function toggleControls() {
+      showControls = !showControls;
+      if (showControls) {
+        controlsBar?.classList.remove('opacity-0', 'pointer-events-none');
+        badgesBar?.classList.remove('opacity-0', 'pointer-events-none');
+        if (video?.paused) pausedOverlay?.classList.remove('hidden');
+      } else {
+        controlsBar?.classList.add('opacity-0', 'pointer-events-none');
+        badgesBar?.classList.add('opacity-0', 'pointer-events-none');
+        pausedOverlay?.classList.add('hidden');
+      }
+    }
+
+    function closeModal() {
+      if (!modal) return;
+      modal.classList.add('hidden');
+      modal.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+
+      if (video) {
+        performWebKitCleanup(video);
+      }
+      updatePlayState(false);
+    }
+
+    function openModal(data: {
+      videoSrc: string;
+      title: string;
+      client: string;
+      category: string;
+      year: string;
+      whatsappUrl: string;
+      aspectRatio: string;
+    }) {
+      if (!modal || !video) return;
+
+      // Update Aspect Ratio Container
+      if (container) {
+        if (data.aspectRatio === '16/9') {
+          container.className = 'relative w-full max-w-4xl aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl flex items-center justify-center';
+        } else {
+          container.className = 'relative w-full max-w-[420px] aspect-[9/16] bg-black rounded-2xl overflow-hidden shadow-2xl flex items-center justify-center';
+        }
+      }
+
+      // Metadata
+      if (titleEl) titleEl.textContent = data.title;
+      if (clientEl) clientEl.textContent = data.client ? `${data.client} • ${data.year}` : data.year;
+      if (categoryEl) categoryEl.textContent = data.category;
+      if (whatsappLinkEl) whatsappLinkEl.href = data.whatsappUrl;
+
+      // Reset seek slider & time display
+      if (seekSlider) {
+        seekSlider.value = '0';
+        seekSlider.max = '100';
+      }
+      if (timeDisplay) timeDisplay.textContent = '00:00 / 00:00';
+
+      // Reset controls visibility
+      showControls = true;
+      controlsBar?.classList.remove('opacity-0', 'pointer-events-none');
+      badgesBar?.classList.remove('opacity-0', 'pointer-events-none');
+
+      // Setup Video
+      video.muted = false;
+      video.volume = 1.0;
+      updateMuteState(false);
+      spinner?.classList.remove('hidden');
+
+      // Create video source
+      const source = document.createElement('source');
+      source.src = data.videoSrc;
+      source.type = data.videoSrc.endsWith('.mov') ? 'video/quicktime' : 'video/mp4';
+      video.appendChild(source);
+      video.src = data.videoSrc;
+
+      modal.classList.remove('hidden');
+      modal.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+
+      video.load();
+      const playPromise = video.play();
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => {
+            updatePlayState(true);
+            spinner?.classList.add('hidden');
+          })
+          .catch(() => {
+            // Autoplay unmuted restricted by policy: fallback to muted
+            video.muted = true;
+            updateMuteState(true);
+            video
+              .play()
+              .then(() => {
+                updatePlayState(true);
+                spinner?.classList.add('hidden');
+              })
+              .catch(() => {
+                updatePlayState(false);
+                spinner?.classList.add('hidden');
+              });
+          });
+      }
+    }
+
+    // Video Event Listeners
+    if (video) {
+      video.addEventListener('timeupdate', () => {
+        const now = performance.now();
+        if (now - lastTimeUpdate >= 250) {
+          lastTimeUpdate = now;
+          if (seekSlider && isFinite(video.duration) && video.duration > 0) {
+            seekSlider.max = String(video.duration);
+            seekSlider.value = String(video.currentTime);
+          }
+          if (timeDisplay) {
+            timeDisplay.textContent = `${formatTime(video.currentTime)} / ${formatTime(video.duration)}`;
+          }
+        }
+      });
+
+      video.addEventListener('play', () => updatePlayState(true));
+      video.addEventListener('pause', () => updatePlayState(false));
+      video.addEventListener('waiting', () => spinner?.classList.remove('hidden'));
+      video.addEventListener('playing', () => spinner?.classList.add('hidden'));
+      video.addEventListener('canplay', () => spinner?.classList.add('hidden'));
+      video.addEventListener('loadeddata', () => spinner?.classList.add('hidden'));
+      video.addEventListener('error', () => {
+        spinner?.classList.add('hidden');
+        updatePlayState(false);
+      });
+    }
+
+    // UI Click Handlers
+    closeBtn?.addEventListener('click', closeModal);
+
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        closeModal();
+      }
+    });
+
+    videoCanvas?.addEventListener('click', () => {
+      toggleControls();
+    });
+
+    const togglePlay = () => {
+      if (!video) return;
+      if (video.paused) {
+        video.play().catch(() => {});
+      } else {
+        video.pause();
+      }
+    };
+
+    centerPlayBtn?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      togglePlay();
+    });
+
+    playPauseBtn?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      togglePlay();
+    });
+
+    muteBtn?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (!video) return;
+      video.muted = !video.muted;
+      updateMuteState(video.muted);
+    });
+
+    seekSlider?.addEventListener('input', (e) => {
+      e.stopPropagation();
+      if (!video) return;
+      const target = e.target as HTMLInputElement;
+      const val = parseFloat(target.value);
+      video.currentTime = val;
+    });
+
+    fullscreenBtn?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (!container) return;
+      if (!document.fullscreenElement) {
+        container.requestFullscreen?.().catch(() => {});
+      } else {
+        document.exitFullscreen?.().catch(() => {});
+      }
+    });
+
+    // Keyboard support: Escape closes, Space toggles play
+    window.addEventListener('keydown', (e) => {
+      if (modal.classList.contains('hidden')) return;
+      if (e.key === 'Escape') {
+        closeModal();
+      } else if (e.key === ' ' && e.target === document.body) {
+        e.preventDefault();
+        togglePlay();
+      }
+    });
+
+    // Attach click listeners to cards on page
+    document.querySelectorAll<HTMLElement>('.phone-card').forEach((card) => {
+      card.addEventListener('click', (e) => {
+        const target = e.target as HTMLElement;
+        if (target.closest('a')) return;
+        const ds = card.dataset;
+        openModal({
+          videoSrc: ds.videoSrc || '',
+          title: ds.title || '',
+          client: ds.client || '',
+          category: ds.category || '',
+          year: ds.year || '2026',
+          whatsappUrl: ds.whatsappUrl || '',
+          aspectRatio: ds.aspectRatio || '9/16',
+        });
+      });
+
+      // Desktop Hover-to-play with Mobile Stability
+      const previewVideo = card.querySelector<HTMLVideoElement>('.phone-video');
+      if (previewVideo) {
+        card.addEventListener('mouseenter', () => {
+          if (window.matchMedia('(hover: hover)').matches) {
+            // Lazy load video src on desktop hover if needed
+            if (!previewVideo.src && previewVideo.dataset.src) {
+              previewVideo.src = previewVideo.dataset.src;
+            }
+            previewVideo.muted = true;
+            previewVideo.volume = 0;
+            previewVideo.play().catch(() => {});
+          }
+        });
+
+        card.addEventListener('mouseleave', () => {
+          if (window.matchMedia('(hover: hover)').matches) {
+            previewVideo.pause();
+            previewVideo.currentTime = 0;
+          }
+        });
+      }
+    });
+  }
+
+  // Run on initial load and Astro page swaps
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initVideoModal);
+  } else {
+    initVideoModal();
+  }
+</script>
+
+<style>
+  .hidden {
+    display: none !important;
+  }
+
+  .video-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background-color: rgba(0, 0, 0, 0.92);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: clamp(0.5rem, 2vw, 1.5rem);
+    animation: modalFadeIn 200ms ease-out;
+    user-select: none;
+    touch-action: manipulation;
+  }
+
+  .video-modal-backdrop.hidden {
+    display: none !important;
+  }
+
+  @keyframes modalFadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  .modal-close-btn {
+    position: absolute;
+    top: clamp(0.75rem, 2vw, 1.25rem);
+    right: clamp(0.75rem, 2vw, 1.25rem);
+    z-index: 60;
+    width: clamp(2.5rem, 4vw, 3rem);
+    height: clamp(2.5rem, 4vw, 3rem);
+    border-radius: 9999px;
+    background-color: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    cursor: pointer;
+    transition: all 200ms ease;
+  }
+
+  .modal-close-btn:hover {
+    background-color: #DC2626;
+    border-color: #DC2626;
+    transform: scale(1.05);
+  }
+
+  #modal-content-container {
+    position: relative;
+    width: 100%;
+    background-color: #000000;
+    border-radius: clamp(14px, 2vw, 24px);
+    overflow: hidden;
+    box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: max-width 300ms ease, aspect-ratio 300ms ease;
+  }
+
+  .aspect-\[9\/16\] {
+    aspect-ratio: 9 / 16;
+  }
+
+  .aspect-video {
+    aspect-ratio: 16 / 9;
+  }
+
+  #modal-badges {
+    position: absolute;
+    top: clamp(0.5rem, 1.5vw, 1rem);
+    left: clamp(0.5rem, 1.5vw, 1rem);
+    z-index: 40;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  #modal-category {
+    padding: 0.25rem 0.65rem;
+    border-radius: 9999px;
+    font-size: clamp(9px, 1.1vw, 11px);
+    font-family: var(--display, inherit);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    background-color: #DC2626;
+    color: #ffffff;
+  }
+
+  #modal-whatsapp-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    background-color: rgba(0, 0, 0, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+    font-size: clamp(9px, 1.1vw, 11px);
+    font-weight: 600;
+    text-decoration: none;
+    backdrop-filter: blur(8px);
+    transition: background-color 200ms ease;
+  }
+
+  #modal-whatsapp-link:hover {
+    background-color: rgba(0, 0, 0, 0.85);
+  }
+
+  #modal-video-canvas {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+
+  #modal-video {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    background-color: #000000;
+  }
+
+  #modal-spinner {
+    position: absolute;
+    inset: 0;
+    z-index: 25;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0, 0, 0, 0.4);
+    pointer-events: none;
+  }
+
+  #modal-paused-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 25;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0, 0, 0, 0.35);
+    backdrop-filter: blur(1px);
+  }
+
+  #modal-center-play-btn {
+    width: clamp(3.5rem, 6vw, 4.5rem);
+    height: clamp(3.5rem, 6vw, 4.5rem);
+    border-radius: 9999px;
+    background-color: #DC2626;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+    transition: transform 200ms ease;
+  }
+
+  #modal-center-play-btn:hover {
+    transform: scale(1.1);
+  }
+
+  #modal-controls-bar {
+    position: absolute;
+    bottom: 0;
+    inset-inline: 0;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.95), rgba(0, 0, 0, 0.6) 60%, transparent);
+    padding: clamp(0.75rem, 2vw, 1.25rem);
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    z-index: 40;
+    transition: opacity 300ms ease;
+  }
+
+  #modal-seek-slider {
+    width: 100%;
+    height: 6px;
+    accent-color: #DC2626;
+    cursor: pointer;
+  }
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  .animate-spin {
+    animation: spin 1s linear infinite;
+  }
+</style>
