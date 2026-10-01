@@ -73,6 +73,16 @@ const { lang } = Astro.props;
         class="modal-video-element"
       ></video>
 
+      {/* Authentic Dynamic Island Cutout */}
+      <div
+        id="modal-island"
+        class="modal-island modal-island--vertical"
+        aria-hidden="true"
+      >
+        <div class="modal-island__dot-sensor"></div>
+        <div class="modal-island__dot-lens"></div>
+      </div>
+
       {/* Buffering Loading Spinner Overlay */}
       <div
         id="modal-spinner"
@@ -152,7 +162,7 @@ const { lang } = Astro.props;
               <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
               <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
             </svg>
-            <svg id="modal-icon-muted" class="w-4 h-4 text-orange-400 hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg id="modal-icon-muted" class="w-4 h-4 hidden" style="color: var(--accent, #bd4225);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
               <line x1="23" y1="9" x2="17" y2="15"></line>
               <line x1="17" y1="9" x2="23" y2="15"></line>
@@ -287,14 +297,19 @@ const { lang } = Astro.props;
     }) {
       if (!modal || !video) return;
 
-      // Update Aspect Ratio Container
+      // Update Aspect Ratio Container & Dynamic Island
+      const islandEl = document.getElementById('modal-island');
       if (container) {
         if (data.aspectRatio === '16/9') {
           container.classList.remove('modal-container--vertical');
           container.classList.add('modal-container--landscape');
+          islandEl?.classList.remove('modal-island--vertical');
+          islandEl?.classList.add('modal-island--landscape');
         } else {
           container.classList.remove('modal-container--landscape');
           container.classList.add('modal-container--vertical');
+          islandEl?.classList.remove('modal-island--landscape');
+          islandEl?.classList.add('modal-island--vertical');
         }
       }
 
@@ -589,18 +604,22 @@ const { lang } = Astro.props;
   }
 
   .modal-close-btn:hover {
-    background-color: #EA580C !important;
-    border-color: #EA580C !important;
+    background-color: var(--accent, #bd4225) !important;
+    border-color: var(--accent, #bd4225) !important;
     transform: scale(1.05);
   }
 
-  /* Modal Content Wrapper: Capped at 85vh on laptop/desktop to prevent distortion */
+  /* Modal Content Wrapper: Authentic iPhone Body */
   .modal-content-container {
     position: relative;
     background-color: #000000;
-    border-radius: clamp(14px, 2vw, 24px);
+    border: clamp(2.5px, 0.35vw, 3.5px) solid rgba(189, 66, 37, 0.4);
     overflow: hidden;
-    box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.95);
+    box-shadow:
+      0 30px 80px -15px rgba(0, 0, 0, 0.95),
+      0 0 0 1px rgba(189, 66, 37, 0.25),
+      0 0 35px -5px rgba(189, 66, 37, 0.2),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.1);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -608,15 +627,16 @@ const { lang } = Astro.props;
     max-width: 95vw;
     width: auto;
     height: auto;
-    transition: max-width 300ms ease, aspect-ratio 300ms ease;
+    transition: max-width 300ms ease, aspect-ratio 300ms ease, border-radius 300ms ease;
   }
 
-  /* Vertical container: capped by height 85vh and 9/16 aspect ratio */
+  /* Vertical container: capped by height 85vh and 9/16 aspect ratio with iPhone rounded corners */
   .modal-container--vertical {
     aspect-ratio: 9 / 16;
     max-height: 85vh;
     max-width: calc(85vh * 9 / 16);
     width: 100%;
+    border-radius: clamp(44px, 5.5vw, 52px);
   }
 
   /* Landscape container: capped by height 85vh and 16/9 aspect ratio */
@@ -625,6 +645,7 @@ const { lang } = Astro.props;
     max-height: 85vh;
     max-width: min(92vw, calc(85vh * 16 / 9));
     width: 100%;
+    border-radius: clamp(32px, 4vw, 42px);
   }
 
   .modal-badges {
@@ -647,7 +668,7 @@ const { lang } = Astro.props;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    background-color: #EA580C;
+    background-color: var(--accent, #bd4225);
     color: #ffffff;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
     border: none;
@@ -684,18 +705,69 @@ const { lang } = Astro.props;
     cursor: pointer;
   }
 
-  /* Centered video element: w-auto, max-h-[85vh], object-fit: contain */
+  /* Centered video element */
   .modal-video-element {
     max-height: 85vh;
     max-width: 100%;
-    width: auto;
-    height: auto;
+    width: 100%;
+    height: 100%;
     object-fit: contain;
     background-color: #000000;
     display: block;
     margin: 0 auto;
     border: none;
     outline: none;
+  }
+
+  /* Authentic Apple Dynamic Island in Modal */
+  .modal-island {
+    position: absolute;
+    background: #000000;
+    border-radius: 9999px;
+    z-index: 35;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    pointer-events: none;
+    box-shadow:
+      0 0 0 0.5px rgba(255, 255, 255, 0.08),
+      0 2px 8px rgba(0, 0, 0, 0.8);
+    transition: all 300ms ease;
+  }
+
+  .modal-island--vertical {
+    top: clamp(8px, 1.2vw, 13px);
+    left: 50%;
+    transform: translateX(-50%);
+    width: clamp(74px, 10vw, 96px);
+    height: clamp(16px, 2.2vw, 20px);
+  }
+
+  .modal-island--landscape {
+    left: clamp(9px, 1.3vw, 14px);
+    top: 50%;
+    transform: translateY(-50%);
+    width: clamp(16px, 2.2vw, 20px);
+    height: clamp(74px, 10vw, 96px);
+    flex-direction: column;
+  }
+
+  .modal-island__dot-sensor {
+    width: clamp(4px, 0.6vw, 6px);
+    height: clamp(4px, 0.6vw, 6px);
+    border-radius: 9999px;
+    background: #141416;
+  }
+
+  .modal-island__dot-lens {
+    width: clamp(6.5px, 0.9vw, 8.5px);
+    height: clamp(6.5px, 0.9vw, 8.5px);
+    border-radius: 9999px;
+    background: #0b0c10;
+    border: 1px solid rgba(189, 66, 37, 0.35);
+    box-shadow: inset 0 0 1px 1px rgba(255, 255, 255, 0.12);
   }
 
   .modal-spinner {
@@ -713,7 +785,7 @@ const { lang } = Astro.props;
     width: 2.5rem;
     height: 2.5rem;
     border: 3px solid rgba(255, 255, 255, 0.2);
-    border-top-color: #EA580C;
+    border-top-color: var(--accent, #bd4225);
     border-radius: 9999px;
     animation: spin 1s linear infinite;
   }
@@ -733,13 +805,13 @@ const { lang } = Astro.props;
     width: clamp(3.5rem, 6vw, 4.5rem);
     height: clamp(3.5rem, 6vw, 4.5rem);
     border-radius: 9999px;
-    background: linear-gradient(135deg, #F97316 0%, #EA580C 100%) !important;
+    background: linear-gradient(135deg, #c84e30 0%, #bd4225 100%) !important;
     color: #ffffff;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    box-shadow: 0 10px 25px rgba(234, 88, 12, 0.45);
+    box-shadow: 0 10px 25px rgba(189, 66, 37, 0.5);
     transition: transform 200ms ease;
   }
 
@@ -803,7 +875,7 @@ const { lang } = Astro.props;
     border-radius: 9999px;
     outline: none;
     cursor: pointer;
-    accent-color: #EA580C;
+    accent-color: var(--accent, #bd4225);
     margin: 0;
     padding: 0;
     border: none;
@@ -815,7 +887,7 @@ const { lang } = Astro.props;
     width: 14px;
     height: 14px;
     border-radius: 50%;
-    background: #EA580C;
+    background: var(--accent, #bd4225);
     border: 2px solid #ffffff;
     cursor: pointer;
   }
@@ -824,7 +896,7 @@ const { lang } = Astro.props;
     width: 14px;
     height: 14px;
     border-radius: 50%;
-    background: #EA580C;
+    background: var(--accent, #bd4225);
     border: 2px solid #ffffff;
     cursor: pointer;
   }
@@ -855,7 +927,7 @@ const { lang } = Astro.props;
   }
 
   .modal-play-btn:hover {
-    background-color: #EA580C !important;
+    background-color: var(--accent, #bd4225) !important;
   }
 
   .modal-time-display {
@@ -883,7 +955,7 @@ const { lang } = Astro.props;
   }
 
   .modal-icon-btn:hover {
-    color: #EA580C;
+    color: var(--accent, #bd4225);
     background-color: rgba(255, 255, 255, 0.1) !important;
   }
 

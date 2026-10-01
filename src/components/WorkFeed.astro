@@ -411,71 +411,75 @@ const withBust = (url: string) => (url ? (url.includes('?') ? `${url}&${cacheBus
     justify-content: center;
   }
 
-  /* Titanium Orange Phone Mockup Frame */
+  /* Exact Avatar-Matched Orange iPhone Mockup Frame */
   .phone-frame {
     width: 100%;
-    background: linear-gradient(145deg, #1c1b18 0%, #121110 50%, #181614 100%);
-    border: clamp(2.5px, 0.4vw, 3.5px) solid #332f28;
+    background: linear-gradient(145deg, #1c1b18 0%, #11100e 50%, #171513 100%);
+    border: clamp(2.5px, 0.35vw, 3.5px) solid rgba(189, 66, 37, 0.38);
     position: relative;
     box-shadow:
-      0 18px 40px -12px rgba(0, 0, 0, 0.7),
-      0 0 0 1px rgba(234, 88, 12, 0.2),
+      0 18px 45px -12px rgba(0, 0, 0, 0.8),
+      0 0 0 1px rgba(189, 66, 37, 0.22),
+      0 0 22px -4px rgba(189, 66, 37, 0.16),
       inset 0 0 0 1px rgba(255, 255, 255, 0.08),
-      inset 0 1px 2px rgba(249, 115, 22, 0.15);
+      inset 0 1px 2px rgba(189, 66, 37, 0.18);
     transition: transform 300ms cubic-bezier(0.2, 0.8, 0.2, 1), border-color 300ms ease, box-shadow 300ms ease;
     pointer-events: auto;
   }
 
   .phone-frame--vertical {
     max-width: 340px;
-    border-radius: clamp(32px, 4vw, 42px);
-    padding: clamp(4px, 0.7vw, 6px);
+    border-radius: clamp(46px, 5.5vw, 52px);
+    padding: clamp(3.5px, 0.55vw, 5.5px);
   }
 
   .phone-frame--landscape {
     max-width: 100%;
-    border-radius: clamp(22px, 3vw, 36px);
-    padding: clamp(4px, 0.7vw, 7px);
+    border-radius: clamp(34px, 4vw, 46px);
+    padding: clamp(3.5px, 0.55vw, 6px);
   }
 
   @media (hover: hover) and (pointer: fine) {
     .phone-card:hover .phone-frame {
       transform: translateY(-6px);
-      border-color: #EA580C;
+      border-color: var(--accent, #bd4225);
       box-shadow:
-        0 26px 50px -12px rgba(234, 88, 12, 0.35),
-        0 0 0 1.5px rgba(249, 115, 22, 0.5),
-        inset 0 0 0 1px rgba(255, 255, 255, 0.15);
+        0 28px 55px -12px rgba(0, 0, 0, 0.85),
+        0 0 0 1.5px rgba(189, 66, 37, 0.65),
+        0 0 35px -2px rgba(189, 66, 37, 0.4),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.18);
     }
   }
 
-  /* Dynamic Island / Notch */
+  /* Authentic Apple Dynamic Island Cutout */
   .phone-island--vertical {
     position: absolute;
-    top: clamp(8px, 1.2vw, 13px);
+    top: clamp(8px, 1.2vw, 12px);
     left: 50%;
     transform: translateX(-50%);
-    width: clamp(60px, 8vw, 82px);
-    height: clamp(12px, 1.6vw, 17px);
+    width: clamp(74px, 10vw, 96px);
+    height: clamp(16px, 2.2vw, 20px);
     background: #000000;
     border-radius: 9999px;
     z-index: 30;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
-    border: 1px solid rgba(255, 255, 255, 0.14);
+    gap: 7px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
     pointer-events: none;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+    box-shadow:
+      0 0 0 0.5px rgba(255, 255, 255, 0.08),
+      0 2px 7px rgba(0, 0, 0, 0.75);
   }
 
   .phone-island--landscape {
     position: absolute;
-    left: clamp(8px, 1.2vw, 14px);
+    left: clamp(9px, 1.3vw, 14px);
     top: 50%;
     transform: translateY(-50%);
-    width: clamp(12px, 1.6vw, 17px);
-    height: clamp(60px, 8vw, 82px);
+    width: clamp(16px, 2.2vw, 20px);
+    height: clamp(74px, 10vw, 96px);
     background: #000000;
     border-radius: 9999px;
     z-index: 30;
@@ -483,28 +487,31 @@ const withBust = (url: string) => (url ? (url.includes('?') ? `${url}&${cacheBus
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 6px;
-    border: 1px solid rgba(255, 255, 255, 0.14);
+    gap: 7px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
     pointer-events: none;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+    box-shadow:
+      0 0 0 0.5px rgba(255, 255, 255, 0.08),
+      0 2px 7px rgba(0, 0, 0, 0.75);
   }
 
   .phone-island__dot-sensor {
-    width: clamp(3px, 0.5vw, 5px);
-    height: clamp(3px, 0.5vw, 5px);
+    width: clamp(4px, 0.6vw, 6px);
+    height: clamp(4px, 0.6vw, 6px);
     border-radius: 9999px;
-    background: #181614;
+    background: #141416;
   }
 
   .phone-island__dot-lens {
-    width: clamp(5px, 0.7vw, 7px);
-    height: clamp(5px, 0.7vw, 7px);
+    width: clamp(6.5px, 0.9vw, 8.5px);
+    height: clamp(6.5px, 0.9vw, 8.5px);
     border-radius: 9999px;
-    background: #0D0C0A;
-    border: 1px solid rgba(234, 88, 12, 0.3);
+    background: #0b0c10;
+    border: 1px solid rgba(189, 66, 37, 0.35);
+    box-shadow: inset 0 0 1px 1px rgba(255, 255, 255, 0.12);
   }
 
-  /* Inner Mobile Screen */
+  /* Inner Mobile Screen: Ultra-Thin Uniform Bezel */
   .phone-screen {
     position: relative;
     overflow: hidden;
@@ -514,12 +521,12 @@ const withBust = (url: string) => (url ? (url.includes('?') ? `${url}&${cacheBus
 
   .phone-screen--vertical {
     aspect-ratio: 9 / 16;
-    border-radius: clamp(26px, 3.4vw, 34px);
+    border-radius: clamp(40px, 4.8vw, 46px);
   }
 
   .phone-screen--landscape {
     aspect-ratio: 16 / 9;
-    border-radius: clamp(18px, 2.5vw, 30px);
+    border-radius: clamp(28px, 3.4vw, 40px);
   }
 
   /* Media */
@@ -599,7 +606,7 @@ const withBust = (url: string) => (url ? (url.includes('?') ? `${url}&${cacheBus
     font-weight: 700;
     letter-spacing: 0.06em;
     text-transform: uppercase;
-    background-color: #EA580C;
+    background-color: var(--accent, #bd4225);
     color: #ffffff;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
   }
@@ -619,11 +626,11 @@ const withBust = (url: string) => (url ? (url.includes('?') ? `${url}&${cacheBus
     width: clamp(42px, 6vw, 58px);
     height: clamp(42px, 6vw, 58px);
     border-radius: 9999px;
-    background: linear-gradient(135deg, #F97316 0%, #EA580C 100%);
+    background: linear-gradient(135deg, #c84e30 0%, #bd4225 100%);
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 8px 24px rgba(234, 88, 12, 0.45);
+    box-shadow: 0 8px 24px rgba(189, 66, 37, 0.45);
     opacity: 0.85;
     transition: transform 300ms ease, opacity 300ms ease, box-shadow 300ms ease;
   }
@@ -636,7 +643,7 @@ const withBust = (url: string) => (url ? (url.includes('?') ? `${url}&${cacheBus
   .phone-card:hover .phone-play-btn {
     transform: scale(1.1);
     opacity: 1;
-    box-shadow: 0 10px 28px rgba(234, 88, 12, 0.6);
+    box-shadow: 0 10px 28px rgba(189, 66, 37, 0.65);
   }
 
   .phone-play-icon {
@@ -752,7 +759,7 @@ const withBust = (url: string) => (url ? (url.includes('?') ? `${url}&${cacheBus
     font-weight: 600;
     letter-spacing: 0.04em;
     text-transform: uppercase;
-    color: #EA580C;
+    color: var(--accent, #bd4225);
     display: flex;
     align-items: center;
     gap: 3px;
